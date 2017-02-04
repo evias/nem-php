@@ -1,6 +1,6 @@
 # evias/php-nem-laravel
 
-[![Build Status](https://magnum.travis-ci.com/evias/php-nem-laravel.svg?branch=master)](https://magnum.travis-ci.com/evias/php-nem-laravel)
+[![Build Status](https://api.travis-ci.org/evias/php-nem-laravel.svg?branch=master)](https://travis-ci.com/evias/php-nem-laravel)
 
 This package aims to provide with a Package installable through Composer, which would be used communicate with the NEM blockchain through it's HTTP REST API.
 
