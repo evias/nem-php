@@ -5,9 +5,9 @@
 [![Latest Unstable Version](https://poser.pugx.org/evias/php-nem-laravel/v/unstable)](//packagist.org/packages/evias/php-nem-laravel)
 [![License](https://poser.pugx.org/evias/php-nem-laravel/license)](https://packagist.org/packages/evias/php-nem-laravel)
 
-This package aims to provide with a Package installable through Composer, which would be used communicate with the NEM blockchain through it's HTTP REST API.
+This package aims to provide with a Composer Package, helping with the communicate with the NEM blockchain through it's HTTP REST API.
 
-This package should be an aid to any developer who wants to develop Laravel applications using the NEM blockchain.
+This package should be an aid to any developer who wants to develop Laravel applications using the NEM blockchain (NIS/NCC APIs).
 
 Package licensed under [MIT](LICENSE) License.
 

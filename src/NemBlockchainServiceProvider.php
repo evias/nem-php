@@ -27,6 +27,9 @@ use Laravel\Lumen\Application as LumenApplication;
 /**
  * This is the NemBlockchainServiceProvider class
  *
+ * The boot automatism of this class includes merging the
+ * configuration file present at config/nem.php
+ *
  * @author Grégory Saive <greg@evias.be>
  */
 class NemBlockchainServiceProvider
@@ -40,6 +43,25 @@ class NemBlockchainServiceProvider
     public function boot()
     {
         $this->setupConfig();
+    }
+
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+    }
+
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return string[]
+     */
+    public function provides()
+    {
+        return [];
     }
 
     /**
@@ -60,27 +82,5 @@ class NemBlockchainServiceProvider
         }
 
         $this->mergeConfigFrom($source, 'nem');
-    }
-
-    /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $this->registerEnvironment();
-        $this->registerMarkdown();
-        $this->registerCompiler();
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return string[]
-     */
-    public function provides()
-    {
-        return [];
     }
 }
