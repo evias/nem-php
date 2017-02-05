@@ -23,13 +23,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | This option specifies which NIS Node Host must be used for NIS API calls.
-    |
-    | Default: [
-    |              'host' => "127.0.01",
-    |              'port' => 7890,
-    |              'endpoint' => "/",
-    |          ]
-    |
+    | By default this package will try to use the localhost NIS infrastructure.
     */
     'nis' => [
         "host" => "127.0.0.1",
@@ -42,13 +36,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | This option specifies which NIS Node Host must be used for NIS API calls.
-    |
-    | Default: [
-    |              'host' => "127.0.01",
-    |              'port' => 8989,
-    |              'endpoint' => "/ncc/api",
-    |          ]
-    |
+    | By default this package will try to use the localhost NCC instance.
     */
     'ncc' => [
         "host" => "127.0.0.1",
