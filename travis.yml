@@ -9,11 +9,15 @@ php:
   - 7.1
   - hhvm
 
+matrix:
+  fast_finish: true
+  allow_failures:
+    - php: hhvm
+
 before_script:
   - cp .env.travis .env
-  - composer self-update
+  - cp phpunit.xml.dist phpunit.xml
   - composer install --no-interaction --prefer-source --dev
-  - php artisan key:generate
 
 script:
   - vendor/bin/phpunit
