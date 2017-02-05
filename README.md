@@ -1,6 +1,9 @@
 # evias/php-nem-laravel
 
 [![Build Status](https://api.travis-ci.org/evias/php-nem-laravel.svg?branch=master)](https://travis-ci.com/evias/php-nem-laravel)
+[![Latest Stable Version](https://poser.pugx.org/evias/php-nem-laravel/version)](https://packagist.org/packages/evias/php-nem-laravel)
+[![Latest Unstable Version](https://poser.pugx.org/evias/php-nem-laravel/v/unstable)](//packagist.org/packages/evias/php-nem-laravel)
+[![License](https://poser.pugx.org/evias/php-nem-laravel/license)](https://packagist.org/packages/evias/php-nem-laravel)
 
 This package aims to provide with a Package installable through Composer, which would be used communicate with the NEM blockchain through it's HTTP REST API.
 
@@ -22,8 +25,8 @@ Important versions listed below. Refer to the [Changelog](CHANGELOG.md) for a fu
 
 The following support channels can be used for contact.
 
-- [Twitter](https://cartalyst.com/@twitter)
-- [Email](mailto:help@cartalyst.com)
+- [Twitter](https://twitter.com/@eVias)
+- [Email](mailto:greg@evias.be)
 
 Bug reports, feature requests, and pull requests can be submitted by following our [Contribution Guide](CONTRIBUTING.md).
 
@@ -32,6 +35,12 @@ Bug reports, feature requests, and pull requests can be submitted by following o
 - [Versioning](CONTRIBUTING.md#versioning)
 - [Coding Standards](CONTRIBUTING.md#coding-standards)
 - [Pull Requests](CONTRIBUTING.md#pull-requests)
+
+## Pot de vin
+
+If you like the initiative, and for the sake of good mood, I recommend you take a few minutes to Donate a beer or Three [because belgians like that] by sending some XEM to my Wallet:
+
+    NB72EM6TTSX72O47T3GQFL345AB5WYKIDODKPPYW
 
 ## License
 
