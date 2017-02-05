@@ -18,8 +18,10 @@
  */
 namespace evias\NEMBlockchain\Tests;
 
+use \PHPUnit_Framework_TestCase;
+
 class HelloNISTest
-    extends TestCase
+    extends PHPUnit_Framework_TestCase
 {
     public function testNISGlobalStatus()
     {

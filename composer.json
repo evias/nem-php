@@ -12,9 +12,7 @@
     "require": {
         "php": ">=5.5.9",
         "illuminate/contracts": "5.1.*|5.2.*|5.3.*|5.4.*",
-        "illuminate/support": "5.1.*|5.2.*|5.3.*|5.4.*",
-        "illuminate/view": "5.1.*|5.2.*|5.3.*|5.4.*",
-        "league/commonmark": "^0.15"
+        "illuminate/support": "5.1.*|5.2.*|5.3.*|5.4.*"
     },
     "require-dev": {
         "mockery/mockery": "^0.9.4",
@@ -35,7 +33,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "7.1-dev"
+            "dev-master": "1.0.0-dev"
         }
     },
     "minimum-stability": "dev",
