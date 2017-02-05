@@ -10,7 +10,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    evias/php-nem-laravel
- * @version    0.1.0
+ * @version    0.0.2
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
@@ -22,25 +22,55 @@ return [
     | Default NIS Configuration
     |--------------------------------------------------------------------------
     |
-    | This option specifies which NIS Node Host must be used for NIS API calls.
-    | By default this package will try to use the localhost NIS infrastructure.
+    | This option specifies which NIS Nodes must be used for NIS API calls.
+    |
+    | The `nis.primary` node configuration corresponds to the preferred node for
+    | NIS API calls.
+    |
+    | Testing environment should always use online nodes to avoid compatibility
+    | issues outside your local network [which could be due to a change on your
+    | localhost nodes].
     */
     'nis' => [
-        "host" => "127.0.0.1",
-        "port" => 7890,
-        "endpoint" => "/",
+        'primary' => [
+            "use_ssl" => false,
+            "host" => "127.0.0.1",
+            "port" => 7890,
+            "endpoint" => "/",
+        ],
+        'testing' => [
+            "use_ssl" => false,
+            "host" => "go.nem.ninja",
+            "port" => 7890,
+            "endpoint" => "/",
+        ],
     ],
     /*
     |--------------------------------------------------------------------------
     | Default NCC Configuration
     |--------------------------------------------------------------------------
     |
-    | This option specifies which NIS Node Host must be used for NIS API calls.
-    | By default this package will try to use the localhost NCC instance.
+    | This option specifies which NCC Nodes must be used for NCC API calls.
+    |
+    | The `ncc.primary` node configuration corresponds to the preferred node for
+    | NCC API calls.
+    |
+    | Testing environment should always use online nodes to avoid compatibility
+    | issues outside your local network [which could be due to a change on your
+    | localhost nodes].
     */
     'ncc' => [
-        "host" => "127.0.0.1",
-        "port" => 8989,
-        "endpoint" => "/ncc/api",
+        'primary' => [
+            "use_ssl" => false,
+            "host" => "127.0.0.1",
+            "port" => 8989,
+            "endpoint" => "/ncc/api",
+        ],
+        'testing' => [
+            "use_ssl" => false,
+            "host" => "go.nem.ninja",
+            "port" => 8989,
+            "endpoint" => "/",
+        ],
     ],
 ];

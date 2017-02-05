@@ -10,7 +10,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    evias/php-nem-laravel
- * @version    0.1.0
+ * @version    0.0.2
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
@@ -20,9 +20,6 @@ namespace evias\NEMBlockchain;
 
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\View\Engines\CompilerEngine;
-use Illuminate\Foundation\Application as LaravelApplication;
-use Laravel\Lumen\Application as LumenApplication;
 
 /**
  * This is the NemBlockchainServiceProvider class
@@ -52,6 +49,7 @@ class NemBlockchainServiceProvider
      */
     public function register()
     {
+        $this->registerConfig();
     }
 
     /**
@@ -61,7 +59,9 @@ class NemBlockchainServiceProvider
      */
     public function provides()
     {
-        return [];
+        return [
+            "nem",
+        ];
     }
 
     /**
@@ -71,16 +71,46 @@ class NemBlockchainServiceProvider
      */
     protected function setupConfig()
     {
-        $source = realpath(__DIR__.'/../config/nem.php');
-        if ($this->app instanceof LaravelApplication && $this->app->runningInConsole()) {
+        $source = realpath(__DIR__.'/../config') . "/nem.php";
+        if (! $this->isLumen())
             // console laravel, use config_path helper
             $this->publishes([$source => config_path('nem.php')]);
-        }
-        elseif ($this->app instanceof LumenApplication) {
+        else
             // lumen configure app
             $this->app->configure('nem');
-        }
 
         $this->mergeConfigFrom($source, 'nem');
+    }
+
+    /**
+     * Check if we are running Lumen or not.
+     *
+     * @return bool
+     */
+    protected function isLumen()
+    {
+        return strpos($this->app->version(), 'Lumen') !== false;
+    }
+
+    /**
+     * Check if we are running on PHP 7.
+     *
+     * @return bool
+     */
+    protected function isRunningPhp7()
+    {
+        return version_compare(PHP_VERSION, '7.0-dev', '>=');
+    }
+
+    /**
+     * Register Twig config option bindings.
+     *
+     * @return void
+     */
+    protected function registerConfig()
+    {
+        $this->app->bindIf('nem', function () {
+            return $this->app['config']->get('nem');
+        });
     }
 }

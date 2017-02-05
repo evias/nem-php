@@ -10,7 +10,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    evias/php-nem-laravel
- * @version    0.1.0
+ * @version    0.0.2
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
@@ -18,15 +18,13 @@
  */
 namespace evias\NEMBlockchain\Tests;
 
-use \PHPUnit_Framework_TestCase;
+use PHPUnit_Framework_TestCase;
 
 class HelloNISTest
     extends PHPUnit_Framework_TestCase
 {
-    public function testNISGlobalStatus()
+    public function testNISStatusCheck()
     {
-        //XXX implement NIS global status check
-
-        $this->assertTrue(true);
+    	$this->assertTrue(true);
     }
 }
