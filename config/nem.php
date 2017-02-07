@@ -19,6 +19,17 @@
 return [
     /*
     |--------------------------------------------------------------------------
+    | Default HTTP Handler
+    |--------------------------------------------------------------------------
+    |
+    | This option specifies which HTTP Handler Class
+    |
+    | Following libraries are currently available: "unirest", "guzzle"
+    */
+    'handler_class' => \evias\NEMBlockchain\Handlers\UnirestHttpHandler::class,
+
+    /*
+    |--------------------------------------------------------------------------
     | Default NIS Configuration
     |--------------------------------------------------------------------------
     |

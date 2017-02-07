@@ -23,8 +23,10 @@ use PHPUnit_Framework_TestCase;
 class HelloNISTest
     extends PHPUnit_Framework_TestCase
 {
-    public function testNISStatusCheck()
+    public function testGuzzleInstances()
     {
+    	$nemConfig = ["handler" => "guzzle"];
+
     	$this->assertTrue(true);
     }
 }

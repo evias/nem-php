@@ -13,7 +13,8 @@
         "php": ">=5.5.9",
         "illuminate/contracts": "5.1.*|5.2.*|5.3.*|5.4.*",
         "illuminate/support": "5.1.*|5.2.*|5.3.*|5.4.*",
-        "mashape/unirest-php": "3.*"
+        "mashape/unirest-php": "3.*",
+        "guzzlehttp/guzzle": "6.*"
     },
     "require-dev": {
         "mockery/mockery": "^0.9.4",
