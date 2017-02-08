@@ -16,11 +16,9 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace evias\NEMBlockchain;
+namespace evias\NEMBlockchain\Handlers;
 
-use Illuminate\Contracts\Container\Container;
 use Unirest\Request;
-
 use evias\NEMBlockchain\Contracts\HttpHandler;
 
 /**
@@ -32,22 +30,10 @@ class UnirestHttpHandler
     implements HttpHandler
 {
     /**
-     * The Laravel/Lumen IoC container
-     *
-     * @var \Illuminate\Contracts\Container\Container
-     */
-    protected $app;
-
-    /**
      * Constructor for a new NEMBlockchain\API instance.
-     *
-     * This will initialize the Laravel/Lumen IoC.
-     *
-     * @param Container $app [description]
      */
-    public function __construct(Container $app)
+    public function __construct()
     {
-        $this->app  = $app;
     }
 
     /**

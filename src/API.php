@@ -18,7 +18,10 @@
  */
 namespace evias\NEMBlockchain;
 
-use Illuminate\Contracts\Container\Container;
+use Illuminate\Container\Container;
+
+use RuntimeException;
+use InvalidArgumentException;
 
 /**
  * This is the NEMBlockchain\API class
@@ -62,14 +65,8 @@ class API
      *
      * @param Container $app [description]
      */
-    public function __construct(Container $app)
+    public function __construct()
     {
-        $this->app = $app;
-
-        if (false !== strpos($this->app->version(), "Laravel")
-            || false !== strpos($this->app->version(), "Lumen"))
-            // lumen or laravel, use config() helper
-            $this->handlerClass = config("nem.handler_class");
     }
 
     /**
@@ -84,17 +81,41 @@ class API
     public function setOptions(array $options)
     {
         foreach ($options as $option => $config) {
-            if (! (bool) preg_match("/^[0-9A-Za-z_]+$/"))
+            if (! (bool) preg_match("/^[0-9A-Za-z_]+$/", $option))
                 // invalid option format
                 throw new InvalidArgumentException("Invalid option name provided to evias\\NEMBlockchain\\API@setOptions: " . var_export($option, true));
 
-            $normalized = str_replace(" ", "", ucwords(str_replace("_", " ", $option)));
+            $upper  = str_replace(" ", "", ucwords(str_replace("_", " ", $option)));
+            $setter = "set" . $upper;
 
-            if (method_exists($this, $normalized))
-                $this->$normalized($config);
+            if (method_exists($this, $setter))
+                $this->$setter($config);
         }
 
         return $this;
+    }
+
+    /**
+     * Set the linked laravel/lument Application
+     * class instance.
+     *
+     * @param Application $app
+     */
+    public function setApplication(Application $app)
+    {
+        $this->app = $app;
+        return $this;
+    }
+
+    /**
+     * Return the linked laravel/lumen Application
+     * class instance.
+     *
+     * @return \Illuminate\Foundation\Application
+     */
+    public function getApplication()
+    {
+        return $this->app;
     }
 
     /**
@@ -120,5 +141,21 @@ class API
     public function getHandlerClass()
     {
         return $this->handlerClass;
+    }
+
+    /**
+     * The getHttpService method creates an instance of the
+     * `handlerClass` and returns it.
+     *
+     * @return \evias\NEMBlockchain\Contracts\HttpHandler
+     */
+    public function getHttpService()
+    {
+        $handlerClass = "\\" . ltrim($this->handlerClass, "\\");
+        if (empty($handlerClass) || !class_exists($handlerClass))
+            throw new RuntimeException("Unable to create HTTP Handler instance with class: " . var_export($handlerClass, true));
+
+        $service = new $handlerClass();
+        return $service;
     }
 }
