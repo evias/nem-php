@@ -81,7 +81,7 @@ return [
             "use_ssl" => false,
             "host" => "go.nem.ninja",
             "port" => 8989,
-            "endpoint" => "/",
+            "endpoint" => "/ncc/api",
         ],
     ],
 ];
