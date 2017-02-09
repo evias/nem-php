@@ -19,7 +19,6 @@
 namespace evias\NEMBlockchain\Handlers;
 
 use GuzzleHttp\Client;
-use evias\NEMBlockchain\Contracts\HttpHandler;
 
 /**
  * This is the GuzzleHttpHandler class
@@ -27,15 +26,8 @@ use evias\NEMBlockchain\Contracts\HttpHandler;
  * @author Grégory Saive <greg@evias.be>
  */
 class GuzzleHttpHandler
-    implements HttpHandler
+    extends AbstractHttpHandler
 {
-    /**
-     * Constructor for a new NEMBlockchain\API instance.
-     */
-    public function __construct()
-    {
-    }
-
     /**
      * This method triggers a GET request to the given
      * URI using the GuzzleHttp client.
@@ -48,7 +40,6 @@ class GuzzleHttpHandler
      */
     public function get($uri, array $params = [], array $headers = [])
     {
-
     }
 
     /**
@@ -63,6 +54,5 @@ class GuzzleHttpHandler
      */
     public function post($uri, array $params = [], array $headers = [])
     {
-
     }
 }

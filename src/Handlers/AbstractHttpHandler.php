@@ -18,19 +18,23 @@
  */
 namespace evias\NEMBlockchain\Handlers;
 
-use Unirest\Request;
+use GuzzleHttp\Client;
+use evias\NEMBlockchain\Contracts\HttpHandler;
+use evias\NEMBlockchain\Traits\Connectable;
 
 /**
- * This is the UnirestHttpHandler class
+ * This is the GuzzleHttpHandler class
  *
  * @author Grégory Saive <greg@evias.be>
  */
-class UnirestHttpHandler
-    extends AbstractHttpHandler
+abstract class AbstractHttpHandler
+    implements HttpHandler
 {
+    use Connectable;
+
     /**
      * This method triggers a GET request to the given
-     * URI using the Unirest Request class.
+     * URI using the GuzzleHttp client.
      *
      * @see  \evias\NEMBlockchain\Contracts\HttpHandler
      * @param  string $uri     [description]
@@ -38,13 +42,11 @@ class UnirestHttpHandler
      * @param  array  $headers [description]
      * @return [type]          [description]
      */
-    public function get($uri, array $params = [], array $headers = [])
-    {
-    }
+    abstract public function get($uri, array $params = [], array $headers = []);
 
     /**
      * This method triggers a POST request to the given
-     * URI using the Unirest Request class.
+     * URI using the GuzzleHttp client.
      *
      * @see  \evias\NEMBlockchain\Contracts\HttpHandler
      * @param  string $uri     [description]
@@ -52,7 +54,5 @@ class UnirestHttpHandler
      * @param  array  $headers [description]
      * @return [type]          [description]
      */
-    public function post($uri, array $params = [], array $headers = [])
-    {
-    }
+    abstract public function post($uri, array $params = [], array $headers = []);
 }

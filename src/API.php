@@ -18,8 +18,6 @@
  */
 namespace evias\NEMBlockchain;
 
-use Illuminate\Container\Container;
-
 use RuntimeException;
 use InvalidArgumentException;
 
@@ -29,6 +27,8 @@ use InvalidArgumentException;
  * This class should provide the gateway for processing
  * API requests and sending to NIS or NCC API clients.
  *
+ * @see  \evias\NEMBlockchain\Contracts\Connector
+ * @see  \evias\NEMBlockchain\Traits\Connectable
  * @author Grégory Saive <greg@evias.be>
  */
 class API
@@ -41,14 +41,6 @@ class API
     protected $app;
 
     /**
-     * The request handler use to send API calls over
-     * HTTP/JSON to NIS or NCC endpoints.
-     *
-     * @var \evias\NEMBlockchain\Contracts\HttpHandler
-     */
-    protected $requestHandler;
-
-    /**
      * The class used for handling HTTP requests.
      *
      * This class must implement the HttpHandler
@@ -57,6 +49,14 @@ class API
      * @var string
      */
     protected $handlerClass = \evias\NEMBlockchain\Handlers\UnirestHttpHandler::class;
+
+    /**
+     * The request handler use to send API calls over
+     * HTTP/JSON to NIS or NCC endpoints.
+     *
+     * @var \evias\NEMBlockchain\Contracts\HttpHandler
+     */
+    protected $requestHandler;
 
     /**
      * Constructor for a new NEMBlockchain\API instance.
@@ -90,13 +90,15 @@ class API
 
             if (method_exists($this, $setter))
                 $this->$setter($config);
+            elseif (method_exists($this->getHttpHandler(), $setter))
+                $this->getHttpHandler()->$setter($config);
         }
 
         return $this;
     }
 
     /**
-     * Set the linked laravel/lument Application
+     * Set the linked laravel/lumen Application
      * class instance.
      *
      * @param Application $app
@@ -144,18 +146,34 @@ class API
     }
 
     /**
-     * The getHttpService method creates an instance of the
+     * Set the HttpHandler to use as this API
+     * instance's request handler.
+     *
+     * @param HttpHandler $handler [description]
+     */
+    public function setHttpHandler(HttpHandler $handler)
+    {
+        $this->requestHandler = $handler;
+        return $this;
+    }
+
+    /**
+     * The getHttpHandler method creates an instance of the
      * `handlerClass` and returns it.
      *
      * @return \evias\NEMBlockchain\Contracts\HttpHandler
      */
-    public function getHttpService()
+    public function getHttpHandler()
     {
+        if (isset($this->requestHandler))
+            return $this->requestHandler;
+
+        // now instantiating handler from config
         $handlerClass = "\\" . ltrim($this->handlerClass, "\\");
-        if (empty($handlerClass) || !class_exists($handlerClass))
+        if (!class_exists($handlerClass))
             throw new RuntimeException("Unable to create HTTP Handler instance with class: " . var_export($handlerClass, true));
 
-        $service = new $handlerClass();
-        return $service;
+        $this->requestHandler = new $handlerClass();
+        return $this->requestHandler;
     }
 }

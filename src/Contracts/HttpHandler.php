@@ -19,7 +19,7 @@
 namespace evias\NEMBlockchain\Contracts;
 
 /**
- * This is the AbstractHttpHandler class
+ * This is the HttpHandler interface
  *
  * This interface defines a Contract for HTTP Handlers
  * implementations. This allows extending the feature to
@@ -33,6 +33,7 @@ namespace evias\NEMBlockchain\Contracts;
  * @author Grégory Saive <greg@evias.be>
  */
 interface HttpHandler
+    extends Connector
 {
     /**
      * This method should implement features for sending
