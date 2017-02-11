@@ -37,22 +37,24 @@ abstract class AbstractHttpHandler
      * URI using the GuzzleHttp client.
      *
      * @see  \evias\NEMBlockchain\Contracts\HttpHandler
-     * @param  string $uri     [description]
-     * @param  array  $params  [description]
-     * @param  array  $headers [description]
+     * @param  string $uri
+     * @param  string $bodyJSON
+     * @param  array  $options
+     * @param  boolean  $synchronous
      * @return [type]          [description]
      */
-    abstract public function get($uri, array $params = [], array $headers = []);
+    abstract public function get($uri, $bodyJSON, array $options = [], $synchronous = false);
 
     /**
      * This method triggers a POST request to the given
      * URI using the GuzzleHttp client.
      *
      * @see  \evias\NEMBlockchain\Contracts\HttpHandler
-     * @param  string $uri     [description]
-     * @param  array  $params  [description]
-     * @param  array  $headers [description]
+     * @param  string $uri
+     * @param  string $bodyJSON
+     * @param  array  $options
+     * @param  boolean  $synchronous
      * @return [type]          [description]
      */
-    abstract public function post($uri, array $params = [], array $headers = []);
+    abstract public function post($uri, $bodyJSON, array $options = [], $synchronous = false);
 }

@@ -40,6 +40,13 @@ trait Connectable
     protected $use_ssl;
 
     /**
+     * The current Connectable connection Protocol
+     *
+     * @var string  i.e.: "http", "ws", "https"
+     */
+    protected $protocol;
+
+    /**
      * The current Connectable connection Hostname
      *
      * @var string  i.e.: "127.0.0.1", "example.com", "my.do.main.com"
@@ -81,6 +88,45 @@ trait Connectable
     public function getUseSsl()
     {
         return $this->use_ssl;
+    }
+
+    /**
+     * This method should implement a protocol
+     * setter which will be used to determine
+     * which Protocol is used in the Base URL.
+     *
+     * @param  string $protocol
+     * @return \evias\NEMBlockchain\Contracts\HttpHandler
+     */
+    public function setProtocol($protocol)
+    {
+        $lowerProtocol = strtolower($protocol);
+
+        // handle special cases where protocol is not
+        // formatted as intended yet.
+
+        if ("websocket" == $lowerProtocol)
+            $lowerProtocol = "ws";
+
+        if (in_array($lowerProtocol, ["https", "wss"])) {
+            // provided secure type of protocol
+            $this->setUseSsl(true);
+            $lowerProtocol = substr($lowerProtocol, 0, -1);
+        }
+
+        $this->protocol = $lowerProtocol;
+        return $this;
+    }
+
+    /**
+     * This method should implement a protocol
+     * getter.
+     *
+     * @return string
+     */
+    public function getProtocol()
+    {
+        return $this->protocol;
     }
 
     /**
@@ -147,5 +193,26 @@ trait Connectable
     public function getEndpoint()
     {
         return $this->endpoint;
+    }
+
+    /**
+     * Getter for `base_url` property.
+     *
+     * @return string
+     */
+    public function getScheme()
+    {
+        $secure = ($this->getUseSsl() ? "s" : "");
+        return sprintf("%s%s%s", $this->getProtocol(), $secure, "://");
+    }
+
+    /**
+     * Getter for `base_url` property.
+     *
+     * @return string
+     */
+    public function getBaseUrl()
+    {
+        return $this->getScheme() . $this->getHost() . $this->getEndpoint();
     }
 }

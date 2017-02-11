@@ -40,7 +40,7 @@ class HttpHandlersConfigurationTest
 		$client = new API();
 		$client->setOptions($config);
 
-		$handler = $client->getHttpHandler();
+		$handler = $client->getRequestHandler();
 		$this->assertTrue($handler instanceof \evias\NEMBlockchain\Handlers\GuzzleHttpHandler);
     }
 
@@ -60,7 +60,7 @@ class HttpHandlersConfigurationTest
 		$client = new API();
 		$client->setOptions($config);
 
-		$handler = $client->getHttpHandler();
+		$handler = $client->getRequestHandler();
 		$this->assertTrue($handler instanceof \evias\NEMBlockchain\Handlers\UnirestHttpHandler);
     }
 
@@ -71,10 +71,11 @@ class HttpHandlersConfigurationTest
      *
      * @return void
      */
-    public function testConnectionPolicyConfiguration()
+    public function testConnectableTraitHttpConfiguration()
     {
     	$config = [
-            "use_ssl" => true,
+            "use_ssl"  => true,
+            "protocol" => "http",
             "host" => "127.0.0.1",
             "port" => 7890,
             "endpoint" => "/",
@@ -83,11 +84,45 @@ class HttpHandlersConfigurationTest
         $client = new API();
         $client->setOptions($config);
 
-        $connectable = $client->getHttpHandler();
+        $connectable = $client->getRequestHandler();
 
         $this->assertTrue($connectable->getUseSsl());
+        $this->assertEquals("http", $connectable->getProtocol());
         $this->assertEquals("127.0.0.1", $connectable->getHost());
         $this->assertEquals(7890, $connectable->getPort());
         $this->assertEquals("/", $connectable->getEndpoint());
+        $this->assertEquals("https://", $connectable->getScheme());
+        $this->assertEquals("https://127.0.0.1/", $connectable->getBaseUrl());
+    }
+
+    /**
+     * This test checks whether the API class correctly
+     * handles the host, port, endpoint and use_ssl
+     * options provided per config.
+     *
+     * @return void
+     */
+    public function testConnectableTraitWebsocketConfiguration()
+    {
+        $config = [
+            "use_ssl"  => true,
+            "protocol" => "ws",
+            "host" => "127.0.0.1",
+            "port" => 7890,
+            "endpoint" => "/",
+        ];
+
+        $client = new API();
+        $client->setOptions($config);
+
+        $connectable = $client->getRequestHandler();
+
+        $this->assertTrue($connectable->getUseSsl());
+        $this->assertEquals("ws", $connectable->getProtocol());
+        $this->assertEquals("127.0.0.1", $connectable->getHost());
+        $this->assertEquals(7890, $connectable->getPort());
+        $this->assertEquals("/", $connectable->getEndpoint());
+        $this->assertEquals("wss://", $connectable->getScheme());
+        $this->assertEquals("wss://127.0.0.1/", $connectable->getBaseUrl());
     }
 }

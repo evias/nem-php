@@ -90,8 +90,8 @@ class API
 
             if (method_exists($this, $setter))
                 $this->$setter($config);
-            elseif (method_exists($this->getHttpHandler(), $setter))
-                $this->getHttpHandler()->$setter($config);
+            elseif (method_exists($this->getRequestHandler(), $setter))
+                $this->getRequestHandler()->$setter($config);
         }
 
         return $this;
@@ -151,19 +151,19 @@ class API
      *
      * @param HttpHandler $handler [description]
      */
-    public function setHttpHandler(HttpHandler $handler)
+    public function setRequestHandler(HttpHandler $handler)
     {
         $this->requestHandler = $handler;
         return $this;
     }
 
     /**
-     * The getHttpHandler method creates an instance of the
+     * The getRequestHandler method creates an instance of the
      * `handlerClass` and returns it.
      *
      * @return \evias\NEMBlockchain\Contracts\HttpHandler
      */
-    public function getHttpHandler()
+    public function getRequestHandler()
     {
         if (isset($this->requestHandler))
             return $this->requestHandler;

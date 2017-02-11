@@ -39,21 +39,23 @@ interface HttpHandler
      * This method should implement features for sending
      * GET requests with the implemented library.
      *
-     * @param  string $uri     [description]
-     * @param  array  $params  [description]
-     * @param  array  $headers [description]
+     * @param  string $uri
+     * @param  string $bodyJSON
+     * @param  array  $options
+     * @param  boolean  $synchronous
      * @return [type]          [description]
      */
-    public function get($uri, array $params = [], array $headers = []);
+    public function get($uri, $bodyJSON, array $options = [], $synchronous = false);
 
     /**
      * This method should implement features for sending
      * POST requests with the implemented library.
      *
-     * @param  string $uri     [description]
-     * @param  array  $params  [description]
-     * @param  array  $headers [description]
+     * @param  string $uri
+     * @param  string $bodyJSON
+     * @param  array  $options
+     * @param  boolean  $synchronous
      * @return [type]          [description]
      */
-    public function post($uri, array $params = [], array $headers = []);
+    public function post($uri, $bodyJSON, array $options = [], $synchronous = false);
 }

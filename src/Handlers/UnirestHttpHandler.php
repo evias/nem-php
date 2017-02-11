@@ -33,12 +33,13 @@ class UnirestHttpHandler
      * URI using the Unirest Request class.
      *
      * @see  \evias\NEMBlockchain\Contracts\HttpHandler
-     * @param  string $uri     [description]
-     * @param  array  $params  [description]
-     * @param  array  $headers [description]
+     * @param  string $uri
+     * @param  string $bodyJSON
+     * @param  array  $options
+     * @param  boolean  $synchronous
      * @return [type]          [description]
      */
-    public function get($uri, array $params = [], array $headers = [])
+    public function get($uri, $bodyJSON, array $options = [], $synchronous = false)
     {
     }
 
@@ -47,12 +48,13 @@ class UnirestHttpHandler
      * URI using the Unirest Request class.
      *
      * @see  \evias\NEMBlockchain\Contracts\HttpHandler
-     * @param  string $uri     [description]
-     * @param  array  $params  [description]
-     * @param  array  $headers [description]
+     * @param  string $uri
+     * @param  string $bodyJSON
+     * @param  array  $options
+     * @param  boolean  $synchronous
      * @return [type]          [description]
      */
-    public function post($uri, array $params = [], array $headers = [])
+    public function post($uri, $bodyJSON, array $options = [], $synchronous = false)
     {
     }
 }

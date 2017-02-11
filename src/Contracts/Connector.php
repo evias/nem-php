@@ -48,10 +48,28 @@ interface Connector
     public function getUseSsl();
 
     /**
+     * This method should implement a protocol
+     * setter which will be used to determine
+     * which Protocol is used in the Base URL.
+     *
+     * @param  string $protocol
+     * @return \evias\NEMBlockchain\Contracts\Connector
+     */
+    public function setProtocol($protocol);
+
+    /**
+     * This method should implement a protocol
+     * getter.
+     *
+     * @return string
+     */
+    public function getProtocol();
+
+    /**
      * Setter for `host` property.
      *
      * @param  string $host
-     * @return \evias\NEMBlockchain\API
+     * @return \evias\NEMBlockchain\Contracts\Connector
      */
     public function setHost($host);
 
@@ -66,7 +84,7 @@ interface Connector
      * Setter for `port` property.
      *
      * @param  integer $port
-     * @return \evias\NEMBlockchain\API
+     * @return \evias\NEMBlockchain\Contracts\Connector
      */
     public function setPort($port);
 
@@ -81,7 +99,7 @@ interface Connector
      * Setter for `endpoint` property.
      *
      * @param  string $endpoint
-     * @return \evias\NEMBlockchain\API
+     * @return \evias\NEMBlockchain\Contracts\Connector
      */
     public function setEndpoint($endpoint);
 
@@ -91,4 +109,18 @@ interface Connector
      * @return string
      */
     public function getEndpoint();
+
+    /**
+     * Getter for `scheme` property.
+     *
+     * @return string
+     */
+    public function getScheme();
+
+    /**
+     * Getter for `base_url` property.
+     *
+     * @return string
+     */
+    public function getBaseUrl();
 }
