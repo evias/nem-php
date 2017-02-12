@@ -92,7 +92,7 @@ class HttpHandlersConfigurationTest
         $this->assertEquals(7890, $connectable->getPort());
         $this->assertEquals("/", $connectable->getEndpoint());
         $this->assertEquals("https://", $connectable->getScheme());
-        $this->assertEquals("https://127.0.0.1/", $connectable->getBaseUrl());
+        $this->assertEquals("https://127.0.0.1:7890/", $connectable->getBaseUrl());
     }
 
     /**
@@ -123,6 +123,8 @@ class HttpHandlersConfigurationTest
         $this->assertEquals(7890, $connectable->getPort());
         $this->assertEquals("/", $connectable->getEndpoint());
         $this->assertEquals("wss://", $connectable->getScheme());
-        $this->assertEquals("wss://127.0.0.1/", $connectable->getBaseUrl());
+        $this->assertEquals("wss://127.0.0.1:7890/", $connectable->getBaseUrl());
     }
+
+    //XXX add test for Basic Authentication feature!
 }

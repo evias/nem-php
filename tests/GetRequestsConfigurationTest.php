@@ -20,6 +20,7 @@ namespace evias\NEMBlockchain\Tests;
 
 use PHPUnit_Framework_TestCase;
 use evias\NEMBlockchain\API;
+use GuzzleHttp\Exception\ConnectException;
 
 class GetRequestsConfigurationTest
     extends PHPUnit_Framework_TestCase
@@ -29,11 +30,12 @@ class GetRequestsConfigurationTest
      * same Http Client configuration to avoid
      * any side effects.
      *
-     * @return \evias\NEMBlockchain\Contracts\HttpHandler
+     * @return \evias\NEMBlockchain\API
      */
-    protected function getHttpClient()
+    protected function getClient()
     {
         $config = [
+            "handler_class" => \evias\NEMBlockchain\Handlers\GuzzleHttpHandler::class,
             "use_ssl"  => true,
             "protocol" => "http",
             "host" => "127.0.0.1",
@@ -43,9 +45,7 @@ class GetRequestsConfigurationTest
 
         $client = new API();
         $client->setOptions($config);
-
-        $connectable = $client->getRequestHandler();
-        return $connectable;
+        return $client;
     }
 
     /**
@@ -56,7 +56,18 @@ class GetRequestsConfigurationTest
      */
     public function testGuzzleRequestHandler()
     {
-		$handler = $this->getHttpClient();
+        $api  = $this->getClient();
+        $data = ["data" => ["field1" => "value1", "field2" => [], "field3" => 0]];
+
+        try {
+            $json = $api->getJSON("wallets", json_encode($data));
+        }
+        catch (ConnectException $e) {
+            // connection to localhost not available
+            //XXX must throw house made exception for
+            //    API Down Times.
+            $this->assertTrue(true);
+        }
 
 		$this->assertTrue(true);
     }
