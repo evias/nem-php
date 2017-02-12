@@ -32,25 +32,6 @@ class GuzzleHttpHandler
     extends AbstractHttpHandler
 {
     /**
-     * [normalizeHeaders description]
-     * @param  array  $headers [description]
-     * @return [type]          [description]
-     */
-    protected function normalizeHeaders(array $headers)
-    {
-        if (empty($headers["User-Agent"]))
-            $headers["User-Agent"] = "evias NEM Wrapper";
-
-        if (empty($headers["Accept"]))
-            $headers["Accept"] = "application/json";
-
-        if (empty($headers["Content-Type"]))
-            $headers["Content-Type"] = "application/json";
-
-        return $headers;
-    }
-
-    /**
      * This method triggers a GET request to the given
      * URI using the GuzzleHttp client.
      *
@@ -79,14 +60,18 @@ class GuzzleHttpHandler
 
         $client  = new Client(["base_uri" => $this->getBaseUrl()]);
         $request = new Request("GET", $uri, $options);
-
         if ($synchronous)
             return $client->send($request);
 
+        $callback = isset($options["callback"]) && is_callable($options["callback"]) ? $options["callback"] : null;
+
         $promise = $client->sendAsync($request);
         $promise->then(
-            function(ResponseInterface $response)
+            function(ResponseInterface $response) use ($callback)
             {
+                if ($callback)
+                    return $callback($response);
+
                 return $response;
             },
             function(RequestException $exception)
@@ -95,7 +80,7 @@ class GuzzleHttpHandler
                 return $exception->getMessage();
             }
         );
-        return $promise;
+        return $promise->wait();
     }
 
     /**

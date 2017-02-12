@@ -33,6 +33,27 @@ abstract class AbstractHttpHandler
     use Connectable;
 
     /**
+     * This method makes sure mandatory headers are
+     * added in case they are not present.
+     *
+     * @param  array  $headers [description]
+     * @return [type]          [description]
+     */
+    protected function normalizeHeaders(array $headers)
+    {
+        if (empty($headers["User-Agent"]))
+            $headers["User-Agent"] = "evias NEM Wrapper";
+
+        if (empty($headers["Accept"]))
+            $headers["Accept"] = "application/json";
+
+        if (empty($headers["Content-Type"]))
+            $headers["Content-Type"] = "application/json";
+
+        return $headers;
+    }
+
+    /**
      * This method triggers a GET request to the given
      * URI using the GuzzleHttp client.
      *

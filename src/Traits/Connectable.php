@@ -69,6 +69,18 @@ trait Connectable
     protected $endpoint;
 
     /**
+     * This array can contain the keys "username"
+     * and "password" and they will be arranged to
+     * compose following format:
+     *
+     *     username:password@
+     *
+     * @see  \evias\NEMBlockchain\Traits\Connectable@getBasicAuth()
+     * @var array   valid keys include: username, password
+     */
+    protected $basicAuth = [];
+
+    /**
      * Setter for `use_ssl` property.
      *
      * @param  string $host
@@ -207,12 +219,81 @@ trait Connectable
     }
 
     /**
+     * Getter for `username` property.
+     *
+     * @return string
+     */
+    public function setUsername($username)
+    {
+        $this->basicAuth["username"] = $username;
+        return $this;
+    }
+
+    /**
+     * Getter for `username` property.
+     *
+     * @return string
+     */
+    public function getUsername()
+    {
+        if (! isset($this->basicAuth["username"]))
+            return null;
+
+        return $this->basicAuth["username"];
+    }
+
+    /**
+     * Setter for `password` property.
+     *
+     * @return string
+     */
+    public function setPassword($password)
+    {
+        $this->basicAuth["password"] = $password;
+        return $this;
+    }
+
+    /**
+     * Getter for `password` property.
+     *
+     * @return string
+     */
+    public function getPassword()
+    {
+        if (! isset($this->basicAuth["password"]))
+            return null;
+
+        return $this->basicAuth["password"];
+    }
+
+    /**
+     * This method returns the username:password@ format
+     * string to perform Basic Authentication using the
+     * URL.
+     *
+     * @return [type] [description]
+     */
+    public function getBasicAuth()
+    {
+        if (empty($this->basicAuth))
+            return "";
+
+        if (empty($this->basicAuth["username"]))
+            // Username cannot be empty in Basic Authentication
+            return "";
+
+        $username = $this->basicAuth["username"];
+        $password = isset($this->basicAuth["password"]) ? $this->basicAuth["password"] : "";
+        return sprintf("%s:%s@", $username, $password);
+    }
+
+    /**
      * Getter for `base_url` property.
      *
      * @return string
      */
     public function getBaseUrl()
     {
-        return $this->getScheme() . $this->getHost() . $this->getEndpoint();
+        return $this->getScheme() . $this->getBasicAuth() . $this->getHost() . ":" . $this->getPort() . $this->getEndpoint();
     }
 }

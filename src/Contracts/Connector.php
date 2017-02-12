@@ -118,6 +118,34 @@ interface Connector
     public function getScheme();
 
     /**
+     * Getter for `username` property.
+     *
+     * @return string
+     */
+    public function setUsername($username);
+
+    /**
+     * Getter for `username` property.
+     *
+     * @return string
+     */
+    public function getUsername();
+
+    /**
+     * Setter for `password` property.
+     *
+     * @return string
+     */
+    public function setPassword($password);
+
+    /**
+     * Getter for `password` property.
+     *
+     * @return string
+     */
+    public function getPassword();
+
+    /**
      * Getter for `base_url` property.
      *
      * @return string
