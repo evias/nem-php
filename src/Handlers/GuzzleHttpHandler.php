@@ -35,14 +35,26 @@ class GuzzleHttpHandler
      * This method triggers a GET request to the given
      * URI using the GuzzleHttp client.
      *
+     * Default behaviour disables Promises Features.
+     *
+     * Promises Features
+     * - success callback can be configured with $options["onSuccess"],
+     *   a ResponseInterface object will be passed to this callable when
+     *   the Request Completes.
+     * - error callback can be configured with $options["onError"],
+     *   a RequestException object will be passed to this callable when
+     *   the Request encounters an error
+     *
      * @see  \evias\NEMBlockchain\Contracts\HttpHandler
      * @param  string $uri
      * @param  string $bodyJSON
-     * @param  array  $options
-     * @param  boolean  $synchronous
+     * @param  array  $options      can contain "headers" array, "onSuccess" callable,
+     *                              "onError" callable and any other GuzzleHTTP request
+     *                              options.
+     * @param  boolean  $usePromises
      * @return [type]
      */
-    public function get($uri, $bodyJSON, array $options = [], $synchronous = false)
+    public function get($uri, $bodyJSON, array $options = [], $usePromises = false)
     {
         $headers = [];
         if (!empty($options["headers"]))
@@ -60,26 +72,46 @@ class GuzzleHttpHandler
 
         $client  = new Client(["base_uri" => $this->getBaseUrl()]);
         $request = new Request("GET", $uri, $options);
-        if ($synchronous)
+        if (! $usePromises)
+            // return the response object when done.
             return $client->send($request);
 
-        $callback = isset($options["callback"]) && is_callable($options["callback"]) ? $options["callback"] : null;
+        // Now use guzzle Promises features, as mentioned at the end,
+        // Guzzle Promises do not allow Asynchronous Requests Handling,
+        // I have implemented this feature only because it will
+        // allow a better Response Time for Paralell Request Handling.
+        // This will be implemented in later versions and so, the
+        // following snippet will basically work just like a normal
+        // Synchronous request, except that the Success and Error
+        // callbacks can be configured more conviniently.
+
+        $successCallback = isset($options["onSuccess"]) && is_callable($options["onSuccess"]) ? $options["onSuccess"] : null;
+        $errorCallback   = isset($options["onError"]) && is_callable($options["onError"]) ? $options["onError"] : null;
 
         $promise = $client->sendAsync($request);
         $promise->then(
-            function(ResponseInterface $response) use ($callback)
+            function(ResponseInterface $response)
+                use ($successCallback)
             {
-                if ($callback)
-                    return $callback($response);
+                if ($successCallback)
+                    return $successCallback($response);
 
                 return $response;
             },
             function(RequestException $exception)
+                use ($errorCallback)
             {
-                //XXX return created response with error code, etc.
-                return $exception->getMessage();
+                if ($errorCallback)
+                    return $errorCallback($exception);
+
+                return $exception;
             }
         );
+
+        // Guzzle Promises advantages will only be leveraged
+        // in Parelell request execution mode as all requests
+        // will be sent in paralell and the handling time goes
+        // down to the minimum response time of ALL promises.
         return $promise->wait();
     }
 
