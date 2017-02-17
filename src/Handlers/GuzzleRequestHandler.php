@@ -56,7 +56,7 @@ class GuzzleRequestHandler
      * @param  array   $options [description]
      * @return [type]           [description]
      */
-    protected function promiseReponse(Client $client, Request $request, array $options = [])
+    protected function promiseResponse(Client $client, Request $request, array $options = [])
     {
         // Guzzle Promises do not allow Asynchronous Requests Handling,
         // I have implemented this feature only because it will
