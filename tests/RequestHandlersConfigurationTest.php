@@ -21,47 +21,47 @@ namespace evias\NEMBlockchain\Tests;
 use PHPUnit_Framework_TestCase;
 use evias\NEMBlockchain\API;
 
-class HttpHandlersConfigurationTest
+class RequestHandlersConfigurationTest
     extends PHPUnit_Framework_TestCase
 {
 	/**
 	 * This test checks whether the API class returns
-	 * a valid GuzzleHttpHandler instance when a
+	 * a valid GuzzleRequestHandler instance when a
 	 * `handler_class` config provides the given
-	 * GuzzleHttpHandler class.
+	 * GuzzleRequestHandler class.
 	 *
 	 * @return void
 	 */
     public function testGuzzleConfiguration()
     {
-		$config = ["handler_class" => \evias\NEMBlockchain\Handlers\GuzzleHttpHandler::class];
+		$config = ["handler_class" => \evias\NEMBlockchain\Handlers\GuzzleRequestHandler::class];
 
 		// each test should have its own API configured
 		$client = new API();
 		$client->setOptions($config);
 
 		$handler = $client->getRequestHandler();
-		$this->assertTrue($handler instanceof \evias\NEMBlockchain\Handlers\GuzzleHttpHandler);
+		$this->assertTrue($handler instanceof \evias\NEMBlockchain\Handlers\GuzzleRequestHandler);
     }
 
 	/**
 	 * This test checks whether the API class returns
-	 * a valid UnirestHttpHandler instance when a
+	 * a valid UnirestRequestHandler instance when a
 	 * `handler_class` config provides the given
-	 * UnirestHttpHandler class.
+	 * UnirestRequestHandler class.
 	 *
 	 * @return void
 	 */
     public function testUnirestConfiguration()
     {
-		$config = ["handler_class" => \evias\NEMBlockchain\Handlers\UnirestHttpHandler::class];
+		$config = ["handler_class" => \evias\NEMBlockchain\Handlers\UnirestRequestHandler::class];
 
 		// each test should have its own API configured
 		$client = new API();
 		$client->setOptions($config);
 
 		$handler = $client->getRequestHandler();
-		$this->assertTrue($handler instanceof \evias\NEMBlockchain\Handlers\UnirestHttpHandler);
+		$this->assertTrue($handler instanceof \evias\NEMBlockchain\Handlers\UnirestRequestHandler);
     }
 
     /**

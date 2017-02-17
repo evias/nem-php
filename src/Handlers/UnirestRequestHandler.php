@@ -16,46 +16,49 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace evias\NEMBlockchain\Contracts;
+namespace evias\NEMBlockchain\Handlers;
+
+use Unirest\Request;
 
 /**
- * This is the HttpHandler interface
+ * This is the UnirestRequestHandler class
  *
- * This interface defines a Contract for HTTP Handlers
- * implementations. This allows extending the feature to
- * different libraries than the one provided by default.
- *
- * The implemented NEM blockchain API calls require only
- * GET and POST requests as of the first version.
- * Further methods could be added to this contract in
- * case implemented NEM API calls need those.
+ * This specialization uses the Unirest
+ * laravel wrapper to perform requests to
+ * the configured API endpoints.
  *
  * @author Grégory Saive <greg@evias.be>
  */
-interface HttpHandler
-    extends Connector
+class UnirestRequestHandler
+    extends AbstractRequestHandler
 {
     /**
-     * This method should implement features for sending
-     * GET requests with the implemented library.
+     * This method triggers a GET request to the given
+     * URI using the Unirest Request class.
      *
+     * @see  \evias\NEMBlockchain\Contracts\RequestHandler
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options
      * @param  boolean  $synchronous
      * @return [type]          [description]
      */
-    public function get($uri, $bodyJSON, array $options = [], $synchronous = false);
+    public function get($uri, $bodyJSON, array $options = [], $synchronous = false)
+    {
+    }
 
     /**
-     * This method should implement features for sending
-     * POST requests with the implemented library.
+     * This method triggers a POST request to the given
+     * URI using the Unirest Request class.
      *
+     * @see  \evias\NEMBlockchain\Contracts\RequestHandler
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options
      * @param  boolean  $synchronous
      * @return [type]          [description]
      */
-    public function post($uri, $bodyJSON, array $options = [], $synchronous = false);
+    public function post($uri, $bodyJSON, array $options = [], $synchronous = false)
+    {
+    }
 }

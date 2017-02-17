@@ -43,18 +43,18 @@ class API
     /**
      * The class used for handling HTTP requests.
      *
-     * This class must implement the HttpHandler
+     * This class must implement the RequestHandler
      * contract.
      *
      * @var string
      */
-    protected $handlerClass = \evias\NEMBlockchain\Handlers\UnirestHttpHandler::class;
+    protected $handlerClass = \evias\NEMBlockchain\Handlers\UnirestRequestHandler::class;
 
     /**
      * The request handler use to send API calls over
      * HTTP/JSON to NIS or NCC endpoints.
      *
-     * @var \evias\NEMBlockchain\Contracts\HttpHandler
+     * @var \evias\NEMBlockchain\Contracts\RequestHandler
      */
     protected $requestHandler;
 
@@ -146,12 +146,12 @@ class API
     }
 
     /**
-     * Set the HttpHandler to use as this API
+     * Set the RequestHandler to use as this API
      * instance's request handler.
      *
-     * @param HttpHandler $handler [description]
+     * @param RequestHandler $handler [description]
      */
-    public function setRequestHandler(HttpHandler $handler)
+    public function setRequestHandler(RequestHandler $handler)
     {
         $this->requestHandler = $handler;
         return $this;
@@ -161,7 +161,7 @@ class API
      * The getRequestHandler method creates an instance of the
      * `handlerClass` and returns it.
      *
-     * @return \evias\NEMBlockchain\Contracts\HttpHandler
+     * @return \evias\NEMBlockchain\Contracts\RequestHandler
      */
     public function getRequestHandler()
     {

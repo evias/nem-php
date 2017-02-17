@@ -24,12 +24,16 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 
 /**
- * This is the GuzzleHttpHandler class
+ * This is the GuzzleRequestHandler class
+ *
+ * This specialization uses the Guzzle
+ * laravel wrapper to perform requests to
+ * the configured API endpoints.
  *
  * @author Grégory Saive <greg@evias.be>
  */
-class GuzzleHttpHandler
-    extends AbstractHttpHandler
+class GuzzleRequestHandler
+    extends AbstractRequestHandler
 {
     /**
      * This method triggers a GET request to the given
@@ -45,7 +49,7 @@ class GuzzleHttpHandler
      *   a RequestException object will be passed to this callable when
      *   the Request encounters an error
      *
-     * @see  \evias\NEMBlockchain\Contracts\HttpHandler
+     * @see  \evias\NEMBlockchain\Contracts\RequestHandler
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options      can contain "headers" array, "onSuccess" callable,
@@ -73,17 +77,18 @@ class GuzzleHttpHandler
         $client  = new Client(["base_uri" => $this->getBaseUrl()]);
         $request = new Request("GET", $uri, $options);
         if (! $usePromises)
-            // return the response object when done.
+            // return the response object when the request is completed.
+            // this behaviour handles the request synchronously.
             return $client->send($request);
 
         // Now use guzzle Promises features, as mentioned at the end,
         // Guzzle Promises do not allow Asynchronous Requests Handling,
         // I have implemented this feature only because it will
         // allow a better Response Time for Paralell Request Handling.
-        // This will be implemented in later versions and so, the
-        // following snippet will basically work just like a normal
-        // Synchronous request, except that the Success and Error
-        // callbacks can be configured more conviniently.
+        // This will be implemented in later versions.
+        // Because of this the following snippet will basically work
+        // just like a normal Synchronous request, except that the Success
+        // and Error callbacks can be configured more conveniently.
 
         $successCallback = isset($options["onSuccess"]) && is_callable($options["onSuccess"]) ? $options["onSuccess"] : null;
         $errorCallback   = isset($options["onError"]) && is_callable($options["onError"]) ? $options["onError"] : null;
@@ -119,7 +124,7 @@ class GuzzleHttpHandler
      * This method triggers a POST request to the given
      * URI using the GuzzleHttp client.
      *
-     * @see  \evias\NEMBlockchain\Contracts\HttpHandler
+     * @see  \evias\NEMBlockchain\Contracts\RequestHandler
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options

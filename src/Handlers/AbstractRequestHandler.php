@@ -19,16 +19,19 @@
 namespace evias\NEMBlockchain\Handlers;
 
 use GuzzleHttp\Client;
-use evias\NEMBlockchain\Contracts\HttpHandler;
+use evias\NEMBlockchain\Contracts\RequestHandler;
 use evias\NEMBlockchain\Traits\Connectable;
 
 /**
- * This is the GuzzleHttpHandler class
+ * This is the AbstractRequestHandler abstract class
+ *
+ * This class should be extended by RequestHandler
+ * specialization classes.
  *
  * @author Grégory Saive <greg@evias.be>
  */
-abstract class AbstractHttpHandler
-    implements HttpHandler
+abstract class AbstractRequestHandler
+    implements RequestHandler
 {
     use Connectable;
 
@@ -57,7 +60,7 @@ abstract class AbstractHttpHandler
      * This method triggers a GET request to the given
      * URI using the GuzzleHttp client.
      *
-     * @see  \evias\NEMBlockchain\Contracts\HttpHandler
+     * @see  \evias\NEMBlockchain\Contracts\RequestHandler
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options
@@ -70,7 +73,7 @@ abstract class AbstractHttpHandler
      * This method triggers a POST request to the given
      * URI using the GuzzleHttp client.
      *
-     * @see  \evias\NEMBlockchain\Contracts\HttpHandler
+     * @see  \evias\NEMBlockchain\Contracts\RequestHandler
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options

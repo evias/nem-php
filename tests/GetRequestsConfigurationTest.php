@@ -35,7 +35,7 @@ class GetRequestsConfigurationTest
     protected function getClient()
     {
         $config = [
-            "handler_class" => \evias\NEMBlockchain\Handlers\GuzzleHttpHandler::class,
+            "handler_class" => \evias\NEMBlockchain\Handlers\GuzzleRequestHandler::class,
             "use_ssl"  => true,
             "protocol" => "http",
             "host" => "127.0.0.1",
@@ -49,7 +49,7 @@ class GetRequestsConfigurationTest
     }
 
     /**
-     * Test the GuzzleHttpHandler Request Handler class
+     * Test the GuzzleRequestHandler Request Handler class
      * for GET requests.
      *
      * @return void
