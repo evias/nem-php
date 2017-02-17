@@ -36,6 +36,73 @@ class GuzzleRequestHandler
     extends AbstractRequestHandler
 {
     /**
+     * Use GuzzleHTTP Promises v6 Implementation to send
+     * the request asynchronously. As mentioned in the source
+     * code, this method will only leverage the advantages
+     * of Asynchronous execution in later versions.
+     *
+     * The current version uses the Promises but will synchronously
+     * execute the Request and wait for it to response.
+     *
+     * Configuring the onSuccess, onError and onReject callbacks
+     * is possible using callables. Following signatures will
+     * apply:
+     *   - onSuccess: function(ResponseInterface $response)
+     *   - onError: function(RequestException $exception)
+     *   - onReject: function(string $reason)
+     *
+     * @param  Client  $client  [description]
+     * @param  Request $request [description]
+     * @param  array   $options [description]
+     * @return [type]           [description]
+     */
+    protected function promiseReponse(Client $client, Request $request, array $options = [])
+    {
+        // Guzzle Promises do not allow Asynchronous Requests Handling,
+        // I have implemented this feature only because it will
+        // allow a better Response Time for Paralell Request Handling.
+        // This will be implemented in later versions.
+        // Because of this, the following snippet will basically work
+        // just like a normal Synchronous request, except that the Success
+        // and Error callbacks can be configured more conveniently.
+
+        $successCallback = isset($options["onSuccess"]) && is_callable($options["onSuccess"]) ? $options["onSuccess"] : null;
+        $errorCallback   = isset($options["onError"]) && is_callable($options["onError"]) ? $options["onError"] : null;
+        $cancelCallback  = isset($options["onReject"]) && is_callable($options["onReject"]) ? $options["onReject"] : null;
+
+        $promise = $client->sendAsync($request);
+        $promise->then(
+            function(ResponseInterface $response)
+                use ($successCallback)
+            {
+                if ($successCallback)
+                    return $successCallback($response);
+
+                return $response;
+            },
+            function(RequestException $exception)
+                use ($errorCallback)
+            {
+                if ($errorCallback)
+                    return $errorCallback($exception);
+
+                return $exception;
+            }
+        );
+
+        if ($cancelCallback)
+            // register promise rejection callback (happens when the
+            // cancel() method is called on promises.)
+            $promise->otherwise($cancelCallback);
+
+        // Guzzle Promises advantages will only be leveraged
+        // in Parelell request execution mode as all requests
+        // will be sent in paralell and the handling time goes
+        // down to the minimum response time of ALL promises.
+        return $promise->wait();
+    }
+
+    /**
      * This method triggers a GET request to the given
      * URI using the GuzzleHttp client.
      *
@@ -81,49 +148,7 @@ class GuzzleRequestHandler
             // this behaviour handles the request synchronously.
             return $client->send($request);
 
-        // Now use guzzle Promises features, as mentioned at the end,
-        // Guzzle Promises do not allow Asynchronous Requests Handling,
-        // I have implemented this feature only because it will
-        // allow a better Response Time for Paralell Request Handling.
-        // This will be implemented in later versions.
-        // Because of this the following snippet will basically work
-        // just like a normal Synchronous request, except that the Success
-        // and Error callbacks can be configured more conveniently.
-
-        $successCallback = isset($options["onSuccess"]) && is_callable($options["onSuccess"]) ? $options["onSuccess"] : null;
-        $errorCallback   = isset($options["onError"]) && is_callable($options["onError"]) ? $options["onError"] : null;
-        $cancelCallback  = isset($options["onReject"]) && is_callable($options["onReject"]) ? $options["onReject"] : null;
-
-        $promise = $client->sendAsync($request);
-        $promise->then(
-            function(ResponseInterface $response)
-                use ($successCallback)
-            {
-                if ($successCallback)
-                    return $successCallback($response);
-
-                return $response;
-            },
-            function(RequestException $exception)
-                use ($errorCallback)
-            {
-                if ($errorCallback)
-                    return $errorCallback($exception);
-
-                return $exception;
-            }
-        );
-
-        if ($cancelCallback)
-            // register promise rejection callback (happens when the
-            // cancel() method is called on promises.)
-            $promise->otherwise($cancelCallback);
-
-        // Guzzle Promises advantages will only be leveraged
-        // in Parelell request execution mode as all requests
-        // will be sent in paralell and the handling time goes
-        // down to the minimum response time of ALL promises.
-        return $promise->wait();
+        return $this->promiseResponse($client, $request, $options);
     }
 
     /**
@@ -139,5 +164,27 @@ class GuzzleRequestHandler
      */
     public function post($uri, $bodyJSON, array $options = [], $synchronous = false)
     {
+        $headers = [];
+        if (!empty($options["headers"]))
+            $headers = $options["headers"];
+
+        // overwrite mandatory headers
+        $headers["Content-Length"] = strlen($bodyJSON);
+        $headers = $this->normalizeHeaders($headers);
+
+        // prepare guzzle request options
+        $options = array_merge($options, [
+            "body"    => $bodyJSON,
+            "headers" => $headers,
+        ]);
+
+        $client  = new Client(["base_uri" => $this->getBaseUrl()]);
+        $request = new Request("POST", $uri, $options);
+        if (! $usePromises)
+            // return the response object when the request is completed.
+            // this behaviour handles the request synchronously.
+            return $client->send($request);
+
+        return $this->promiseResponse($client, $request, $options);
     }
 }
