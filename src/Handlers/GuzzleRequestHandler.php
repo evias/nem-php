@@ -90,10 +90,11 @@ class GuzzleRequestHandler
             }
         );
 
-        if ($cancelCallback)
+        if ($cancelCallback) {
             // register promise rejection callback (happens when the
             // cancel() method is called on promises.)
             $promise->otherwise($cancelCallback);
+        }
 
         // Guzzle Promises advantages will only be leveraged
         // in Parelell request execution mode as all requests

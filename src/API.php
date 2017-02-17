@@ -48,7 +48,7 @@ class API
      *
      * @var string
      */
-    protected $handlerClass = \evias\NEMBlockchain\Handlers\UnirestRequestHandler::class;
+    protected $handlerClass = \evias\NEMBlockchain\Handlers\GuzzleRequestHandler::class;
 
     /**
      * The request handler use to send API calls over

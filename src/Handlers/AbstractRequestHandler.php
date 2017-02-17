@@ -45,7 +45,7 @@ abstract class AbstractRequestHandler
     protected function normalizeHeaders(array $headers)
     {
         if (empty($headers["User-Agent"]))
-            $headers["User-Agent"] = "evias NEM Wrapper";
+            $headers["User-Agent"] = "evias NEM Blockchain Wrapper";
 
         if (empty($headers["Accept"]))
             $headers["Accept"] = "application/json";
