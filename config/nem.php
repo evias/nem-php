@@ -24,9 +24,9 @@ return [
     |
     | This option specifies which HTTP Handler Class
     |
-    | Following libraries are currently available: "unirest", "guzzle"
+    | Following libraries are currently available: "guzzle"
     */
-    'handler_class' => \evias\NEMBlockchain\Handlers\UnirestHttpHandler::class,
+    'handler_class' => \evias\NEMBlockchain\Handlers\GuzzleRequestHandler::class,
 
     /*
     |--------------------------------------------------------------------------

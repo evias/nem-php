@@ -44,26 +44,6 @@ class RequestHandlersConfigurationTest
 		$this->assertTrue($handler instanceof \evias\NEMBlockchain\Handlers\GuzzleRequestHandler);
     }
 
-	/**
-	 * This test checks whether the API class returns
-	 * a valid UnirestRequestHandler instance when a
-	 * `handler_class` config provides the given
-	 * UnirestRequestHandler class.
-	 *
-	 * @return void
-	 */
-    public function testUnirestConfiguration()
-    {
-		$config = ["handler_class" => \evias\NEMBlockchain\Handlers\UnirestRequestHandler::class];
-
-		// each test should have its own API configured
-		$client = new API();
-		$client->setOptions($config);
-
-		$handler = $client->getRequestHandler();
-		$this->assertTrue($handler instanceof \evias\NEMBlockchain\Handlers\UnirestRequestHandler);
-    }
-
     /**
      * This test checks whether the API class correctly
      * handles the host, port, endpoint and use_ssl
