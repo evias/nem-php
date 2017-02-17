@@ -126,5 +126,32 @@ class RequestHandlersConfigurationTest
         $this->assertEquals("wss://127.0.0.1:7890/", $connectable->getBaseUrl());
     }
 
-    //XXX add test for Basic Authentication feature!
+    /**
+     * This test checks whether the API class correctly
+     * handles the username and password pair
+     * options provided per config.
+     *
+     * @return void
+     */
+    public function testHttpBasicAuthenticationConfiguration()
+    {
+        $config = [
+            "use_ssl"  => true,
+            "protocol" => "http",
+            "username" => "nem",
+            "password" => "nemdev",
+            "host" => "127.0.0.1",
+            "port" => 7890,
+            "endpoint" => "/",
+        ];
+
+        $client = new API();
+        $client->setOptions($config);
+
+        $connectable = $client->getRequestHandler();
+
+        $this->assertEquals("nem", $connectable->getUsername());
+        $this->assertEquals("nemdev", $connectable->getPassword());
+        $this->assertEquals("https://nem:nemdev@127.0.0.1:7890/", $connectable->getBaseUrl());
+    }
 }

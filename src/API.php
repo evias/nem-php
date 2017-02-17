@@ -207,7 +207,7 @@ class API
             $realMethod = $proxyCall[1][0];
             if (! method_exists($this->getRequestHandler(), $realMethod))
                 // after remove of "JSON" in the name, the method still doesn't exist
-                throw new BadMethodCallException("Method '" . $realMethod . "' is not defined in evias\\NEMBlockchain\\Handlers\\" . get_class($this->getRequestHandler()) . " and could not forwarded.");
+                throw new BadMethodCallException("Method '" . $realMethod . "' is not defined in evias\\NEMBlockchain\\Handlers\\" . get_class($this->getRequestHandler()) . " and could not be forwarded.");
 
             // valid forwarding applied (took the "JSON" part away)
             // get response from request handler and return JSON body.

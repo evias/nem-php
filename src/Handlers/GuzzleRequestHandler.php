@@ -92,6 +92,7 @@ class GuzzleRequestHandler
 
         $successCallback = isset($options["onSuccess"]) && is_callable($options["onSuccess"]) ? $options["onSuccess"] : null;
         $errorCallback   = isset($options["onError"]) && is_callable($options["onError"]) ? $options["onError"] : null;
+        $cancelCallback  = isset($options["onReject"]) && is_callable($options["onReject"]) ? $options["onReject"] : null;
 
         $promise = $client->sendAsync($request);
         $promise->then(
@@ -112,6 +113,11 @@ class GuzzleRequestHandler
                 return $exception;
             }
         );
+
+        if ($cancelCallback)
+            // register promise rejection callback (happens when the
+            // cancel() method is called on promises.)
+            $promise->otherwise($cancelCallback);
 
         // Guzzle Promises advantages will only be leveraged
         // in Parelell request execution mode as all requests
