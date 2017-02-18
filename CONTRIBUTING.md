@@ -20,12 +20,6 @@ And constructed with the following guidelines:
 
 This application is compliant with the [PSR-1](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-1-basic-coding-standard.md) and [PSR-4](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader.md). If you notice any compliance oversights, please send a patch via pull request or notify me by creating an Issue.
 
-## Pull Requests
-
-The pull request process differs for new features and bugs.
-
-Pull requests for bugs may be sent without creating any proposal issue. If you believe that you know of a solution for a bug that has been filed, please leave a comment detailing your proposed fix or create a pull request with the fix mentioning that issue id.
-
 ### Proposal \ Feature Requests
 
 If you have a proposal or a feature request, you may create an issue with `[Proposal]` in the title.

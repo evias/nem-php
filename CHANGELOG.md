@@ -2,23 +2,26 @@
 
 This project follows [Semantic Versioning](CONTRIBUTING.md).
 
-## Proposals
-
-I cannot give estimated times for completion on `Accepted` Proposals.
-
-- [Accepted](https://github.com/evias/php-nem-laravel/labels/Accepted)
-- [Rejected](https://github.com/evias/php-nem-laravel/labels/Rejected)
-
 ---
 
-### v0.2.0 - Ongoing
+### v0.1.0
+
+- wallets and accounts informations basics (read only)
+- transactions informations basics (read only)
+
+### v0.0.3
+
+- add IoC binding "nem" for API instantiation with config/nem.php
+- add laravel/lumen service provider and configuration specific tests
+
+### v0.0.2
 
 - add packages contracts
 - add guzzle request handler
 - implement API wrapper class
 - add test cases
 
-### v0.1.0 - 2017-02-01
+### v0.0.1
 
 - add contributions notes, add LICENSE and readme file.
 - prepare travis.yml for travis CI integration.

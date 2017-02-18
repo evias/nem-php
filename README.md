@@ -5,9 +5,9 @@
 [![Latest Unstable Version](https://poser.pugx.org/evias/php-nem-laravel/v/unstable)](//packagist.org/packages/evias/php-nem-laravel)
 [![License](https://poser.pugx.org/evias/php-nem-laravel/license)](https://packagist.org/packages/evias/php-nem-laravel)
 
-This package aims to provide with an easy-to-use PHP Laravel Namespace helping with to communicate with the NEM blockchain through its NIS API.
+This package aims to provide with an easy-to-use PHP Laravel Namespace helping developers to communicate with the NEM blockchain through its NIS API.
 
-This package should be an aid to any developer working on Laravel applications with the NEM blockchain.
+This package should be an aid to any developer working on Laravel/Lumen/Symfony applications with the NEM blockchain.
 
 Package licensed under [MIT](LICENSE) License.
 
@@ -95,8 +95,10 @@ If you are using Laravel or Lumen, you will need to register the Service Provide
 
 Important versions listed below. Refer to the [Changelog](CHANGELOG.md) for a full history of the project.
 
-- [0.2.0](CHANGELOG.md) - Ongoing
-- [0.1.0](CHANGELOG.md) - 2015-02-04
+- [0.1.0](CHANGELOG.md#v010) - future release
+- [0.0.3](CHANGELOG.md#v003) - ongoing development
+- [0.0.2](CHANGELOG.md#v002) - 2017-02-18
+- [0.0.1](CHANGELOG.md#v001) - 2017-02-04
 
 ## License
 
