@@ -98,6 +98,47 @@ class API
     }
 
     /**
+     * This __call hook makes sure calls to Request Handlers
+     * methods get forwarded and also forwards methods like
+     * "getJSON" and "postJSON" so that it will directly
+     * return the JSON (string) from the response of the
+     * Request Handler.
+     *
+     * @param  [type] $method    [description]
+     * @param  array  $arguments [description]
+     * @return [type]            [description]
+     */
+    public function __call($method, array $arguments)
+    {
+        if (method_exists($this->getRequestHandler(), $method))
+            // simple method call forwarding
+            return call_user_func_array([$this->getRequestHandler(), $method], $arguments);
+
+        // if user wants "JSON"-ending method, it is possible that he is
+        // specifying that we should return the JSON directly.
+        if (false !== strpos($method, "JSON")) {
+            $proxyCall = [];
+            preg_match_all("/([a-zA-Z0-9]+)JSON$/", $method, $proxyCall);
+
+            if (empty($proxyCall[1]) || empty($proxyCall[1][0]))
+                // invalid method name
+                throw new BadMethodCallException("Method '" . $method . "' is not defined in evias\\NEMBlockchain\\API and could not forwarded.");
+
+            $realMethod = $proxyCall[1][0];
+            if (! method_exists($this->getRequestHandler(), $realMethod))
+                // after remove of "JSON" in the name, the method still doesn't exist
+                throw new BadMethodCallException("Method '" . $realMethod . "' is not defined in evias\\NEMBlockchain\\Handlers\\" . get_class($this->getRequestHandler()) . " and could not be forwarded.");
+
+            // valid forwarding applied (took the "JSON" part away)
+            // get response from request handler and return JSON body.
+            $response = call_user_func_array([$this->getRequestHandler(), $realMethod], $arguments);
+            return (string) $response->getBody();
+        }
+
+        throw new BadMethodCallException("Method '" . $method . "' is not defined in evias\\NEMBlockchain\\API.");
+    }
+
+    /**
      * Set the linked laravel/lumen Application
      * class instance.
      *
@@ -175,46 +216,5 @@ class API
 
         $this->requestHandler = new $handlerClass();
         return $this->requestHandler;
-    }
-
-    /**
-     * This __call hook makes sure calls to Request Handlers
-     * methods get forwarded and also forwards methods like
-     * "getJSON" and "postJSON" so that it will directly
-     * return the JSON (string) from the response of the
-     * Request Handler.
-     *
-     * @param  [type] $method    [description]
-     * @param  array  $arguments [description]
-     * @return [type]            [description]
-     */
-    public function __call($method, array $arguments)
-    {
-        if (method_exists($this->getRequestHandler(), $method))
-            // simple method call forwarding
-            return call_user_func_array([$this->getRequestHandler(), $method], $arguments);
-
-        // if user wants "JSON"-ending method, it is possible that he is
-        // specifying that we should return the JSON directly.
-        if (false !== strpos($method, "JSON")) {
-            $proxyCall = [];
-            preg_match_all("/([a-zA-Z0-9]+)JSON$/", $method, $proxyCall);
-
-            if (empty($proxyCall[1]) || empty($proxyCall[1][0]))
-                // invalid method name
-                throw new BadMethodCallException("Method '" . $method . "' is not defined in evias\\NEMBlockchain\\API and could not forwarded.");
-
-            $realMethod = $proxyCall[1][0];
-            if (! method_exists($this->getRequestHandler(), $realMethod))
-                // after remove of "JSON" in the name, the method still doesn't exist
-                throw new BadMethodCallException("Method '" . $realMethod . "' is not defined in evias\\NEMBlockchain\\Handlers\\" . get_class($this->getRequestHandler()) . " and could not be forwarded.");
-
-            // valid forwarding applied (took the "JSON" part away)
-            // get response from request handler and return JSON body.
-            $response = call_user_func_array([$this->getRequestHandler(), $realMethod], $arguments);
-            return (string) $response->getBody();
-        }
-
-        throw new BadMethodCallException("Method '" . $method . "' is not defined in evias\\NEMBlockchain\\API.");
     }
 }

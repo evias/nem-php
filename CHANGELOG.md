@@ -11,6 +11,13 @@ I cannot give estimated times for completion on `Accepted` Proposals.
 
 ---
 
+### v0.2.0 - Ongoing
+
+- add packages contracts
+- add guzzle request handler
+- implement API wrapper class
+- add test cases
+
 ### v0.1.0 - 2017-02-01
 
 - add contributions notes, add LICENSE and readme file.

@@ -30,6 +30,34 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Default Networks Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This option specifies the available NEM networks.
+    |
+    | Mainnet, Testnet and Mijin are the 3 available NEM networks.
+    | @see https://github.com/NemProject/NanoWallet/blob/master/src/app/utils/Network.js
+    */
+    'networks' => [
+        'Mainnet' => [
+            'id' => 104,
+            'prefix' => "68",
+            'char' => "N",
+        ],
+        'Testnet' => [
+            'id' => -104,
+            'prefix' => "98",
+            'char' => "T",
+        ],
+        'Mijin' => [
+            'id' => 96,
+            'prefix' => "60",
+            'char' => "M",
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Default NIS Configuration
     |--------------------------------------------------------------------------
     |
