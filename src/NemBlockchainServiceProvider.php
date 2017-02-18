@@ -114,9 +114,9 @@ class NemBlockchainServiceProvider
      */
     protected function registerConfig()
     {
-        $this->app->bindIf('nem.config', function () {
+        $this->app->bind('nem.config', function () {
             return $this->app['config']->get('nem.config');
-        });
+        }, true);
     }
 
     /**
@@ -136,40 +136,40 @@ class NemBlockchainServiceProvider
      */
     protected function registerPreConfiguredApiClients()
     {
-        $this->app->bindIf("nem", function()
+        $this->app->bind("nem", function()
         {
             $config  = $this->app["nem.config"];
-            $nisConf = $config["nis.primary"];
+            $nisConf = $config["nis"]["primary"];
             $client  = new API($nisConf);
 
             return $client;
-        });
+        }, true); // shared
 
-        $this->app->bindIf("nem.testing", function()
+        $this->app->bind("nem.testing", function()
         {
             $config  = $this->app["nem.config"];
-            $nisConf = $config["nis.testing"];
+            $nisConf = $config["nis"]["testing"];
             $client  = new API($nisConf);
 
             return $client;
-        });
+        }, true); // shared
 
-        $this->app->bindIf("nem.ncc", function()
+        $this->app->bind("nem.ncc", function()
         {
             $config  = $this->app["nem.config"];
-            $nccConf = $config["ncc.primary"];
+            $nccConf = $config["ncc"]["primary"];
             $client  = new API($nccConf);
 
             return $client;
-        });
+        }, true); // shared
 
-        $this->app->bindIf("nem.ncc.testing", function()
+        $this->app->bind("nem.ncc.testing", function()
         {
             $config  = $this->app["nem.config"];
-            $nccConf = $config["ncc.testing"];
+            $nccConf = $config["ncc"]["testing"];
             $client  = new API($nccConf);
 
             return $client;
-        });
+        }, true); // shared
     }
 }
