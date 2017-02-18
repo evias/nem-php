@@ -50,6 +50,7 @@ class NemBlockchainServiceProvider
     public function register()
     {
         $this->registerConfig();
+        $this->registerPreConfiguredApiClients();
     }
 
     /**
@@ -61,6 +62,10 @@ class NemBlockchainServiceProvider
     {
         return [
             "nem.config",
+            "nem",
+            "nem.testing",
+            "nem.ncc",
+            "nem.ncc.testing",
         ];
     }
 
@@ -110,7 +115,61 @@ class NemBlockchainServiceProvider
     protected function registerConfig()
     {
         $this->app->bindIf('nem.config', function () {
-            return $this->app['config']->get('nem');
+            return $this->app['config']->get('nem.config');
+        });
+    }
+
+    /**
+     * Register all pre-configured NEM API clients.
+     *
+     * This will register following IoC bindings:
+     * - nem : using the primary NIS server configuration
+     * - nem.testing : using the testing NIS server configuration
+     * - nem.ncc : using the primary NCC client configuration
+     * - nem.ncc.testing : using the testing NCC client configuration
+     *
+     * All registered bindings will return an instance of
+     * evias\NEMBlockchain\API.
+     *
+     * @see  \evias\NEMBlockchain\API
+     * @return void
+     */
+    protected function registerPreConfiguredApiClients()
+    {
+        $this->app->bindIf("nem", function()
+        {
+            $config  = $this->app["nem.config"];
+            $nisConf = $config["nis.primary"];
+            $client  = new API($nisConf);
+
+            return $client;
+        });
+
+        $this->app->bindIf("nem.testing", function()
+        {
+            $config  = $this->app["nem.config"];
+            $nisConf = $config["nis.testing"];
+            $client  = new API($nisConf);
+
+            return $client;
+        });
+
+        $this->app->bindIf("nem.ncc", function()
+        {
+            $config  = $this->app["nem.config"];
+            $nccConf = $config["ncc.primary"];
+            $client  = new API($nccConf);
+
+            return $client;
+        });
+
+        $this->app->bindIf("nem.ncc.testing", function()
+        {
+            $config  = $this->app["nem.config"];
+            $nccConf = $config["ncc.testing"];
+            $client  = new API($nccConf);
+
+            return $client;
         });
     }
 }

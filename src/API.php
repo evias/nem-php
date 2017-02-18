@@ -65,8 +65,10 @@ class API
      *
      * @param Container $app [description]
      */
-    public function __construct()
+    public function __construct(array $options = [])
     {
+        if (!empty($options))
+            $this->setOptions($options);
     }
 
     /**
