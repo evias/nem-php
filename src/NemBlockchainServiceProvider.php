@@ -60,7 +60,7 @@ class NemBlockchainServiceProvider
     public function provides()
     {
         return [
-            "nem",
+            "nem.config",
         ];
     }
 
@@ -77,9 +77,9 @@ class NemBlockchainServiceProvider
             $this->publishes([$source => config_path('nem.php')]);
         else
             // lumen configure app
-            $this->app->configure('nem');
+            $this->app->configure('nem.config');
 
-        $this->mergeConfigFrom($source, 'nem');
+        $this->mergeConfigFrom($source, 'nem.config');
     }
 
     /**
@@ -109,7 +109,7 @@ class NemBlockchainServiceProvider
      */
     protected function registerConfig()
     {
-        $this->app->bindIf('nem', function () {
+        $this->app->bindIf('nem.config', function () {
             return $this->app['config']->get('nem');
         });
     }
