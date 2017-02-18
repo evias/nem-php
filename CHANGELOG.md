@@ -13,6 +13,7 @@ This project follows [Semantic Versioning](CONTRIBUTING.md).
 
 - add IoC binding "nem" for API instantiation with config/nem.php
 - add laravel/lumen service provider and configuration specific tests
+- add examples to README.md
 
 ### v0.0.2
 

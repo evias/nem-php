@@ -63,9 +63,7 @@ class NemBlockchainServiceProvider
         return [
             "nem.config",
             "nem",
-            "nem.testing",
             "nem.ncc",
-            "nem.ncc.testing",
         ];
     }
 
@@ -114,7 +112,7 @@ class NemBlockchainServiceProvider
      */
     protected function registerConfig()
     {
-        $this->app->bind('nem.config', function () {
+        $this->app->bindIf('nem.config', function () {
             return $this->app['config']->get('nem.config');
         }, true);
     }
@@ -136,37 +134,25 @@ class NemBlockchainServiceProvider
      */
     protected function registerPreConfiguredApiClients()
     {
-        $this->app->bind("nem", function()
+        $this->app->bindIf("nem", function()
         {
+            $environment = env("APP_ENV", "testing");
+            $envConfig   = $environment == "production" ? "primary" : "testing";
+
             $config  = $this->app["nem.config"];
-            $nisConf = $config["nis"]["primary"];
+            $nisConf = $config["nis"][$envConfig];
             $client  = new API($nisConf);
 
             return $client;
         }, true); // shared
 
-        $this->app->bind("nem.testing", function()
+        $this->app->bindIf("nem.ncc", function()
         {
+            $environment = env("APP_ENV", "testing");
+            $envConfig   = $environment == "production" ? "primary" : "testing";
+
             $config  = $this->app["nem.config"];
-            $nisConf = $config["nis"]["testing"];
-            $client  = new API($nisConf);
-
-            return $client;
-        }, true); // shared
-
-        $this->app->bind("nem.ncc", function()
-        {
-            $config  = $this->app["nem.config"];
-            $nccConf = $config["ncc"]["primary"];
-            $client  = new API($nccConf);
-
-            return $client;
-        }, true); // shared
-
-        $this->app->bind("nem.ncc.testing", function()
-        {
-            $config  = $this->app["nem.config"];
-            $nccConf = $config["ncc"]["testing"];
+            $nccConf = $config["ncc"][$envConfig];
             $client  = new API($nccConf);
 
             return $client;
