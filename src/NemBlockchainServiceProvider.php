@@ -50,6 +50,7 @@ class NemBlockchainServiceProvider
     public function register()
     {
         $this->registerConfig();
+        $this->registerPreConfiguredApiClients();
     }
 
     /**
@@ -61,6 +62,8 @@ class NemBlockchainServiceProvider
     {
         return [
             "nem.config",
+            "nem",
+            "nem.ncc",
         ];
     }
 
@@ -110,7 +113,49 @@ class NemBlockchainServiceProvider
     protected function registerConfig()
     {
         $this->app->bindIf('nem.config', function () {
-            return $this->app['config']->get('nem');
-        });
+            return $this->app['config']->get('nem.config');
+        }, true);
+    }
+
+    /**
+     * Register all pre-configured NEM API clients.
+     *
+     * This will register following IoC bindings:
+     * - nem : using the primary NIS server configuration
+     * - nem.testing : using the testing NIS server configuration
+     * - nem.ncc : using the primary NCC client configuration
+     * - nem.ncc.testing : using the testing NCC client configuration
+     *
+     * All registered bindings will return an instance of
+     * evias\NEMBlockchain\API.
+     *
+     * @see  \evias\NEMBlockchain\API
+     * @return void
+     */
+    protected function registerPreConfiguredApiClients()
+    {
+        $this->app->bindIf("nem", function()
+        {
+            $environment = env("APP_ENV", "testing");
+            $envConfig   = $environment == "production" ? "primary" : "testing";
+
+            $config  = $this->app["nem.config"];
+            $nisConf = $config["nis"][$envConfig];
+            $client  = new API($nisConf);
+
+            return $client;
+        }, true); // shared
+
+        $this->app->bindIf("nem.ncc", function()
+        {
+            $environment = env("APP_ENV", "testing");
+            $envConfig   = $environment == "production" ? "primary" : "testing";
+
+            $config  = $this->app["nem.config"];
+            $nccConf = $config["ncc"][$envConfig];
+            $client  = new API($nccConf);
+
+            return $client;
+        }, true); // shared
     }
 }

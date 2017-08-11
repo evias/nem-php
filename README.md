@@ -31,26 +31,81 @@ The package can also be download manually by cloning this repository or by downl
 
 	$ https://packagist.org/packages/evias/php-nem-laravel
 
-## Usage / Examples
+## Usage / Examples NemSDK
+
+### Laravel
+Go into /config/app.php and ADD this to your providers
+
+```php
+'providers' => [
+    evias\NEMBlockchain\NemBlockchainServiceProvider::class,
+    evias\NEMBlockchain\NemServiceProvider::class,
+],
+```
+
+and this to your aliases
+```php
+'aliases' => [
+    'NemSDK'    => evias\NEMBlockchain\Facades\NemSDK::class,
+],
+```
+You can test it with this command
+```php
+NemSDK::node()->info();
+```
+It will now connect to the pre-configured node in evias\php-nem-laravel\config\nem.php. Either change this or pass in options like this:
+```php
+NemSDK::setOptions([
+		"protocol" => "http",
+		"use_ssl" => false,
+		"host" 	  => "10.0.2.2",
+		"port"    => 7890,
+		"endpoint" => "/",
+	]);
+```
+
+### PHP standalone
+
+Instantiate new SDK
+```php
+$NemSDK = new \evias\NEMBlockchain\NemSDK([
+		"protocol" => "http",
+		"use_ssl" => false,
+		"host" => "go.nem.ninja",
+		"port" => 7890,
+		"endpoint" => "/",
+	]);
+```
+Test it
+```php
+var_dump( $NemSDK->node()->info() ) ;
+```
+
+## Usage / Examples API
 
 When you have installed the evias/php-nem-laravel package you will be able to use the API class to send API requests to the configured NIS. By default, the config/nem.php file defines the localhost NIS to be used, this can be changed.
 
 If you are using Laravel or Lumen, you will need to register the Service Provider of this package into your app:
 
+	// Laravel/Lumen registering the service provider
 	$app = Laravel\Lumen\Application(realpath(__DIR__));
     $app->register(evias\NEMBlockchain\NemBlockchainServiceProvider::class);
 
-    // The configuration can be retrieved with "nem.config" IoC binding:
+	// Example 1: Using the Service Provider
+	// --------------------------------------
+    // The Service Provider for Laravel/Lumen will bind "nem.config",
+    // "nem" and "nem.ncc" in the IoC. "nem" and "nem.ncc" are pre-
+    // configured instances of the API class using APP_ENV for the environment.
     $nemConfig = $app["nem.config"]
-
-    // A pre-configured API client instance can be retrieved with "nem" IoC binding:
-    // the configuration file at config/nem.php will define which host, port, protocol,
-    // etc. is used according to the current APP_ENV.
     $nemAPI = $app["nem"];
+    $nccAPI = $app["nem.ncc"];
 
+	// Example 2: Instantiating the API class
+	// --------------------------------------
     // You can also create a new instance of the API
-    $myAPI = new evias\NEMBlockchain\API();
-    $myAPI->setOptions([
+    $nemAPI = new evias\NEMBlockchain\API();
+    $nemAPI->setOptions([
+        "protocol" => "http",
 		"use_ssl" => false,
 		"host" 	  => "go.nem.ninja",
 		"port"    => 7890,
@@ -59,17 +114,20 @@ If you are using Laravel or Lumen, you will need to register the Service Provide
 
     // If you wish you can define your own RequestHandler, have a look at the
     // evias\NEMBlockchain\Contracts\RequestHandler interface.
-    $myAPI->setOptions(["handler_class" => Path\To\My\Handler::class]);
+    $nemAPI->setOptions(["handler_class" => Path\To\My\Handler::class]);
 
+	// Example 3: Sending GET/POST JSON requests
+	// -----------------------------------------
     // The API wrapper class can be used to send API requests to the
     // configured NIS host with following snippet:
-
 	$response = $nemAPI->getJSON("heartbeat", "");
 
 	// sending JSON through POST and receiving JSON back.
 	$postData = ["myField" => "hasThisValue", "yourField" => "isNotEmpty"];
 	$response = $nemAPI->postJSON("post/endpoint", json_encode($postData));
 
+	// Example 4: Custom headers and Callback configuration
+	// -----------------------------------------------------
 	// The 3rd parameter of the get() and post() methods lets you pass
 	// an options array to the RequestHandler. To add specific headers for
 	// example you would do as follows:
