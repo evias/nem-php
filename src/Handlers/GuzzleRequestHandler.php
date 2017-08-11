@@ -18,6 +18,7 @@
  */
 namespace evias\NEMBlockchain\Handlers;
 
+use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Client;
@@ -133,7 +134,9 @@ class GuzzleRequestHandler
             $headers = $options["headers"];
 
         // overwrite mandatory headers
-        $headers["Content-Length"] = strlen($bodyJSON);
+	    if(!is_array($bodyJSON)){
+		    $headers["Content-Length"] = strlen($bodyJSON);
+	    }
         $headers = $this->normalizeHeaders($headers);
 
         // prepare guzzle request options
@@ -163,29 +166,36 @@ class GuzzleRequestHandler
      * @param  boolean  $synchronous
      * @return [type]
      */
-    public function post($uri, $bodyJSON, array $options = [], $synchronous = false)
+    public function post($uri, $bodyJSON, array $options = [], $usePromises = false)
     {
         $headers = [];
         if (!empty($options["headers"]))
             $headers = $options["headers"];
 
         // overwrite mandatory headers
-        $headers["Content-Length"] = strlen($bodyJSON);
+	    if(!is_array($bodyJSON)){
+		    $headers["Content-Length"] = strlen($bodyJSON);
+	    }
         $headers = $this->normalizeHeaders($headers);
 
         // prepare guzzle request options
-        $options = array_merge($options, [
-            "body"    => $bodyJSON,
-            "headers" => $headers,
-        ]);
+
+        $options = [
+        	"headers" => $headers,
+	        "json" => $bodyJSON,
+        ];
+
 
         $client  = new Client(["base_uri" => $this->getBaseUrl()]);
-        $request = new Request("POST", $uri, $options);
-        if (! $usePromises)
-            // return the response object when the request is completed.
-            // this behaviour handles the request synchronously.
-            return $client->send($request);
 
-        return $this->promiseResponse($client, $request, $options);
+
+		if (! $usePromises){
+			$response = $client->request('POST', $uri, $options);
+			return $response->getBody()->getContents();
+		}
+
+		//TODO: Implement post promise
+	    throw new \Exception("Promises for POST is not implmented yet");
+
     }
 }
