@@ -254,6 +254,7 @@ class Account {
 	 * @return Array<Mosaic[]>
 	 */
 	public function getMosaicOwnedByAddress( $address ) {
+		$address = $this->nemSDK->models()->address($address)->plain();
 		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'mosaic/owned?address=' . $address, "" ) )->data;
 	}
 
