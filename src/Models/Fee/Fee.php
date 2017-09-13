@@ -35,7 +35,7 @@ class Fee {
 					$mosaicFee               += ( 0.05 * max( 1, $xemfee - $supplyRelatedAdjustment ) ) * 1000000;
 				} else {
 					//Small Business mosaic fee
-					$mosaicFee += 0.05 * 1000000;
+					$mosaicFee += 0.1 * 1000000;
 				}
 			}
 			$fee += $mosaicFee;
