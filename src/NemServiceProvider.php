@@ -32,7 +32,13 @@ class NemServiceProvider extends ServiceProvider {
 	public function register() {
 		$this->app->bind( 'NemSDK', function () {
 
-			return new NemSDK();
+			return new NemSDK([
+	                        "protocol" => "http",
+	                        "use_ssl" => false,
+	                        "host"      => "127.0.0.1",
+	                        "port"    => 7890,
+	                        "endpoint" => "/",
+	                        ]);
 
 		} );
 	}
