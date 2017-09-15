@@ -81,7 +81,7 @@ return [
         'testing' => [
         	"protocol" => "http",
             "use_ssl" => false,
-            "host" => "go.nem.ninja",
+            "host" => "127.0.0.1",
             "port" => 7890,
             "endpoint" => "/",
         ],
