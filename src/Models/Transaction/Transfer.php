@@ -98,7 +98,6 @@ class Transfer {
 				) );
 			}
 		}
-		$test = json_encode( $dto );
 
 		return $dto;
 	}

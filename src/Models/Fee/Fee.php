@@ -24,10 +24,10 @@ class Fee {
 		if ( ! empty( $mosaics ) ) {
 			$mosaicFee = 0;
 			foreach ( $mosaics as $mosaic ) {
+				$mosaicProperties        = $this->nemSDK->models()->mosaic()->getProperties( $mosaic['namespace'], $mosaic['mosaic'] );
 
-				if ( $mosaic['quantity'] > 10000 ) {
+				if ( $mosaicProperties['initialSupply'] > 10000 ) {
 					//custom mosaic fee, Max is 1.25.
-					$mosaicProperties        = $this->nemSDK->models()->mosaic()->getProperties( $mosaic['namespace'], $mosaic['mosaic'] );
 					$maxMosaicQuantity       = 9000000000000000;
 					$totalMosaicQuantity     = $mosaicProperties['initialSupply'] * ( 10 ^ $mosaicProperties['divisibility'] );
 					$supplyRelatedAdjustment = floor( 0.8 * ( log( $maxMosaicQuantity / $totalMosaicQuantity ) ) );
@@ -35,7 +35,7 @@ class Fee {
 					$mosaicFee               += ( 0.05 * max( 1, $xemfee - $supplyRelatedAdjustment ) ) * 1000000;
 				} else {
 					//Small Business mosaic fee
-					$mosaicFee += 0.05 * 1000000;
+					$mosaicFee += 500000;
 				}
 			}
 			$fee += $mosaicFee;
