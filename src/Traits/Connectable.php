@@ -16,7 +16,7 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace evias\NEMBlockchain\Traits;
+namespace NEM\Traits;
 
 /**
  * This is the Connectable interface
@@ -75,7 +75,7 @@ trait Connectable
      *
      *     username:password@
      *
-     * @see  \evias\NEMBlockchain\Traits\Connectable@getBasicAuth()
+     * @see  \NEM\Traits\Connectable@getBasicAuth()
      * @var array   valid keys include: username, password
      */
     protected $basicAuth = [];
@@ -84,7 +84,7 @@ trait Connectable
      * Setter for `use_ssl` property.
      *
      * @param  string $host
-     * @return \evias\NEMBlockchain\API
+     * @return \NEM\API
      */
     public function setUseSsl($use_ssl)
     {
@@ -108,7 +108,7 @@ trait Connectable
      * which Protocol is used in the Base URL.
      *
      * @param  string $protocol
-     * @return \evias\NEMBlockchain\Contracts\HttpHandler
+     * @return \NEM\Contracts\HttpHandler
      */
     public function setProtocol($protocol)
     {
@@ -145,7 +145,7 @@ trait Connectable
      * Setter for `host` property.
      *
      * @param  string $host
-     * @return \evias\NEMBlockchain\API
+     * @return \NEM\API
      */
     public function setHost($host)
     {
@@ -167,7 +167,7 @@ trait Connectable
      * Setter for `port` property.
      *
      * @param  integer $port
-     * @return \evias\NEMBlockchain\API
+     * @return \NEM\API
      */
     public function setPort($port)
     {
@@ -189,7 +189,7 @@ trait Connectable
      * Setter for `endpoint` property.
      *
      * @param  string $endpoint
-     * @return \evias\NEMBlockchain\API
+     * @return \NEM\API
      */
     public function setEndpoint($endpoint)
     {

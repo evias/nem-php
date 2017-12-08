@@ -1,9 +1,9 @@
 <?php
 
 
-namespace evias\NEMBlockchain\Infrastructure;
+namespace NEM\Infrastructure;
 
-use evias\NEMBlockchain\NemSDK;
+use NEM\NemSDK;
 
 class Block {
 

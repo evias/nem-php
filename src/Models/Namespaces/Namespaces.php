@@ -1,10 +1,10 @@
 <?php
 
 
-namespace evias\NEMBlockchain\Models\Namespaces;
+namespace NEM\Models\Namespaces;
 
 
-use evias\NEMBlockchain\NemSDK;
+use NEM\NemSDK;
 
 class Namespaces {
 

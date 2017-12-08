@@ -1,9 +1,9 @@
 <?php
 
-namespace evias\NEMBlockchain\Models\Blockchain;
+namespace NEM\Models\Blockchain;
 
 
-use evias\NEMBlockchain\NemSDK;
+use NEM\NemSDK;
 
 class Blockchain {
 	public $nemSDK;

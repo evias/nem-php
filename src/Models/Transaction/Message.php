@@ -1,7 +1,7 @@
 <?php
 
 
-namespace evias\NEMBlockchain\Models\Transaction;
+namespace NEM\Models\Transaction;
 
 
 class Message {

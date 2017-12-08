@@ -1,28 +1,31 @@
 <?php
 
-namespace evias\NEMBlockchain\Infrastructure;
+namespace NEM\Infrastructure;
 
-use evias\NEMBlockchain\NemSDK;
+use NEM\NemSDK;
 
-class Account {
+class Account 
+{
 
-	public $nemSDK;
-	private $endpoint = "/account/";
+    public $nemSDK;
+    private $endpoint = "/account";
 
-	public function __construct( NemSDK $nemSDK ) {
-		$this->nemSDK = $nemSDK;
-	}
+    public function __construct( NemSDK $nemSDK ) {
+        $this->nemSDK = $nemSDK;
+    }
 	
-	/**
-	 * Gets an AccountInfoWithMetaData for an account.
-	 *
-	 * @param address - Address
-	 *
-	 * @return Array<AccountInfoWithMetaData>
-	 */
-	public function getFromAddress( $address ) {
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'get?address=' . $address, "" ) );
-	}
+    /**
+     * Gets an [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair) for an account.
+     *
+     * @param   string  address     Address
+     * @return  array               Array of [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair) objects.
+     */
+    public function getFromAddress($address) 
+    {
+        $apiUrl = $this->endpoint . '/get?' . http_build_query(["address" => $address]);
+        $response = $this->nemSDK->api->getJSON($apiUrl);
+        return json_decode($response);
+    }
 
 	/**
 	 * Gets an AccountInfoWithMetaData for an account with publicKey

@@ -16,7 +16,7 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace evias\NEMBlockchain;
+namespace NEM;
 
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\ServiceProvider;
@@ -64,6 +64,7 @@ class NemBlockchainServiceProvider
             "nem.config",
             "nem",
             "nem.ncc",
+            "nem.sdk",
         ];
     }
 
@@ -125,11 +126,12 @@ class NemBlockchainServiceProvider
      * - nem.testing : using the testing NIS server configuration
      * - nem.ncc : using the primary NCC client configuration
      * - nem.ncc.testing : using the testing NCC client configuration
+     * - nem.sdk : The SDK interface
      *
      * All registered bindings will return an instance of
-     * evias\NEMBlockchain\API.
+     * NEM\API.
      *
-     * @see  \evias\NEMBlockchain\API
+     * @see  \NEM\API
      * @return void
      */
     protected function registerPreConfiguredApiClients()
@@ -144,7 +146,7 @@ class NemBlockchainServiceProvider
             $client  = new API($nisConf);
 
             return $client;
-        }, true); // shared
+        }, true); // shared=true
 
         $this->app->bindIf("nem.ncc", function()
         {
@@ -156,6 +158,17 @@ class NemBlockchainServiceProvider
             $client  = new API($nccConf);
 
             return $client;
-        }, true); // shared
+        }, true); // shared=true
+
+        $this->app->bindIf("nem.sdk", function()
+        {
+            $environment = env("APP_ENV", "testing");
+            $envConfig   = $environment == "production" ? "primary" : "testing";
+
+            $api = $this->app["nem"];
+            $sdk = new SDK($api);
+
+            return $sdk;
+        }, true); // shared=true
     }
 }

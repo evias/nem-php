@@ -1,10 +1,10 @@
 <?php
 
 
-namespace evias\NEMBlockchain\Models\Account;
+namespace NEM\Models\Account;
 
 
-use evias\NEMBlockchain\NemSDK;
+use NEM\NemSDK;
 
 class Account {
 

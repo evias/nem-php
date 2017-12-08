@@ -7,6 +7,9 @@
         {
             "name": "Gregory Saive",
             "email": "greg@evias.be"
+        },
+        {
+            "name": "Robin Pedersen"
         }
     ],
     "require": {
@@ -22,12 +25,12 @@
     },
     "autoload": {
         "psr-4": {
-            "evias\\NEMBlockchain\\": "src/"
+            "NEM\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "evias\\NEMBlockchain\\Tests\\": "tests/"
+            "NEM\\Tests\\": "tests/"
         }
     },
     "config": {

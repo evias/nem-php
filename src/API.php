@@ -12,11 +12,12 @@
  * @package    evias/php-nem-laravel
  * @version    0.0.2
  * @author     Grégory Saive <greg@evias.be>
+ * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace evias\NEMBlockchain;
+namespace NEM;
 
 use RuntimeException;
 use InvalidArgumentException;
@@ -27,8 +28,8 @@ use InvalidArgumentException;
  * This class should provide the gateway for processing
  * API requests and sending to NIS or NCC API clients.
  *
- * @see  \evias\NEMBlockchain\Contracts\Connector
- * @see  \evias\NEMBlockchain\Traits\Connectable
+ * @see  \NEM\Contracts\Connector
+ * @see  \NEM\Traits\Connectable
  * @author Grégory Saive <greg@evias.be>
  */
 class API
@@ -48,13 +49,13 @@ class API
      *
      * @var string
      */
-    protected $handlerClass = \evias\NEMBlockchain\Handlers\GuzzleRequestHandler::class;
+    protected $handlerClass = \NEM\Handlers\GuzzleRequestHandler::class;
 
     /**
      * The request handler use to send API calls over
      * HTTP/JSON to NIS or NCC endpoints.
      *
-     * @var \evias\NEMBlockchain\Contracts\RequestHandler
+     * @var \NEM\Contracts\RequestHandler
      */
     protected $requestHandler;
 
@@ -77,7 +78,7 @@ class API
      * and Lumen Config contracts.
      *
      * @param  array $options
-     * @return \evias\NEMBlockchain\API
+     * @return \NEM\API
      * @throws InvalidArgumentException on invalid option names.
      */
     public function setOptions(array $options)
@@ -113,7 +114,7 @@ class API
     public function __call($method, array $arguments)
     {
         if (method_exists($this->getRequestHandler(), $method))
-            // simple method call forwarding
+            // simple method call forwarding to request handler
             return call_user_func_array([$this->getRequestHandler(), $method], $arguments);
 
         // if user wants "JSON"-ending method, it is possible that he is
@@ -170,7 +171,7 @@ class API
      * HTTP handler object.
      *
      * @param  string $class
-     * @return \evias\NEMBlockchain\API
+     * @return \NEM\API
      */
     public function setHandlerClass($class)
     {
@@ -204,7 +205,7 @@ class API
      * The getRequestHandler method creates an instance of the
      * `handlerClass` and returns it.
      *
-     * @return \evias\NEMBlockchain\Contracts\RequestHandler
+     * @return \NEM\Contracts\RequestHandler
      */
     public function getRequestHandler()
     {

@@ -16,7 +16,7 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace evias\NEMBlockchain\Contracts;
+namespace NEM\Contracts;
 
 /**
  * This is the RequestHandler interface

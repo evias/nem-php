@@ -1,7 +1,7 @@
 <?php
 
 
-namespace evias\NEMBlockchain\Models\Mosaic;
+namespace NEM\Models\Mosaic;
 
 
 class MosaicId {

@@ -1,6 +1,6 @@
 <?php
 
-namespace evias\NEMBlockchain\Facades;
+namespace NEM\Facades;
 
 use Illuminate\Support\Facades\Facade;
 

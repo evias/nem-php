@@ -1,8 +1,8 @@
 <?php
 
-namespace evias\NEMBlockchain\Models\Fee;
+namespace NEM\Models\Fee;
 
-use evias\NEMBlockchain\NemSDK;
+use NEM\NemSDK;
 
 class Fee {
 

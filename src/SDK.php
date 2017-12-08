@@ -1,23 +1,35 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Eier
- * Date: 21.07.2017
- * Time: 19:10
+ * Part of the evias/php-nem-laravel package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under MIT License.
+ *
+ * This source file is subject to the MIT License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    evias/php-nem-laravel
+ * @version    0.0.2
+ * @author     Grégory Saive <greg@evias.be>
+ * @author     Robin Pedersen (https://github.com/RobertoSnap)
+ * @license    MIT License
+ * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @link       http://github.com/evias/php-nem-laravel
  */
+namespace NEM;
 
-namespace evias\NEMBlockchain;
+use NEM\Infrastructure\Account;
+use NEM\Infrastructure\Block;
+use NEM\Infrastructure\Mosaic;
+use NEM\Infrastructure\Namespaces;
+use NEM\Infrastructure\Network;
+use NEM\Infrastructure\Node;
+use NEM\Infrastructure\Transaction;
+use NEM\Models\Models;
 
-use evias\NEMBlockchain\Infrastructure\Account;
-use evias\NEMBlockchain\Infrastructure\Block;
-use evias\NEMBlockchain\Infrastructure\Mosaic;
-use evias\NEMBlockchain\Infrastructure\Namespaces;
-use evias\NEMBlockchain\Infrastructure\Network;
-use evias\NEMBlockchain\Infrastructure\Node;
-use evias\NEMBlockchain\Infrastructure\Transaction;
-use evias\NEMBlockchain\Models\Models;
-
-class NemSDK {
+class SDK 
+{
 
 	public $api;
 

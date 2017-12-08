@@ -1,13 +1,13 @@
 <?php
 
 
-namespace evias\NEMBlockchain\Infrastructure;
+namespace NEM\Infrastructure;
 
 
-use evias\NEMBlockchain\Models\Transaction\Multisig;
-use evias\NEMBlockchain\Models\Transaction\Transfer;
-use evias\NEMBlockchain\Models\Transaction\Mosaic;
-use evias\NEMBlockchain\NemSDK;
+use NEM\Models\Transaction\Multisig;
+use NEM\Models\Transaction\Transfer;
+use NEM\Models\Transaction\Mosaic;
+use NEM\NemSDK;
 
 class Transaction {
 	public $nemSDK;

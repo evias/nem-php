@@ -1,16 +1,16 @@
 <?php
 
-namespace evias\NEMBlockchain\Models;
+namespace NEM\Models;
 
-use evias\NEMBlockchain\NemSDK;
-use evias\NEMBlockchain\Models\Account\Account;
-use evias\NEMBlockchain\Models\Account\Address;
-use evias\NEMBlockchain\Models\Fee\Fee;
-use evias\NEMBlockchain\Models\Mosaic\Mosaic;
-use evias\NEMBlockchain\Models\Mosaic\Xem;
-use evias\NEMBlockchain\Models\Namespaces\Namespaces;
-use evias\NEMBlockchain\Models\Blockchain\Blockchain;
-use evias\NEMBlockchain\Models\Transaction\Transaction;
+use NEM\NemSDK;
+use NEM\Models\Account\Account;
+use NEM\Models\Account\Address;
+use NEM\Models\Fee\Fee;
+use NEM\Models\Mosaic\Mosaic;
+use NEM\Models\Mosaic\Xem;
+use NEM\Models\Namespaces\Namespaces;
+use NEM\Models\Blockchain\Blockchain;
+use NEM\Models\Transaction\Transaction;
 
 class Models {
 	public $nemSDK;

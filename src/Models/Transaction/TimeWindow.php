@@ -1,8 +1,8 @@
 <?php
 
-namespace evias\NEMBlockchain\Models\Transaction;
+namespace NEM\Models\Transaction;
 
-use evias\NEMBlockchain\NemSDK;
+use NEM\NemSDK;
 
 class TimeWindow {
 

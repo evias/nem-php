@@ -6,10 +6,10 @@
  * Time: 22:19
  */
 
-namespace evias\NEMBlockchain\Models\Mosaic;
+namespace NEM\Models\Mosaic;
 
 
-use evias\NEMBlockchain\NemSDK;
+use NEM\NemSDK;
 
 class Xem {
 

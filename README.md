@@ -21,6 +21,11 @@ If you like the initiative, and for the sake of good mood, I recommend you take 
 
     NB72EM6TTSX72O47T3GQFL345AB5WYKIDODKPPYW
 
+| Username | Role |
+| --- | --- |
+| [eVias](https://github.com/evias) | Project Lead |
+| [RobertoSnap](https://github.com/RobertoSnap) | Developer |
+
 ## Installation
 
 You can install this package with Composer. You only need to require evias/php-nem-laravel.
