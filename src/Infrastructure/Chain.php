@@ -14,7 +14,6 @@ class Chain {
 		$this->nemSDK = $nemSDK;
 	}
 
-
 	/**
 	 * Gets the current height of the block chain.
 	 * @returns Observable<BlockHeight>
@@ -38,6 +37,14 @@ class Chain {
 	 */
 	public function getBlockchainLastBlock() {
 		return $this->nemSDK->api->getJSON( $this->endpoint . 'last-block', "" );
+	}
+
+	/**
+	 * Gets the current node information.
+	 * @returns Observable<Block>
+	 */
+	public function getNodeInfo() {
+		return json_decode( $this->nemSDK->api->getJSON( '/node/info', "" ) );
 	}
 
 }

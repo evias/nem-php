@@ -10,7 +10,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    evias/php-nem-laravel
- * @version    0.1.0
+ * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
@@ -19,18 +19,11 @@
  */
 namespace NEM\Models;
 
-use NEM\NemSDK;
-use NEM\Models\Account\Account;
-use NEM\Models\Account\Address;
-use NEM\Models\Fee\Fee;
-use NEM\Models\Mosaic\Mosaic;
-use NEM\Models\Mosaic\Xem;
-use NEM\Models\Namespaces\Namespaces;
-use NEM\Models\Blockchain\Blockchain;
-use NEM\Models\Transaction\Transaction;
+use Nem\Infrastructure\ServiceInterface;
 
 class Model
     extends ArrayObject
+    implements ModelInterface
 {
     /**
      * List of fillable attributes
@@ -40,8 +33,15 @@ class Model
     protected $fillable = [];
 
     /**
+     * The model instance's attribute values.
+     *
+     * @var array
+     */
+    protected $attributes = [];
+
+    /**
      * Construct a Model instance with attributes data.
-     * 
+     *
      * @param   array   $attributes         Associative array where keys are attribute names and values are attribute values
      * @return  void
      */
@@ -78,7 +78,7 @@ class Model
      * @param   string      $name   The property/attribute name.
      * @return  mixed
      */
-    public function __get($name)
+    public function &__get($name)
     {
         // attributes prevail over class properties
         if (array_key_exists($this->attributes, $name))
@@ -107,5 +107,26 @@ class Model
         // attributes prevail over class properties in __get()
         $this->attributes[$name] = $value;
         return $this->attributes[$name];
+    }
+
+    /**
+     * Check whether or not a data key exists by name.
+     *
+     * @param   string  $name   A data name to check for
+     * @return  boolean
+     */
+    public function __isset($name) {
+        return isset($this->attributes[$name]);
+    }
+
+    /**
+     * Unsets an data key by name.
+     *
+     * @param   string  $name   A data name to check for
+     * @return  void
+     */
+    public function __unset($name) 
+    {
+        unset($this->attributes[$name]);
     }
 }

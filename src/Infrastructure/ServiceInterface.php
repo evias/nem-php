@@ -18,7 +18,7 @@
  */
 namespace NEM\Infrastructure;
 
-interface EndpointInterface
+interface ServiceInterface
 {
     /**
      * Setter for the `endpoint` property.

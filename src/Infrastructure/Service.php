@@ -18,8 +18,8 @@
  */
 namespace NEM\Infrastructure;
 
-class Endpoint
-    implements EndpointInterface
+class Service
+    implements ServiceInterface
 {
     /**
      * The NEM API wrapper instance.
@@ -29,7 +29,7 @@ class Endpoint
     protected $api;
 
     /**
-     * The Base URL for this endpoint.
+     * The Base URL for this Service.
      *
      * @var string
      */
@@ -86,5 +86,38 @@ class Endpoint
         // build HTTP query for GET request
         $query = http_build_query($params);
         return sprintf("/%s/%s?%s", $cleanUrl, $cleanUri);
+    }
+
+    /**
+     * This __call hook makes sure calls to methods likes createAccountModel,
+     * createAccountCollection, createTransactionModel, etc. are parsed correctly
+     * and will always create Model instances.
+     *
+     * This can be used to craft correctly formed Model and Collection objects.
+     *
+     * @param  string   $name           The model name you would like to create.
+     * @param  array    $attributes     The model's attribute values.
+     * @return \NEM\Models\ModelInterface
+     */
+    public function __call($name, array $arguments)
+    {
+        if (method_exists($this, $name))
+            // method overload exists, call it.
+            return call_user_func_array([$this, $name], $arguments);
+
+        // parse createXModel and createXCollection method calls automatically
+        $parts = [];
+        if ((bool) preg_match("/^create([A-Za-z0-9\_]+)(Model|Collection)/", $name, $parts)) {
+            // valid createX(Model|Collection)() call.
+            // @see \NEM\Models namespace classes
+            $objectClass = $parts[1];
+            $returnType  = $parts[2]; // Model or Collection
+
+            $class   = "\\NEM\\Models\\" . $returnType . "Mutator"; // ModelMutator or CollectionMutator
+            $mutator = new $class();
+            return $mutator->mutate(lcfirst($objectClass), $arguments);
+        }
+
+        throw new BadMethodCallException("Method or model '" . $name . "' could not be found.");
     }
 }

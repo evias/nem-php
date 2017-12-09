@@ -10,7 +10,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    evias/php-nem-laravel
- * @version    0.0.2
+ * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License

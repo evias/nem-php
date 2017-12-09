@@ -10,7 +10,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    evias/php-nem-laravel
- * @version    0.1.0
+ * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
@@ -19,6 +19,8 @@
  */
 namespace NEM;
 
+use NEM\Models\ModelMutator;
+
 class SDK
 {
     /**
@@ -26,7 +28,14 @@ class SDK
      * 
      * @var \NEM\API
      */
-    public $api;
+    protected $api;
+
+    /**
+     * The model mutator.
+     *
+     * @var \NEM\Models\ModelMutator
+     */
+    protected $models;
 
     /**
      * Construct a SDK object.
@@ -38,6 +47,7 @@ class SDK
     public function __construct($options = []) 
     {
         $this->api = new API($options);
+        $this->models = new ModelMutator();
     }
 
     /**
@@ -91,5 +101,30 @@ class SDK
     public function models() 
     {
         return new ModelMutator();
+    }
+
+    /**
+     * Setter for the `api` property.
+     *
+     * This lets the developer overwrite the currently used NEM NIS API Wrapper.
+     *
+     * @param   \NEM\API    $api    An initialized NIS API instance.
+     * @return  \NEM\SDK
+     */
+    public function setWrapper(API $api)
+    {
+        $this->api = $api;
+        return $this;
+    }
+
+    /**
+     * Getter for the `api` property.
+     *
+     * @param   \NEM\API    $api    An initialized NIS API instance.
+     * @return  \NEM\SDK
+     */
+    public function getWrapper()
+    {
+        return $this->api;
     }
 }

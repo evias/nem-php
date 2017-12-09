@@ -19,29 +19,29 @@
  */
 namespace NEM\Models;
 
-use Illuminate\Support\Collection;
+use NEM\NemSDK;
+use NEM\Models\Account\Account;
+use NEM\Models\Account\Address;
+use NEM\Models\Fee\Fee;
+use NEM\Models\Mosaic\Mosaic;
+use NEM\Models\Mosaic\Xem;
+use NEM\Models\Namespaces\Namespaces;
+use NEM\Models\Blockchain\Blockchain;
+use NEM\Models\Transaction\Transaction;
 
-class Account
-    extends Model
+interface ModelInterface
 {
     /**
-     * List of fillable attributes
+     * Setter for the `attributes` property.
      *
-     * @var array
+     * @return  \NEM\Models\Model
      */
-    protected $fillable = [
-        "address",
-        "publicKey",
-        "privateKey"
-    ];
+    public function setAttributes(array $attributes);
 
     /**
-     * Mutator for the address object.
+     * Getter for the `attributes` property.
      *
-     * @return \NEM\Models\Address
+     * @return array
      */
-    public function address()
-    {
-        return new Address($this->address);
-    }
+    public function getAttributes();
 }

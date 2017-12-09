@@ -10,7 +10,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    evias/php-nem-laravel
- * @version    0.0.2
+ * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
@@ -19,8 +19,8 @@
  */
 namespace NEM\Infrastructure;
 
-class Account 
-    extends Endpoint
+class Account
+    extends Service
 {
     /**
      * The Base URL for this endpoint.
@@ -28,6 +28,22 @@ class Account
      * @var string
      */
     protected $baseUrl = "/account";
+
+    /**
+     * Generate a new Account KeyPair.
+     *
+     * @return  object      Object with keys `address`, `publicKey` and `privateKey`.
+     */
+    public function generateAccount()
+    {
+        $params = [];
+        $apiUrl = $this->getPath('generate', $params);
+        $response = $this->api->getJSON($apiUrl);
+
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createAccountModel($object); //XXX brr => error/content validation first
+    }
 
     /**
      * Gets an [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair) for an account
@@ -43,7 +59,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $object;
+        return $this->createAccountModel($object);
     }
 
     /**
@@ -60,7 +76,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $object;
+        return $this->createAccountModel($object);
     }
 
     /**
@@ -78,7 +94,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $object;
+        return $this->createAccountModel($object);
     }
 
     /**
@@ -94,7 +110,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $object;
+        return $this->createAccountModel($object);
     }
 
     /**
@@ -110,7 +126,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $object;
+        return $this->createBaseModel($object);
     }
 
     /**
@@ -139,7 +155,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $object->data; //XXX brr => error/content validation first
+        return $this->createTransactionCollection($object->data); //XXX brr => error/content validation first
     }
 
     /**
@@ -167,7 +183,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $object->data; //XXX brr => error/content validation first
+        return $this->createTransactionCollection($object->data) //XXX brr => error/content validation first
     }
 
     /**
@@ -195,7 +211,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $object->data; //XXX brr => error/content validation first
+        return $this->createTransactionCollection($object->data) //XXX brr => error/content validation first
     }
 
     /**
@@ -218,7 +234,7 @@ class Account
 
         //XXX include Error checks
         $data = json_decode($response);
-        return $data; //XXX brr => error/content validation first
+        return $this->createTransactionCollection($object->data) //XXX brr => error/content validation first
     }
 
     /**
@@ -240,7 +256,7 @@ class Account
 
         //XXX include Error checks
         $data = json_decode($response);
-        return $data; //XXX brr => error/content validation first
+        return $this->createBaseModel($object); //XXX brr => error/content validation first
     }
 
     /**
@@ -257,7 +273,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $object->data; //XXX brr => error/content validation first
+        return $this->createBaseCollection($object->data) //XXX brr => error/content validation first
     }
 
     /**
@@ -288,7 +304,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $object->data; //XXX brr => error/content validation first
+        return $this->createNamespaceCollection($object->data) //XXX brr => error/content validation first
     }
 
     /**
@@ -316,14 +332,14 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $object->data; //XXX brr => error/content validation first
+        return $this->createMosaicCollection($object->data) //XXX brr => error/content validation first
     }
 
     /**
      * Gets an array of mosaic objects for a given account address.
      *
-     * @param   string          $address        The address of the account.
-     * @return  array                           Array of object with keys from [AccountHistoricalDataViewModel](https://bob.nem.ninja/docs/#accountHistoricalDataViewModel) objects.
+     * @param   string          $address    The address of the account.
+     * @return  array                       Array of object with keys from [MosaicDefinitionMetaDataPair](https://bob.nem.ninja/docs/#mosaicDefinitionMetaDataPair) objects.
      */
     public function getOwnedMosaics($address) 
     {
@@ -334,7 +350,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $object->data; //XXX brr => error/content validation first
+        return $this->createMosaicCollection($object->data) //XXX brr => error/content validation first
     }
 
     /**
@@ -366,7 +382,26 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $object->data; //XXX brr => error/content validation first
+        return $this->createBaseCollection($object->data) //XXX brr => error/content validation first
+    }
+
+    /**
+     * Each node can allow users to harvest with their delegated key on that node.
+     * The NIS configuration has entries for configuring the maximum number of allowed harvesters and optionally allow
+     * harvesting only for certain account addresses. The unlock info gives information about the maximum number of
+     * allowed harvesters and how many harvesters are already using the node.
+     *
+     * @return  object      Object with num-unlocked and max-unlocked keys.
+     */
+    public function getUnlockInfo() 
+    {
+        $params = [];
+        $apiUrl = $this->getPath('unlocked/info', $params, false);
+        $response = $this->api->postJSON($apiUrl);
+
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createBaseModel($object) //XXX brr => error/content validation first
     }
 
     /**
@@ -377,8 +412,16 @@ class Account
      *
      * @return Array<boolean>
      */
-    public function unlockHarvesting( $host, $privateKey ) {
-        //todo create unlockHarvesting
+    public function startHarvesting($privateKey) 
+    {
+        $params = ["value" => $privateKey];
+
+        $apiUrl = $this->getPath('unlock', $params);
+        $response = $this->api->postJSON($apiUrl);
+
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createBaseModel($object) //XXX brr => error/content validation first
     }
 
     /**
@@ -389,19 +432,15 @@ class Account
      *
      * @return Array<boolean>
      */
-    public function lockHarvesting( $host, $privateKey ) {
-        //todo lockHarvesting
-    }
+    public function stopHarvesting($privateKey) 
+    {
+        $params = ["value" => $privateKey];
 
-    /**
-     * Each node can allow users to harvest with their delegated key on that node.
-     * The NIS configuration has entries for configuring the maximum number of allowed harvesters and optionally allow
-     * harvesting only for certain account addresses. The unlock info gives information about the maximum number of
-     * allowed harvesters and how many harvesters are already using the node.
-     * @return Array<NodeHarvestInfo>
-     */
-    public function unlockInfo() {
-        //Todo create unlockInfo
-    }
+        $apiUrl = $this->getPath('lock', $params);
+        $response = $this->api->postJSON($apiUrl);
 
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createBaseModel($object) //XXX brr => error/content validation first
+    }
 }
