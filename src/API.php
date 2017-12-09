@@ -107,9 +107,10 @@ class API
      * return the JSON (string) from the response of the
      * Request Handler.
      *
-     * @param  [type] $method    [description]
-     * @param  array  $arguments [description]
-     * @return [type]            [description]
+     * @param  string $method       Name of the method called.
+     * @param  array  $arguments    Array of Arguments to forward to the actual method call.
+     * @return mixed
+     * @throws BadMethodCallException   On invalid (+unparseable) method call.
      */
     public function __call($method, array $arguments)
     {

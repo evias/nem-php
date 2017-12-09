@@ -166,7 +166,7 @@ class NemBlockchainServiceProvider
             $envConfig   = $environment == "production" ? "primary" : "testing";
 
             $api = $this->app["nem"];
-            $sdk = new SDK($api);
+            $sdk = new SDK($this->app);
 
             return $sdk;
         }, true); // shared=true

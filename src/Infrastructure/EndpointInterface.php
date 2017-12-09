@@ -18,50 +18,20 @@
  */
 namespace NEM\Infrastructure;
 
-abstract class Abstract 
+interface EndpointInterface
 {
-    /** 
-     * The Laravel IoC Container
-     *
-     * @var \Illuminate\Container\Container
-     */
-    protected $app;
-
-    /**
-     * The Base URL for this endpoint.
-     *
-     * @var string
-     */
-    protected $endpoint;
-
-    /**
-     * Constructor for Infrastructure objects.
-     *
-     * @return void
-     */
-    public function __construct() 
-    {
-    }
-
     /**
      * Setter for the `endpoint` property.
      *
      * @param   string  $endpoint
      * @return  \NEM\Infrastructure\Abstract
      */
-    public function setEndpoint($endpoint)
-    {
-        $this->endpoint = $endpoint;
-        return $this;
-    }
+    public function setBaseUrl($endpoint);
 
     /**
      * Getter for the `endpoint` property.
      *
      * @return string
      */
-    public function getEndpoint($endpoint)
-    {
-        return $this->endpoint ?: "";
-    }
+    public function getBaseUrl();
 }

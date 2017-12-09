@@ -10,7 +10,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    evias/php-nem-laravel
- * @version    0.0.2
+ * @version    0.1.0
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
@@ -19,78 +19,77 @@
  */
 namespace NEM;
 
-use NEM\Infrastructure\Account;
-use NEM\Infrastructure\Block;
-use NEM\Infrastructure\Mosaic;
-use NEM\Infrastructure\Namespaces;
-use NEM\Infrastructure\Network;
-use NEM\Infrastructure\Node;
-use NEM\Infrastructure\Transaction;
-use NEM\Models\Models;
-
-class SDK 
+class SDK
 {
+    /**
+     * The API wrapper instance.
+     * 
+     * @var \NEM\API
+     */
+    public $api;
 
-	public $api;
+    /**
+     * Construct a SDK object.
+     *
+     * @see \NEM\API::__construct()
+     * @param   array   $options    Options array passed to NEM\API
+     * @return  void
+     */
+    public function __construct($options = []) 
+    {
+        $this->api = new API($options);
+    }
 
-	/**
-	 * NemSDK constructor.
-	 *
-	 * @param array $options [
-	 *                       "protocol" => "http",
-	 *                       "use_ssl" => false,
-	 *                       "host"      => "go.nem.ninja",
-	 *                       "port"    => 7890,
-	 *                       "endpoint" => "/",
-	 *                       ]
-	 */
-	public function __construct( $options = array() ) {
-		if ( ! empty( $options ) ) {
-			$this->setOptions( $options );
-		} else {
-			$this->api = \App::make( 'nem' );
-		}
-	}
+    /**
+     * This __call hook makes sure calls to the SDK object
+     * will always instatiate a class provided by the SDK.
+     *
+     * @example Example calls for \NEM\SDK
+     *
+     * $sdk = new SDK();
+     * $sdk->models(); // will automatically craft \NEM\Infrastructure\Models
+     * $sdk->network(); // will automatically craft \NEM\Infrastructure\Network
+     *
+     * @param  [type] $method    [description]
+     * @param  array  $arguments [description]
+     * @return [type]            [description]
+     */
+    public function __call($method, array $arguments)
+    {
+        if (method_exists($this, $method))
+            // method overload exists, call it.
+            return call_user_func_array([$this, $method], $arguments);
 
-	public function setOptions( $options ) {
-		$this->api = new API();
-		$this->api->setOptions( $options );
-	}
+        // method does not exist, try to craft infrastructure class instance.
 
+        // snake_case to camelCase
+        $normalized = ltrim(strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '_$0', $method)), '_');
+        $className  = ucfirst($normalized);
+        $infraClass = "\\NEM\\Infrastructure\\" . $className;
 
-	public function models() {
-		return new Models( $this );
-	}
+        if (!class_exists($infraClass)) {
+            throw new BadMethodCallException("Infrastructure class '" . $infraClass . "' could not be found in \\NEM\\Infrastructure namespace.");
+        }
 
-	/*Infrastructure endpoints*/
+        $instance = new $infraClass($this->api);
+        return $instance;
+    }
 
-	public function network() {
-		return new Network( $this );
-	}
-
-	public function account() {
-		return new Account( $this );
-	}
-
-	public function block() {
-		return new Block( $this );
-	}
-
-	public function mosaic() {
-		return new Mosaic( $this );
-	}
-
-	public function namespaces() {
-		return new Namespaces( $this );
-	}
-
-	public function node() {
-		return new Node( $this );
-	}
-
-	public function transaction() {
-		return new Transaction( $this );
-	}
-
-
+    /**
+     * The models() method should implement an easy to use models mutator for the 
+     * SDK. This will help creating NEM compatible objects.
+     *
+     * @example Example calls for \NEM\Models\ModelMutator
+     *
+     * $sdk = new SDK();
+     * $sdk->models()->address(); // will automatically craft a \NEM\Models\Address object
+     * $sdk->models()->namespace(); // will automatically craft a \NEM\Models\Namespace object
+     *
+     * @see \NEM\Models\Mutator
+     * @return \NEM\Models\Mutator      The models mutator
+     */
+    public function models() 
+    {
+        return new ModelMutator();
+    }
 }
