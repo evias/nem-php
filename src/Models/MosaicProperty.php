@@ -17,23 +17,31 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace NEM\Models\Transaction;
+namespace NEM\Models;
 
-use NEM\Models\Transaction;
-
-class Transfer
-    extends Transaction
+class MosaicProperty
+    extends Model
 {
     /**
-     * The extend() method must be overloaded by any Transaction Type
-     * which needs to extend the base DTO structure.
+     * List of fillable attributes
      *
-     * @return array
+     * @var array
      */
-    public function extend() 
+    protected $fillable = [
+        "name",
+        "value"
+    ];
+
+    /**
+     * Address DTO automatically cleans address representation.
+     *
+     * @return  array       Associative array with key `address` containing a NIS *compliable* address representation.
+     */
+    public function toDTO()
     {
-        // Transfer transaction is *default transaction type* for NEM.
-        // No data needs to be added to the base transaction DTO.
-        return [];
+        return [
+            "name" => $this->name,
+            "value" => $this->value,
+        ];
     }
 }

@@ -21,19 +21,40 @@ namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
 
-class Transfer
+class ImportanceTransfer
     extends Transaction
 {
     /**
-     * The extend() method must be overloaded by any Transaction Type
-     * which needs to extend the base DTO structure.
+     * List of additional fillable attributes
+     *
+     * @var array
+     */
+    protected $appends = [
+        "remoteAccount",
+        "mode",
+    ];
+
+    /**
+     * The Signature transaction type does not need to add an offset to
+     * the transaction base DTO.
      *
      * @return array
      */
     public function extend() 
     {
-        // Transfer transaction is *default transaction type* for NEM.
-        // No data needs to be added to the base transaction DTO.
-        return [];
+        return [
+            "remoteAccount" => $this->remoteAccount()->address()->toClean(),
+            "mode" => $this->mode,
+        ];
+    }
+
+    /**
+     * Mutator for the `remoteAccount` relationship.
+     * 
+     * @param   string      $address
+     */
+    public function remoteAccount($address = null)
+    {
+        return new Account($address ?: $this->attributes["remoteAccount"]);
     }
 }

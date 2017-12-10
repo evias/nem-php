@@ -17,31 +17,37 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace NEM\Models;
+namespace NEM\Models\Mutators;
 
-use \Illuminate\Support\Collection;
 use BadMethodCallException;
 
 class CollectionMutator
 {
     /**
-     * Collect several items into a Collection.
+     * Collect several items into a Collection of Models.
      *
+     * The \NEM\Models\ModelMutator will be used internally to craft singular
+     * model objects for each item you pass to this method.
+     *
+     * @internal
      * @param  string   $name           The model name you would like to store in the collection.
      * @param  array    $items          The collection's items data.
      * @return \Illuminate\Support\Collection
      */
-    protected function mutate($name, array $items)
+    public function mutate($name, array $items)
     {
         // snake_case to camelCase
-        $normalized = ltrim(strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '_$0', $name)), '_');
-        $className  = ucfirst($normalized);
-        $modelClass = "\\NEM\\Models\\" . $className;
+        $modelClass = "\\NEM\\Models\\" . Str::studly($className);
 
         if (!class_exists($modelClass)) {
             throw new BadMethodCallException("Model class '" . $modelClass . "' could not be found in \\NEM\\Model namespace.");
         }
 
-        return collect($items);
+        $collection = new ModelCollection;
+        for ($i = 0, $m = count($items); $i < $m; $i++)
+            // load Model instance with item data
+            $collection->push((new ModelMutator())->mutate($name, $items[$i]));
+
+        return $collection;
     }
 }

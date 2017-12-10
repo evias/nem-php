@@ -10,14 +10,14 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    evias/php-nem-laravel
- * @version    0.1.0
+ * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace NEM\Models;
+namespace NEM\Models\Mutators;
 
 use BadMethodCallException;
 
@@ -29,6 +29,7 @@ class ModelMutator
      * This method takes a *snake_case* model name and converts it
      * to a class name in the namespace \NEM\Models.
      *
+     * @internal
      * @param  string   $name           The model name you would like to create.
      * @param  array    $attributes     The model's attribute values.
      * @return \NEM\Models\ModelInterface
@@ -36,9 +37,7 @@ class ModelMutator
     public function mutate($name, array $attributes)
     {
         // snake_case to camelCase
-        $normalized = ltrim(strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '_$0', $name)), '_');
-        $className  = ucfirst($normalized);
-        $modelClass = "\\NEM\\Models\\" . $className;
+        $modelClass = "\\NEM\\Models\\" . Str::studly($className);
 
         if (!class_exists($modelClass)) {
             throw new BadMethodCallException("Model class '" . $modelClass . "' could not be found in \\NEM\\Model namespace.");
@@ -66,6 +65,7 @@ class ModelMutator
      * $addr->address = "NB72EM6TTSX72O47T3GQFL345AB5WYKIDODKPPYW";
      * var_dump($addr->toDTO()); // will contain address field
      *
+     * @internal
      * @param  string   $name           The model name you would like to create.
      * @param  array    $attributes     The model's attribute values.
      * @return \NEM\Models\ModelInterface

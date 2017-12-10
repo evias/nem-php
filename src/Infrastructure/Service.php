@@ -80,7 +80,7 @@ class Service
         $cleanUrl = trim($this->getBaseUrl(), "/ ");
         $cleanUri = trim($uri, "/ ");
 
-        if ($buildQuery === false)
+        if ($buildQuery === false || empty($params))
             return sprintf("%s/%s", $this->getBaseUrl(), $cleanUri);
 
         // build HTTP query for GET request
@@ -113,7 +113,10 @@ class Service
             $objectClass = $parts[1];
             $returnType  = $parts[2]; // Model or Collection
 
-            $class   = "\\NEM\\Models\\" . $returnType . "Mutator"; // ModelMutator or CollectionMutator
+            if ("Base" === $objectClass)
+                $objectClass = "Model"; // "Base" objects are generic models.
+
+            $class   = "\\NEM\\Models\\" . Std::studly($returnType) . "Mutator"; // ModelMutator or CollectionMutator
             $mutator = new $class();
             return $mutator->mutate(lcfirst($objectClass), $arguments);
         }

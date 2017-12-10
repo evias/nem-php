@@ -19,13 +19,13 @@
  */
 namespace NEM;
 
-use NEM\Models\ModelMutator;
+use NEM\Models\Mutators\ModelMutator;
 
 class SDK
 {
     /**
      * The API wrapper instance.
-     * 
+     *
      * @var \NEM\API
      */
     protected $api;
@@ -51,18 +51,43 @@ class SDK
     }
 
     /**
+     * Setter for the currently used NIS API Wrapper.
+     *
+     * This lets the developer overwrite the currently used NEM NIS API Wrapper.
+     *
+     * @param   \NEM\API    $api    An initialized NIS API instance.
+     * @return  \NEM\SDK
+     */
+    public function setNISWrapper(API $api)
+    {
+        $this->api = $api;
+        return $this;
+    }
+
+    /**
+     * Getter for the currently used NIS API Wrapper.
+     *
+     * @param   \NEM\API    $api    An initialized NIS API instance.
+     * @return  \NEM\SDK
+     */
+    public function getNISWrapper()
+    {
+        return $this->api;
+    }
+
+    /**
      * This __call hook makes sure calls to the SDK object
      * will always instatiate a class provided by the SDK.
      *
      * @example Example calls for \NEM\SDK
      *
      * $sdk = new SDK();
-     * $sdk->models(); // will automatically craft \NEM\Infrastructure\Models
-     * $sdk->network(); // will automatically craft \NEM\Infrastructure\Network
+     * $sdk->account(); // will automatically craft service instance for \NEM\Infrastructure\Account
+     * $sdk->network(); // will automatically craft service instance for \NEM\Infrastructure\Network
      *
-     * @param  [type] $method    [description]
-     * @param  array  $arguments [description]
-     * @return [type]            [description]
+     * @param  string $method
+     * @param  array  $arguments
+     * @return mixed|\NEM\Infrastructure\ServiceInterface
      */
     public function __call($method, array $arguments)
     {
@@ -72,10 +97,8 @@ class SDK
 
         // method does not exist, try to craft infrastructure class instance.
 
-        // snake_case to camelCase
-        $normalized = ltrim(strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '_$0', $method)), '_');
-        $className  = ucfirst($normalized);
-        $infraClass = "\\NEM\\Infrastructure\\" . $className;
+        // snake_case to CamelCase
+        $infraClass = "\\NEM\\Infrastructure\\" . Str::studly($method);
 
         if (!class_exists($infraClass)) {
             throw new BadMethodCallException("Infrastructure class '" . $infraClass . "' could not be found in \\NEM\\Infrastructure namespace.");
@@ -101,30 +124,5 @@ class SDK
     public function models() 
     {
         return new ModelMutator();
-    }
-
-    /**
-     * Setter for the `api` property.
-     *
-     * This lets the developer overwrite the currently used NEM NIS API Wrapper.
-     *
-     * @param   \NEM\API    $api    An initialized NIS API instance.
-     * @return  \NEM\SDK
-     */
-    public function setWrapper(API $api)
-    {
-        $this->api = $api;
-        return $this;
-    }
-
-    /**
-     * Getter for the `api` property.
-     *
-     * @param   \NEM\API    $api    An initialized NIS API instance.
-     * @return  \NEM\SDK
-     */
-    public function getWrapper()
-    {
-        return $this->api;
     }
 }

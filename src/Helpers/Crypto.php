@@ -12,28 +12,24 @@
  * @package    evias/php-nem-laravel
  * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
- * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace NEM\Models\Transaction;
+namespace NEM\Helpers;
 
-use NEM\Models\Transaction;
-
-class Transfer
-    extends Transaction
+class Crypto
 {
     /**
-     * The extend() method must be overloaded by any Transaction Type
-     * which needs to extend the base DTO structure.
+     * Helper for password derivation using `iterations` count iterations
+     * of SHA3-256.
      *
-     * @return array
+     * @param   string      $password
+     * @param   integer     $iterations
+     * @return  string
      */
-    public function extend() 
+    public function derive($password, $iterations = 6000) // 6000=NanoWallet
     {
-        // Transfer transaction is *default transaction type* for NEM.
-        // No data needs to be added to the base transaction DTO.
-        return [];
+
     }
 }

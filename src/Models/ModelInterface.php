@@ -34,7 +34,7 @@ interface ModelInterface
     /**
      * Setter for the `attributes` property.
      *
-     * @return  \NEM\Models\Model
+     * @return  \NEM\Models\ModelInterface
      */
     public function setAttributes(array $attributes);
 
@@ -44,4 +44,12 @@ interface ModelInterface
      * @return array
      */
     public function getAttributes();
+
+    /**
+     * Helper method to build NIS compliant Data Transfer
+     * Objects.
+     *
+     * @return array
+     */
+    public function toDTO();
 }

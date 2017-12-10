@@ -1,48 +1,113 @@
 <?php
-
-
+/**
+ * Part of the evias/php-nem-laravel package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under MIT License.
+ *
+ * This source file is subject to the MIT License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    evias/php-nem-laravel
+ * @version    1.0.0
+ * @author     Grégory Saive <greg@evias.be>
+ * @author     Robin Pedersen (https://github.com/RobertoSnap)
+ * @license    MIT License
+ * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @link       http://github.com/evias/php-nem-laravel
+ */
 namespace NEM\Models\Transaction;
 
-use NEM\NemSDK;
+use NEM\Models\Transaction;
 
-class Multisig {
+class Multisig
+    extends Transaction
+{
+    /**
+     * List of additional fillable attributes
+     *
+     * @var array
+     */
+    protected $appends = [
+        "innerHash",
+        "otherTrans",
+        "signatures",
+    ];
 
-	public $nemSDK;
-	public $multisigPublicKey;
-	public $multisigPrivateKey;
-	public $otherTrans;
+    /**
+     * The Multisig transaction type adds offsets `otherTrans` and
+     * `signatures`.
+     *
+     * The `otherTrans` in the DTO is used to store transaction details.
+     *
+     * The Multisig Transaction Type only acts as a wrapper! It will contain
+     * a subordinate Transaction object in the `otherTrans` attribute and a
+     * collection of subordinate Transaction\Signature transactions in the
+     * `signatures` attribute.
+     *
+     * @return array
+     */
+    public function extend() 
+    {
+        return [
+            "otherTrans" => $this->otherTrans()->toDTO(),
+            "signatures" => $this->signatures()->toDTO(),
+        ];
+    }
 
-	public function __construct( NemSDK $nemSDK, $multisigPublicKey, $multisigPrivateKey ) {
-		$this->nemSDK             = $nemSDK;
-		$this->multisigPublicKey  = $multisigPublicKey;
-		$this->multisigPrivateKey = $multisigPrivateKey;
-	}
+    /**
+     * The Multisig transaction type adds offsets `innerHash` to the
+     * transaction's meta DTO.
+     *
+     * The `innerHash` attribute references the inner transaction hash.
+     *
+     * Inner transactions are store in the attribute `otherTrans`.
+     *
+     * @return array
+     */
+    public function extendMeta() 
+    {
+        return [
+            "innerHash" => [
+                "data" => $this->otherTrans()->hash
+            ],
+        ];
+    }
 
-	public function toDTO() {
-		$dto = array(
-			'transaction' =>
-				array(
-					'timeStamp'  => $this->nemSDK->models()->transaction()->timeWindow()->timestamp(),
-					'fee'        => $this->nemSDK->models()->fee()->multisig(),
-					'type'       => $this->nemSDK->models()->transaction()->transactionsTypes()::MULTISIG,
-					'deadline'   => $this->nemSDK->models()->transaction()->timeWindow()->deadline(),
-					'version'    => $this->nemSDK->network()->getVersion(),
-					'signer'     => $this->multisigPublicKey,
-					'otherTrans' => $this->otherTrans,
-					'signatures' =>
-						array(),
-				),
-			'privateKey'  => $this->multisigPrivateKey,
-		);
+    /**
+     * Setter for the `otherTrans` DTO property.
+     *
+     * This is used to include non-multisig transaction data in
+     * the multisig transaction package.
+     *
+     * @param   \NEM\Models\Transaction     $otherTrans     Transaction to include in the multisig DTO's `otherTrans` attribute.
+     * @return  \NEM\Models\Transaction\Multisig
+     */
+    public function setOtherTrans(Transaction $otherTrans)
+    {
+        if ($otherTrans->type === TransactionType::MULTISIG) {
+            // cannot nest multisig in another multisig.
+            throw RuntimeException("It is forbidden to nest a Multisig transaction in another Multisig transaction.");
+        }
 
-		return $dto;
-	}
+        $this->attributes["otherTrans"] = $otherTrans;
+        return $this;
+    }
 
-	/**
-	 * @param mixed $otherTrans
-	 */
-	public function setOtherTrans( $otherTrans ) {
-		$this->otherTrans = $otherTrans['transaction'];
-	}
+    public function otherTrans()
+    {
+        // identify type by content
+        $typeId = (int) ($this->attributes["otherTrans"]->type);
+    }
 
+    /**
+     * Mutator for the signatures collection.
+     *
+     * @return \NEM\Models\ModelCollection
+     */
+    public function signatures(array $signatures = null)
+    {
+        return (new CollectionMutator())->mutate("Transaction\\Signature", $signatures ?: $this->attributes["signatures"]);
+    }
 }

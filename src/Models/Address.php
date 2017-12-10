@@ -30,6 +30,16 @@ class Address
     protected $fillable = ["address"];
 
     /**
+     * Address DTO automatically cleans address representation.
+     *
+     * @return  array       Associative array with key `address` containing a NIS *compliable* address representation.
+     */
+    public function toDTO()
+    {
+        return ["address" => $this->toClean()];
+    }
+
+    /**
      * Helper to clean an address of any non alpha-numeric characters
      * back to the actual Base32 representation of the address.
      *

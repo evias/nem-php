@@ -396,8 +396,8 @@ class Account
     public function getUnlockInfo() 
     {
         $params = [];
-        $apiUrl = $this->getPath('unlocked/info', $params, false);
-        $response = $this->api->postJSON($apiUrl);
+        $apiUrl = $this->getPath('unlocked/info', []);
+        $response = $this->api->post($apiUrl, $params);
 
         //XXX include Error checks
         $object = json_decode($response);
@@ -417,7 +417,7 @@ class Account
         $params = ["value" => $privateKey];
 
         $apiUrl = $this->getPath('unlock', $params);
-        $response = $this->api->postJSON($apiUrl);
+        $response = $this->api->post($apiUrl, []);
 
         //XXX include Error checks
         $object = json_decode($response);
@@ -437,7 +437,7 @@ class Account
         $params = ["value" => $privateKey];
 
         $apiUrl = $this->getPath('lock', $params);
-        $response = $this->api->postJSON($apiUrl);
+        $response = $this->api->post($apiUrl, []);
 
         //XXX include Error checks
         $object = json_decode($response);
