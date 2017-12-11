@@ -38,9 +38,12 @@ You can install this package with Composer. You only need to require evias/nem-p
 composer require evias/nem-php
 ```
 
-The package can also be download manually by cloning this repository or by download the packagist archive:
+The package can also be downloaded manually by cloning this repository or by downloading the packagist archive:
 
 - [nem-php at Packagist](https://packagist.org/packages/evias/nem-php)
+- [nem-php at Github](https://github.com/evias/nem-php)
+- [ZIP Archive of master branch at Github](https://github.com/evias/nem-php/archive/master.zip)
+- [nem-php Releases at Github](https://github.com/evias/nem-php/releases)
 
 Once you have required the package in your `composer.json` file (or using the command above), you can install
 the dependencies of this package:
@@ -58,12 +61,12 @@ The unit test suite is also configured on Travis-CI with the current Build Statu
 - [![Build Status](https://api.travis-ci.org/evias/nem-php.svg?branch=master)](https://travis-ci.com/evias/nem-php)
 
 If you wish to run the unitary test suite, you can use the executable file provided by PHPUnit which is located
-under `vendor/phpunit/phpunit/phpunit`.
+under `vendor/bin/phpunit`.
 
 Alernatively, you can create a symbolic link to this executable file in the `nem-php` clone root folder.
 
 ```bash
-ln -s vendors/phpunit/phpunit/phpunit .
+ln -s vendor/bin/phpunit .
 ```
 
 Now you can simply run `phpunit` in the terminal and it will launch the Rocket.. meh, the Unit Tests Suite.
