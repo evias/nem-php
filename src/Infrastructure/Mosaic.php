@@ -59,4 +59,21 @@ class Mosaic {
 	}
 
 
+	public function getProperties( $namespace, $mosaic ) {
+		$mosaics = json_decode( $this->nemSDK->api->getJSON( "/namespace/mosaic/definition/page?namespace=" . $namespace, "" ) )->data;
+		if ( is_array( $mosaics ) ) {
+			foreach ( $mosaics as $key => $value ) {
+				if ( $mosaic === $value->mosaic->id->name ) {
+					return [
+						'divisibility'  => intval( $value->mosaic->properties[0]->value ),
+						'initialSupply' => intval( $value->mosaic->properties[1]->value ),
+						'supplyMutable' => $value->mosaic->properties[2]->value === "true" ? true : false,
+						'transferable'  => $value->mosaic->properties[3]->value === "true" ? true : false,
+					];
+				}
+			}
+		}
+
+		return false;
+	}
 }

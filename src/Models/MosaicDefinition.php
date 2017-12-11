@@ -94,10 +94,10 @@ class MosaicDefinition
      * This will return a NIS compliant collection of [MosaicProperties](https://bob.nem.ninja/docs/#mosaicProperties) object. 
      *
      * @param   array   $properties       Array of MosaicProperty instances
-     * @return  \NEM\Models\Mosaic
+     * @return  \NEM\Models\MosaicProperties
      */
     public function properties(array $properties = null)
     {
-        return (new CollectionMutator())->mutate("mosaicProperties", $properties ?: $this->attributes["properties"]);
+        return MosaicProperties($properties ?: $this->attributes["properties"]);
     }
 }
