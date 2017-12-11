@@ -1,4 +1,4 @@
-<?php<?php
+<?php
 /**
  * Part of the evias/php-nem-laravel package.
  *
@@ -19,9 +19,18 @@
  */
 namespace NEM\Models;
 
+use NEM\Helpers\Crypto as CryptoHelper;
+use RuntimeException;
+
 class Message
     extends Model
 {
+    /**
+     * @internal
+     * @var integer
+     */
+    public const TYPE_HEX = 0;
+
     /**
      * @internal
      * @var integer
@@ -59,11 +68,33 @@ class Message
      */
     public function toDTO() 
     {
-        if ()
+        // CryptoHelper will store a KeyPair when necessary
+        // to allow encryption (needs private + public keys)
+        $helper = new CryptoHelper();
+        $plain  = $this->toPlain();
 
+        if ($this->type == Message::TYPE_HEX) {
+
+            if (! ctype_xdigit($plain)) {
+                throw new RuntimeException("Invalid hexadecimal representation. Use Message::TYPE_SIMPLE instead of Message::TYPE_HEX.");
+            }
+
+            // hexadecimal message content
+            $payload = "fe" . $plain;
+        }
+        elseif ($this->type == Message::TYPE_SIMPLE) {
+            // simple message, unencrypted
+            $payload = $this->toHex();
+        }
+        elseif ($this->type == Message::TYPE_ENCRYPTED) {
+            // encrypted message
+            $payload = $helper->encrypt($plain);
+
+            //XXX HW Trezor include "publicKey" to DTO.
+        }
 
         return [
-            "payload" => $this->toHex(),
+            "payload" => $payload,
             "type"    => $this->type,
         ];
     }
@@ -89,6 +120,12 @@ class Message
         return $this->payload;
     }
 
+    /**
+     * Helper to retrieve the UTF8 representation of a message
+     * payload (hexadecimal representation).
+     *
+     * @return string
+     */
     public function toPlain($hex = null)
     {
         if (empty($this->payload) && empty($hex))
@@ -104,20 +141,4 @@ class Message
 
         return $plain;
     }
-
-    /**
-     * TRYS to evaluate if the message is hex
-     *
-     * @param $string
-     *
-     * @return bool
-     */
-    private function isHex( $string ) {
-        if ( ctype_xdigit( $string ) ) {
-            return true;
-        }
-
-        return false;
-    }
-
 }

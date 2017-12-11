@@ -16,21 +16,21 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace evias\NEMBlockchain\Tests;
+namespace NEM\Tests\API;
 
 use PHPUnit_Framework_TestCase;
 use GuzzleHttp\Exception\ConnectException;
 use Psr\Http\Message\ResponseInterface;
 
-use evias\NEMBlockchain\API;
-use evias\NEMBlockchain\Exception\NISNotAvailableException;
+use NEM\API;
+use NEM\Errors\NISNotAvailableException;
 
 class GuzzleRequestHandlersRequestsTest
     extends PHPUnit_Framework_TestCase
 {
     /**
      * The evias NEM Blockchain API Client
-     * @var \evias\NEMBlockchain\API
+     * @var \NEM\API
      */
     protected $client;
 

@@ -183,7 +183,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $this->createTransactionCollection($object->data) //XXX brr => error/content validation first
+        return $this->createTransactionCollection($object->data); //XXX brr => error/content validation first
     }
 
     /**
@@ -211,7 +211,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $this->createTransactionCollection($object->data) //XXX brr => error/content validation first
+        return $this->createTransactionCollection($object->data); //XXX brr => error/content validation first
     }
 
     /**
@@ -234,7 +234,7 @@ class Account
 
         //XXX include Error checks
         $data = json_decode($response);
-        return $this->createTransactionCollection($object->data) //XXX brr => error/content validation first
+        return $this->createTransactionCollection($object->data); //XXX brr => error/content validation first
     }
 
     /**
@@ -273,7 +273,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $this->createBaseCollection($object->data) //XXX brr => error/content validation first
+        return $this->createBaseCollection($object->data); //XXX brr => error/content validation first
     }
 
     /**
@@ -304,7 +304,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $this->createNamespaceCollection($object->data) //XXX brr => error/content validation first
+        return $this->createNamespaceCollection($object->data); //XXX brr => error/content validation first
     }
 
     /**
@@ -332,7 +332,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $this->createMosaicCollection($object->data) //XXX brr => error/content validation first
+        return $this->createMosaicCollection($object->data); //XXX brr => error/content validation first
     }
 
     /**
@@ -350,7 +350,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $this->createMosaicCollection($object->data) //XXX brr => error/content validation first
+        return $this->createMosaicCollection($object->data); //XXX brr => error/content validation first
     }
 
     /**
@@ -382,7 +382,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $this->createBaseCollection($object->data) //XXX brr => error/content validation first
+        return $this->createBaseCollection($object->data); //XXX brr => error/content validation first
     }
 
     /**
@@ -401,7 +401,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $this->createBaseModel($object) //XXX brr => error/content validation first
+        return $this->createBaseModel($object); //XXX brr => error/content validation first
     }
 
     /**
@@ -421,7 +421,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $this->createBaseModel($object) //XXX brr => error/content validation first
+        return $this->createBaseModel($object); //XXX brr => error/content validation first
     }
 
     /**
@@ -441,6 +441,6 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $this->createBaseModel($object) //XXX brr => error/content validation first
+        return $this->createBaseModel($object); //XXX brr => error/content validation first
     }
 }

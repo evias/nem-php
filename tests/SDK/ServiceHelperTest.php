@@ -16,11 +16,23 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace NEM\Exception;
+namespace NEM\Tests\SDK;
 
-use RuntimeException;
+use PHPUnit_Framework_TestCase;
 
-class NISNotAvailableException
-    extends RuntimeException
+class ServiceHelperTest
+    extends PHPUnit_Framework_TestCase
 {
+    /**
+     * This test will only check if the RequestHandler
+     * instance is correctly handling the GET request
+     * and provides with a ResponseInterface.
+     *
+     * This test is NOT using promises.
+     *
+     * @return void
+     */
+    public function testSDKInstantiation()
+    {
+    }
 }

@@ -20,6 +20,8 @@
 namespace NEM\Models;
 
 use \Illuminate\Support\Collection;
+use \NEM\Infrastructure\ServiceInterface;
+use BadMethodCallException;
 
 class ModelCollection
     extends Collection
@@ -55,5 +57,55 @@ class ModelCollection
         }
 
         return $dtos;
+    }
+
+    /**
+     * Helper to *paginate requests* to NIS.
+     *
+     * This will automatically re-call the Service method in case there
+     * is more results to process.
+     *
+     * This method can be used to return the *full list* of transactions
+     * rather than just a *pageSize* number of transactions.
+     *
+     * @param   \NEM\Infrastructure\ServiceInterface    $service    The NEM Service helper.
+     * @param   string                                  $method     The Service method name to replicate.
+     * @param   array                                   $arguments  The (optional) arguments list for the forwarded method call.
+     * @param   string                                  $field      The (optional) Array Dot Notation for retrieving the *counting* field.
+     * @param   integer                                 $pageSize   The (optional) number of elements which NIS will return with the given Service method.
+     * @return  \NEM\Models\ModelCollection
+     * @throws  \BadMethodCallException         On invalid service method.
+     */
+    public function paginate(ServiceInterface $service, $method, array $arguments = [], $field = "id", $pageSize = 25)
+    {
+        if (! method_exists($service, $method)) {
+            throw new BadMethodCallException("Invalid method name '" . $method . "'. Not implemented in Service '" . get_class($service) . "'.");
+        }
+
+        $hasValues = [];
+        $objects = [];
+        $cntResults = 0;
+        do {
+            // forward service method call
+            $items = call_user_func_array([$service, $method], $arguments);
+            $cntResults = count($objects);
+
+            $lastObj = end($objects);
+            $dotObj  = array_dot((array) $lastObj);
+
+            $lastValue = $dotObj[$field];
+
+            if (in_array($lastValue, $hasValues))
+                break; // done (looping)
+
+            if ($cntResults < $pageSize)
+                break; // done (retrieved less values than maximum possible)
+
+            array_push($hasValues, $lastValue);
+            $objects = $objects + $items;
+        }
+        while ($cntResults);
+
+        return $objects;
     }
 }

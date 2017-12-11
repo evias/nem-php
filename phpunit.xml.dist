@@ -16,8 +16,11 @@
          verbose="true"
 >
     <testsuites>
-        <testsuite name="eVias/php-nem-laravel Test Suite">
-            <directory suffix="Test.php">./tests</directory>
+        <testsuite name="NEM PHP API Wrapper Test Suite">
+            <directory suffix="Test.php">./tests/API</directory>
+        </testsuite>
+        <testsuite name="NEM PHP SDK Test Suite">
+            <directory suffix="Test.php">./tests/SDK</directory>
         </testsuite>
     </testsuites>
     <filter>

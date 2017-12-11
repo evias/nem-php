@@ -16,10 +16,10 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace evias\NEMBlockchain\Tests;
+namespace NEM\Tests\API;
 
 use PHPUnit_Framework_TestCase;
-use evias\NEMBlockchain\API;
+use NEM\API;
 
 class RequestHandlersConfigurationTest
     extends PHPUnit_Framework_TestCase
@@ -34,14 +34,14 @@ class RequestHandlersConfigurationTest
 	 */
     public function testGuzzleConfiguration()
     {
-		$config = ["handler_class" => \evias\NEMBlockchain\Handlers\GuzzleRequestHandler::class];
+		$config = ["handler_class" => \NEM\Handlers\GuzzleRequestHandler::class];
 
 		// each test should have its own API configured
 		$client = new API();
 		$client->setOptions($config);
 
 		$handler = $client->getRequestHandler();
-		$this->assertTrue($handler instanceof \evias\NEMBlockchain\Handlers\GuzzleRequestHandler);
+		$this->assertTrue($handler instanceof \NEM\Handlers\GuzzleRequestHandler);
     }
 
     /**
