@@ -63,6 +63,6 @@ class Address
         if (empty($this->address))
             return "";
 
-        return trim(chunk_split($this->address, 5, '-'), "");
+        return trim(chunk_split($this->address, 6, '-'), " -");
     }
 }

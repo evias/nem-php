@@ -16,28 +16,21 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/php-nem-laravel
  */
-namespace NEM\Tests\API;
+namespace NEM\Tests\SDK;
 
-use PHPUnit_Framework_TestCase;
 use GuzzleHttp\Exception\ConnectException;
-use Psr\Http\Message\ResponseInterface;
+use PHPUnit_Framework_TestCase;
 
 use NEM\API;
-use NEM\Errors\NISNotAvailableException;
+use NEM\SDK;
 
-class GuzzleRequestHandlersRequestsTest
+class ServiceMutatorTest
     extends PHPUnit_Framework_TestCase
 {
     /**
-     * The evias NEM Blockchain API Client
-     * @var \NEM\API
-     */
-    protected $client;
-
-    /**
      * The setUp method of this test case will
      * instantiate the API using the bigalice2.nem.ninja
-     * NIS node.
+     * NIS testnet node.
      *
      * @see :Execution of this Test Case requires an Internet Connection
 	 * @return void
@@ -68,44 +61,11 @@ class GuzzleRequestHandlersRequestsTest
     }
 
     /**
-     * This test will only check if the RequestHandler
-     * instance is correctly handling the GET request
-     * and provides with a ResponseInterface.
-     *
-     * This test is NOT using promises.
+     * Test the SDK instantiation
      *
      * @return void
      */
-    public function testSynchronousGetRequest()
+    public function testSDKInstantiation()
     {
-        try {
-            $response  = $this->client->get("heartbeat", "", [], false);
-
-            $this->assertTrue($response instanceof ResponseInterface);
-        }
-        catch (ConnectException $e) {
-            $this->fail("Could not establish connection to NIS node \"bigalice2.nem.ninja:7890\".");
-        }
-    }
-
-    /**
-     * This test will only check if the RequestHandler
-     * instance is correctly handling the GET request
-     * and provides with a ResponseInterface.
-     *
-     * This test WILL use promises.
-     *
-     * @return void
-     */
-    public function testAsynchronousGetRequest()
-    {
-        try {
-            $response = $this->client->get("heartbeat", "", [], true);
-
-            $this->assertTrue($response instanceof ResponseInterface);
-        }
-        catch (ConnectException $e) {
-            $this->fail("Could not establish connection to NIS node \"bigalice2.nem.ninja:7890\".");
-        }
     }
 }

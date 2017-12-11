@@ -118,6 +118,14 @@ class SDK
      * $sdk->models()->address(); // will automatically craft a \NEM\Models\Address object
      * $sdk->models()->namespace(); // will automatically craft a \NEM\Models\Namespace object
      *
+     * @example Example from Data Transfer Object for \NEM\Models\ModelMutator
+     *
+     * $sdk = new SDK();
+     * $address = $sdk->models()->address(["address" => "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ"]);
+     *
+     * echo $address->address; // "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ"
+     * echo $address->toPretty(); // "TDWZ55-R5VIHS-H5WWK6-CEGAIP-7D35XV-FZ3RU2-S5UQ"
+     *
      * @see \NEM\Models\Mutator
      * @return \NEM\Models\Mutator      The models mutator
      */

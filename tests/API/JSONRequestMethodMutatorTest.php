@@ -25,7 +25,7 @@ use Psr\Http\Message\ResponseInterface;
 use NEM\API;
 use NEM\Errors\NISNotAvailableException;
 
-class GuzzleRequestHandlersRequestsTest
+class JSONRequestMethodMutatorTest
     extends PHPUnit_Framework_TestCase
 {
     /**
@@ -40,8 +40,8 @@ class GuzzleRequestHandlersRequestsTest
      * NIS node.
      *
      * @see :Execution of this Test Case requires an Internet Connection
-	 * @return void
-	 */
+     * @return void
+     */
     public function setUp()
     {
         parent::setUp();
@@ -68,41 +68,23 @@ class GuzzleRequestHandlersRequestsTest
     }
 
     /**
-     * This test will only check if the RequestHandler
-     * instance is correctly handling the GET request
-     * and provides with a ResponseInterface.
+     * This will test the *JSON Request Method Mutator* in NEM\API.
      *
-     * This test is NOT using promises.
+     * The method mutator is supposed to automatically return a JSON
+     * response whenever you call methods `getJSON` and `postJSON`.
      *
-     * @return void
-     */
-    public function testSynchronousGetRequest()
-    {
-        try {
-            $response  = $this->client->get("heartbeat", "", [], false);
-
-            $this->assertTrue($response instanceof ResponseInterface);
-        }
-        catch (ConnectException $e) {
-            $this->fail("Could not establish connection to NIS node \"bigalice2.nem.ninja:7890\".");
-        }
-    }
-
-    /**
-     * This test will only check if the RequestHandler
-     * instance is correctly handling the GET request
-     * and provides with a ResponseInterface.
-     *
-     * This test WILL use promises.
+     * This test will only make sure that the response is indeed cast
+     * to the *string* type.
      *
      * @return void
      */
-    public function testAsynchronousGetRequest()
+    public function testGetJSONMethodMutator()
     {
         try {
-            $response = $this->client->get("heartbeat", "", [], true);
+            $response = $this->client->getJSON("heartbeat", "", [], false);
 
-            $this->assertTrue($response instanceof ResponseInterface);
+            $this->assertFalse($response instanceof ResponseInterface);
+            $this->assertTrue(is_string($response));
         }
         catch (ConnectException $e) {
             $this->fail("Could not establish connection to NIS node \"bigalice2.nem.ninja:7890\".");

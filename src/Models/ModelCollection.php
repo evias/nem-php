@@ -20,6 +20,7 @@
 namespace NEM\Models;
 
 use \Illuminate\Support\Collection;
+use \Illuminate\Support\Arr as ArrayHelper;
 use \NEM\Infrastructure\ServiceInterface;
 use BadMethodCallException;
 
@@ -91,7 +92,7 @@ class ModelCollection
             $cntResults = count($objects);
 
             $lastObj = end($objects);
-            $dotObj  = array_dot((array) $lastObj);
+            $dotObj  = ArrayHelper::dot((array) $lastObj);
 
             $lastValue = $dotObj[$field];
 

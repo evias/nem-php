@@ -24,24 +24,24 @@ use NEM\API;
 class RequestHandlersConfigurationTest
     extends PHPUnit_Framework_TestCase
 {
-	/**
-	 * This test checks whether the API class returns
-	 * a valid GuzzleRequestHandler instance when a
-	 * `handler_class` config provides the given
-	 * GuzzleRequestHandler class.
-	 *
-	 * @return void
-	 */
+    /**
+     * This test checks whether the API class returns
+     * a valid GuzzleRequestHandler instance when a
+     * `handler_class` config provides the given
+     * GuzzleRequestHandler class.
+     *
+     * @return void
+     */
     public function testGuzzleConfiguration()
     {
-		$config = ["handler_class" => \NEM\Handlers\GuzzleRequestHandler::class];
+        $config = ["handler_class" => \NEM\Handlers\GuzzleRequestHandler::class];
 
-		// each test should have its own API configured
-		$client = new API();
-		$client->setOptions($config);
+        // each test should have its own API configured
+        $client = new API();
+        $client->setOptions($config);
 
-		$handler = $client->getRequestHandler();
-		$this->assertTrue($handler instanceof \NEM\Handlers\GuzzleRequestHandler);
+        $handler = $client->getRequestHandler();
+        $this->assertTrue($handler instanceof \NEM\Handlers\GuzzleRequestHandler);
     }
 
     /**
