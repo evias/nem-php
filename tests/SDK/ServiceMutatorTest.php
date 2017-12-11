@@ -19,16 +19,21 @@
 namespace NEM\Tests\SDK;
 
 use GuzzleHttp\Exception\ConnectException;
-use PHPUnit_Framework_TestCase;
+use \NEM\Tests\TestCase;
 
 use NEM\API;
 use NEM\SDK;
 use NEM\Models\Mutators\ModelMutator;
 use NEM\Models\Mutators\CollectionMutator;
 use NEM\Models\ModelCollection;
+use NEM\Contracts\DataTransferObject;
+use NEM\Models\Model;
+use NEM\Models\Account;
+use NEM\Models\Transaction;
+use NEM\Models\Address;
 
 class ServiceMutatorTest
-    extends PHPUnit_Framework_TestCase
+    extends TestCase
 {
     /**
      * The NIS API Client
@@ -68,14 +73,6 @@ class ServiceMutatorTest
         $this->client = new API();
         $this->client->setOptions($config);
 
-        // test hearbeat on NIS to make sure the Internet Connection is up.
-        try {
-            $response = $this->client->getJSON("heartbeat", "", [], false);
-        }
-        catch (ConnectException $e) {
-            $this->fail("Could not establish connection to NIS node \"bigalice2.nem.ninja:7890\".");
-        }
-
         $this->sdk = new SDK();
         $this->sdk->setAPIClient($this->client);
     }
@@ -112,7 +109,82 @@ class ServiceMutatorTest
     public function testSDKServiceBaseMutation()
     {
         $service = $this->sdk->service();
+        $this->assertTrue($service instanceof \NEM\Infrastructure\Service);
+    }
 
-        $this->assertTrue($service instance \NEM\Infrastructure\Service);
+    /**
+     * Test model mutator in service base mutation
+     *
+     * @return void
+     */
+    public function testSDKServiceMutationModelMutatorWithoutData()
+    {
+        $service = $this->sdk->service();
+        $newAccount = $service->createAccountModel();
+        $newTransaction = $service->createTransactionModel();
+
+        // test extendability
+        $this->assertTrue($newAccount instanceof DataTransferObject);
+        $this->assertTrue($newAccount instanceof Model);
+
+        // test model extension
+        $this->assertTrue($newAccount instanceof Account);
+        $this->assertTrue($newTransaction instanceof Transaction);
+    }
+
+    /**
+     * Test collection mutator in service base mutation
+     *
+     * @return void
+     */
+    public function testSDKServiceMutationCollectionMutatorWithoutData()
+    {
+        $service = $this->sdk->service();
+        $newAccounts = $service->createAccountCollection();
+        $newTransactions = $service->createTransactionCollection();
+
+        $this->assertTrue($newAccounts instanceof ModelCollection);
+        $this->assertTrue($newTransactions instanceof ModelCollection);
+    }
+
+    /**
+     * Test model mutator in service base mutation with data.
+     *
+     * @return void
+     */
+    public function testSDKServiceMutationModelMutatorWithData()
+    {
+        $testAddress = "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ";
+
+        $service = $this->sdk->service();
+        $newAccount = $service->createAccountModel(["address" => $testAddress]);
+
+        $this->assertTrue($newAccount instanceof Account);
+        $this->assertTrue($newAccount->address() instanceof Address);
+        $this->assertEquals($testAddress, $newAccount->address()->toClean());
+    }
+
+    /**
+     * Test collection mutator in service base mutation with data.
+     *
+     * @return void
+     */
+    public function testSDKServiceMutationCollectionMutatorWithData()
+    {
+        $testAddress = "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ";
+
+        $service = $this->sdk->service();
+        $newAccounts = $service->createAccountCollection([
+            ["address" => $testAddress], 
+            ["address" => $testAddress]
+        ]);
+
+        $this->assertTrue($newAccounts instanceof ModelCollection);
+        $this->assertEquals(2, $newAccounts->count());
+
+        foreach ($newAccounts as $testAccount) :
+            $this->assertTrue($testAccount->address() instanceof Address);
+            $this->assertEquals($testAddress, $testAccount->address()->toClean());
+        endforeach ;
     }
 }

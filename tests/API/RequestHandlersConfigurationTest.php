@@ -18,11 +18,11 @@
  */
 namespace NEM\Tests\API;
 
-use PHPUnit_Framework_TestCase;
+use \NEM\Tests\TestCase;
 use NEM\API;
 
 class RequestHandlersConfigurationTest
-    extends PHPUnit_Framework_TestCase
+    extends TestCase
 {
     /**
      * This test checks whether the API class returns

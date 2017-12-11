@@ -20,9 +20,15 @@
 namespace NEM\Models;
 
 use \Illuminate\Support\Collection;
+use \Illuminate\Support\Str;
+
 use NEM\Infrastructure\ServiceInterface;
+use NEM\Models\Mutators\ModelMutator;
+use NEM\Contracts\DataTransferObject;
 
 use ArrayObject;
+use BadMethodCallException;
+use InvalidArgumentException;
 
 /**
  * Generic Model class
@@ -41,7 +47,7 @@ use ArrayObject;
  *         "address"
  *     ];
  * 
- *     // Relationship Method should return a ModelInterface or ModelCollection!
+ *     // Relationship Method should return a DataTransferObject or ModelCollection!
  *     public function address($data = null)
  *     {
  *         return new Address($data ?: $this->address);
@@ -57,7 +63,7 @@ use ArrayObject;
  *         "cosignatories"
  *     ];
  * 
- *     // Relationship Method should return a ModelInterface or ModelCollection!
+ *     // Relationship Method should return a DataTransferObject or ModelCollection!
  *     public function cosignatories(array $data = null)
  *     {
  *         return new MosaicCollection($data ?: $this->cosignatories);
@@ -77,7 +83,7 @@ use ArrayObject;
  */
 class Model
     extends ArrayObject
-    implements ModelInterface
+    implements DataTransferObject
 {
     /**
      * List of fillable attributes
@@ -106,6 +112,18 @@ class Model
      * @var array
      */
     protected $appends = [];
+
+    /**
+     * The model instance's RELATED OBJECTS.
+     *
+     * Can't overload this property as it is used internally. 
+     * This property suits only the storage of previously loaded
+     * relationship objects.
+     *
+     * @internal
+     * @var array
+     */
+    private $related = [];
 
     /**
      * Construct a Model instance with attributes data.
@@ -139,11 +157,11 @@ class Model
 
             // we may need to parse the attribute relation or use
             // the model to get the subordinated Data Transfer Object.
-            if ($data instanceof ModelInterface || $data instanceof ModelCollection) {
+            if ($data instanceof DataTransferObject || $data instanceof ModelCollection) {
                 // sub DTO convert to array
                 $attribDTO = $data->toDTO();
             }
-            elseif (array_key_exists($attrib, $this->relations)) {
+            elseif (in_array($attrib, $this->relations) || method_exists($this, $attrib)) {
                 // unparsed sub DTO passed - parse the DTO to make sure
                 // we are working with NEM *NIS compliant* objects *always*.
                 $attribDTO = ($this->resolveRelationship($attrib, $data))->toDTO();
@@ -158,7 +176,7 @@ class Model
     /**
      * Setter for the `attributes` property.
      *
-     * @return  \NEM\Models\ModelInterface
+     * @return  \NEM\Contracts\DataTransferObject
      */
     public function setAttributes(array $attributes)
     {
@@ -186,7 +204,7 @@ class Model
      */
     public function getAttribute($name)
     {
-        if (array_key_exists($name, $this->attributes))
+        if (in_array($name, $this->attributes))
             return $this->attributes[$name];
 
         return null;
@@ -201,10 +219,11 @@ class Model
      */
     public function setAttribute($name, $data)
     {
-        if (in_array($name, $this->relations)) {
+        if (in_array($name, $this->relations) || method_exists($this, $name)) {
             // subordinate DTO data passed (one-to-one, one-to-many, etc.)
             // build the linked Model using Relationship configuration.
-            $this->attributes[$name] = $this->resolveRelationship($name, $data);
+            $this->related[$name] = $this->resolveRelationship($name, $data);
+            $this->attributes[$name] = $data; // attributes property contains scalar data
         }
         elseif (empty($this->fillable) || in_array($name, $this->fillable)) {
             // attribute is fillable or any attribute is fillable.
@@ -221,10 +240,14 @@ class Model
      * @param   string      $name   The property/attribute name.
      * @return  mixed
      */
-    public function &__get($name)
+    public function __get($name)
     {
+        // check for existing related object
+        if (array_key_exists($name, $this->related))
+            return $this->related[$name]; // return
+
         // attributes prevail over class properties
-        if (array_key_exists($this->attributes, $name))
+        if (array_key_exists($name, $this->attributes))
             return $this->attributes[$name];
 
         if ($this->offsetExists($name))
@@ -277,7 +300,7 @@ class Model
     }
 
     /**
-     * Build a Model Relationship between \NEM\Models\ModelInterface objects.
+     * Build a Model Relationship between \NEM\Contracts\DataTransferObject objects.
      *
      * Relation can be defined with the `$relations` property on extending classes.
      *
@@ -287,17 +310,17 @@ class Model
      * 
      * @param   string  $alias      Relation alias name.
      * @param   array   $data       The relationship data.
-     * @return  ModelInterface|ModelCollection
+     * @return  DataTransferObject|ModelCollection
      */
-    public function resolveRelationship($alias, array $data = null)
+    public function resolveRelationship($alias, $data)
     {
-        if (! in_array($alias, $this->relations)) {
-            throw InvalidArgumentException("Relationship for field '" . $alias . "' not configured in " . get_class($this));
+        if (! in_array($alias, $this->relations) && ! method_exists($this, $alias)) {
+            throw new InvalidArgumentException("Relationship for field '" . $alias . "' not configured in " . get_class($this));
         }
 
         if (method_exists($this, $alias)) {
             // Use relationship *method*
-            $related = $this->$method($data);
+            $related = $this->$alias($data);
             return $related;
         }
 
@@ -305,7 +328,7 @@ class Model
         $relation = "\\NEM\\Models\\" . Str::studly($alias);
 
         if (! class_exists($relation)) {
-            throw BadMethodCallException("Relationship method for field '" . $alias . "' not implemented in " . get_class($this));
+            throw new BadMethodCallException("Relationship method for field '" . $alias . "' not implemented in " . get_class($this));
         }
 
         $related  = new $relation($data);

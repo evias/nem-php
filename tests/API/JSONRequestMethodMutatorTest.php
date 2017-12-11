@@ -18,7 +18,7 @@
  */
 namespace NEM\Tests\API;
 
-use PHPUnit_Framework_TestCase;
+use \NEM\Tests\TestCase;
 use GuzzleHttp\Exception\ConnectException;
 use Psr\Http\Message\ResponseInterface;
 
@@ -26,7 +26,7 @@ use NEM\API;
 use NEM\Errors\NISNotAvailableException;
 
 class JSONRequestMethodMutatorTest
-    extends PHPUnit_Framework_TestCase
+    extends TestCase
 {
     /**
      * The evias NEM Blockchain API Client
@@ -57,14 +57,6 @@ class JSONRequestMethodMutatorTest
         // each test should have its own API configured
         $this->client = new API();
         $this->client->setOptions($config);
-
-        // test hearbeat on NIS to make sure the Internet Connection is up.
-        try {
-            $response = $this->client->getJSON("heartbeat", "", [], false);
-        }
-        catch (ConnectException $e) {
-            $this->fail("Could not establish connection to NIS node \"bigalice2.nem.ninja:7890\".");
-        }
     }
 
     /**
@@ -87,7 +79,9 @@ class JSONRequestMethodMutatorTest
             $this->assertTrue(is_string($response));
         }
         catch (ConnectException $e) {
-            $this->fail("Could not establish connection to NIS node \"bigalice2.nem.ninja:7890\".");
+            // HOST DOWN, not feature!
+            $this->assertTrue(false !== strpos(strtolower($e->getMessage()), "failed to connect"));
+            $this->fail("Could not establish connection to remote node 'bigalice2.nem.ninja:7890'.");
         }
     }
 }

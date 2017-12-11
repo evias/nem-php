@@ -19,6 +19,7 @@
  */
 namespace NEM\Models\Mutators;
 
+use Illuminate\Support\Str;
 use BadMethodCallException;
 
 class ModelMutator
@@ -37,7 +38,7 @@ class ModelMutator
     public function mutate($name, array $attributes)
     {
         // snake_case to camelCase
-        $modelClass = "\\NEM\\Models\\" . Str::studly($className);
+        $modelClass = "\\NEM\\Models\\" . Str::studly($name);
 
         if (!class_exists($modelClass)) {
             throw new BadMethodCallException("Model class '" . $modelClass . "' could not be found in \\NEM\\Model namespace.");

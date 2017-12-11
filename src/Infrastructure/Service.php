@@ -18,6 +18,10 @@
  */
 namespace NEM\Infrastructure;
 
+use Illuminate\Support\Str;
+
+use NEM\API;
+
 class Service
     implements ServiceInterface
 {
@@ -62,7 +66,7 @@ class Service
      *
      * @return string
      */
-    public function getBaseUrl($baseUrl)
+    public function getBaseUrl()
     {
         return $this->baseUrl ?: "";
     }
@@ -96,8 +100,8 @@ class Service
      * This can be used to craft correctly formed Model and Collection objects.
      *
      * @param  string   $name           The model name you would like to create.
-     * @param  array    $attributes     The model's attribute values.
-     * @return \NEM\Models\ModelInterface
+     * @param  array    $arguments     The model's attribute values.
+     * @return \NEM\Contract\DataTransferObject
      */
     public function __call($name, array $arguments)
     {
@@ -116,9 +120,10 @@ class Service
             if ("Base" === $objectClass)
                 $objectClass = "Model"; // "Base" objects are generic models.
 
-            $class   = "\\NEM\\Models\\" . Std::studly($returnType) . "Mutator"; // ModelMutator or CollectionMutator
+            $class   = "\\NEM\\Models\\Mutators\\" . Str::studly($returnType) . "Mutator"; // ModelMutator or CollectionMutator
             $mutator = new $class();
-            return $mutator->mutate(lcfirst($objectClass), $arguments);
+            $attribs = !empty($arguments) ? $arguments[0] : [];
+            return $mutator->mutate(lcfirst($objectClass), $attribs);
         }
 
         throw new BadMethodCallException("Method or model '" . $name . "' could not be found.");

@@ -17,19 +17,9 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Models;
+namespace NEM\Contracts;
 
-use NEM\NemSDK;
-use NEM\Models\Account\Account;
-use NEM\Models\Account\Address;
-use NEM\Models\Fee\Fee;
-use NEM\Models\Mosaic\Mosaic;
-use NEM\Models\Mosaic\Xem;
-use NEM\Models\Namespaces\Namespaces;
-use NEM\Models\Blockchain\Blockchain;
-use NEM\Models\Transaction\Transaction;
-
-interface ModelInterface
+interface DataTransferObject
 {
     /**
      * Setter for the `attributes` property.

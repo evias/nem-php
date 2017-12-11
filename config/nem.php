@@ -26,7 +26,7 @@ return [
     |
     | Following libraries are currently available: "guzzle"
     */
-    'handler_class' => \evias\NEMBlockchain\Handlers\GuzzleRequestHandler::class,
+    'handler_class' => \NEM\Handlers\GuzzleRequestHandler::class,
 
     /*
     |--------------------------------------------------------------------------

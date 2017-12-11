@@ -46,12 +46,13 @@ class SDK
      * Construct a SDK object.
      *
      * @see \NEM\API::__construct()
-     * @param   array   $options    Options array passed to NEM\API
+     * @param   array       $options    Options array passed to NEM\API
+     * @param   \NEM\API    $client     The (optional) already initialized NIS API client.
      * @return  void
      */
-    public function __construct($options = []) 
+    public function __construct($options = [], API $client = null)
     {
-        $this->api = new API($options);
+        $this->api = $client ?: new API($options);
         $this->models = new ModelMutator();
     }
 

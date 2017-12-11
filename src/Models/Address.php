@@ -47,10 +47,10 @@ class Address
      */
     public function toClean()
     {
-        if (empty($this->address))
+        if (empty($this->attributes["address"]))
             return "";
 
-        return strtoupper(preg_replace("/[^a-zA-Z0-9]+/", "", $this->address));
+        return strtoupper(preg_replace("/[^a-zA-Z0-9]+/", "", $this->attributes["address"]));
     }
 
     /**
@@ -60,9 +60,9 @@ class Address
      */
     public function toPretty()
     {
-        if (empty($this->address))
+        if (empty($this->attributes["address"]))
             return "";
 
-        return trim(chunk_split($this->address, 6, '-'), " -");
+        return trim(chunk_split($this->attributes["address"], 6, '-'), " -");
     }
 }

@@ -84,9 +84,9 @@ class Account
      *
      * @return \NEM\Models\Address
      */
-    public function address()
+    public function address($address = null)
     {
-        return new Address($this->address);
+        return new Address(["address" => $address ?: $this->attributes["address"]]);
     }
 
     /**

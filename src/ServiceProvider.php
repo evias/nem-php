@@ -19,7 +19,7 @@
 namespace NEM;
 
 use Illuminate\Contracts\Container\Container;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 /**
  * This is the NemBlockchainServiceProvider class
@@ -29,8 +29,8 @@ use Illuminate\Support\ServiceProvider;
  *
  * @author Grégory Saive <greg@evias.be>
  */
-class NemBlockchainServiceProvider
-    extends ServiceProvider
+class ServiceProvider
+    extends BaseServiceProvider
 {
     /**
      * Boot the service provider.
@@ -166,7 +166,7 @@ class NemBlockchainServiceProvider
             $envConfig   = $environment == "production" ? "primary" : "testing";
 
             $api = $this->app["nem"];
-            $sdk = new SDK($this->app);
+            $sdk = new SDK([], $api); // use already initialized NIS API client
 
             return $sdk;
         }, true); // shared=true

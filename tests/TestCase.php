@@ -21,7 +21,7 @@ namespace NEM\Tests;
 use PHPUnit\Framework\TestCase as BaseTest;
 use Mockery;
 
-class TestCase 
+abstract class TestCase 
     extends BaseTest
 {
     /**
