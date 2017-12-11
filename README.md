@@ -1,9 +1,9 @@
-# evias/php-nem-laravel
+# evias/nem-php
 
-[![Build Status](https://api.travis-ci.org/evias/php-nem-laravel.svg?branch=master)](https://travis-ci.com/evias/php-nem-laravel)
-[![Latest Stable Version](https://poser.pugx.org/evias/php-nem-laravel/version)](https://packagist.org/packages/evias/php-nem-laravel)
-[![Latest Unstable Version](https://poser.pugx.org/evias/php-nem-laravel/v/unstable)](//packagist.org/packages/evias/php-nem-laravel)
-[![License](https://poser.pugx.org/evias/php-nem-laravel/license)](https://packagist.org/packages/evias/php-nem-laravel)
+[![Build Status](https://api.travis-ci.org/evias/nem-php.svg?branch=master)](https://travis-ci.com/evias/nem-php)
+[![Latest Stable Version](https://poser.pugx.org/evias/nem-php/version)](https://packagist.org/packages/evias/nem-php)
+[![Latest Unstable Version](https://poser.pugx.org/evias/nem-php/v/unstable)](//packagist.org/packages/evias/nem-php)
+[![License](https://poser.pugx.org/evias/nem-php/license)](https://packagist.org/packages/evias/nem-php)
 
 This package aims to provide with an easy-to-use PHP Laravel Namespace helping developers to communicate with the NEM blockchain through its NIS API.
 
@@ -13,7 +13,7 @@ Package licensed under [MIT](LICENSE) License.
 
 ## Documentation
 
-Reader-friendly Documentation will be added in development period and will be available on the Github Wiki at [evias/php-nem-laravel Wiki](https://github.com/evias/php-nem-laravel/wiki).
+Reader-friendly Documentation will be added in development period and will be available on the Github Wiki at [evias/nem-php Wiki](https://github.com/evias/nem-php/wiki).
 
 ## Pot de vin
 
@@ -28,13 +28,13 @@ If you like the initiative, and for the sake of good mood, I recommend you take 
 
 ## Installation
 
-You can install this package with Composer. You only need to require evias/php-nem-laravel.
+You can install this package with Composer. You only need to require evias/nem-php.
 
-    $ composer require evias/php-nem-laravel
+    $ composer require evias/nem-php
 
 The package can also be download manually by cloning this repository or by download the packagist archive:
 
-	$ https://packagist.org/packages/evias/php-nem-laravel
+	$ https://packagist.org/packages/evias/nem-php
 
 ## Usage / Examples NemSDK
 
@@ -88,7 +88,7 @@ var_dump( $NemSDK->node()->info() ) ;
 
 ## Usage / Examples API
 
-When you have installed the evias/php-nem-laravel package you will be able to use the API class to send API requests to the configured NIS. By default, the config/nem.php file defines the localhost NIS to be used, this can be changed.
+When you have installed the evias/nem-php package you will be able to use the API class to send API requests to the configured NIS. By default, the config/nem.php file defines the localhost NIS to be used, this can be changed.
 
 If you are using Laravel or Lumen, you will need to register the Service Provider of this package into your app:
 

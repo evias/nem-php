@@ -16,11 +16,32 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Errors;
+namespace NEM\Tests;
 
-use RuntimeException;
+use PHPUnit\Framework\TestCase as BaseTest;
+use Mockery;
 
-class NISNotAvailableException
-    extends RuntimeException
+class TestCase 
+    extends BaseTest
 {
+    /**
+     * Setup unit test cases
+     *
+     * @return void
+     */
+    public function setUp()
+    {
+        parent::setUp();
+    }
+
+    /**
+     * Close the mockery operator.
+     *
+     * @return void
+     */
+    public function tearDown()
+    {
+        parent::tearDown();
+        Mockery::close();
+    }
 }

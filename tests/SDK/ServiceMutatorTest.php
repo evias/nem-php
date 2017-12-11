@@ -1,6 +1,6 @@
 <?php
 /**
- * Part of the evias/php-nem-laravel package.
+ * Part of the evias/nem-php package.
  *
  * NOTICE OF LICENSE
  *
@@ -9,12 +9,12 @@
  * This source file is subject to the MIT License that is
  * bundled with this package in the LICENSE file.
  *
- * @package    evias/php-nem-laravel
+ * @package    evias/nem-php
  * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
- * @link       http://github.com/evias/php-nem-laravel
+ * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Tests\SDK;
 
@@ -102,5 +102,17 @@ class ServiceMutatorTest
     public function testSDKServiceMutator()
     {
         $this->sdk->invalidServiceName();
+    }
+
+    /**
+     * Test base Service instantiation for unimplemented API Endpoints.
+     *
+     * @return void
+     */
+    public function testSDKServiceBaseMutation()
+    {
+        $service = $this->sdk->service();
+
+        $this->assertTrue($service instance \NEM\Infrastructure\Service);
     }
 }

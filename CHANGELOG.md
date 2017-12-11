@@ -1,13 +1,15 @@
-# evias/php-nem-laravel Change log
+# evias/nem-php Change log
 
 This project follows [Semantic Versioning](CONTRIBUTING.md).
 
 ---
 
-### v0.1.0
+### v1.0.0
 
-- wallets and accounts informations basics (read only)
-- transactions informations basics (read only)
+- revamp of the implemented SDK
+- implement necessary model abstraction layer
+- implement necessary infrastructure service abstraction layer (NIS Web Services)
+- implement NIS API requests
 
 ### v0.0.3
 
