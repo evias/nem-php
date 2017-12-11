@@ -18,7 +18,7 @@
  */
 namespace NEM\Tests\API;
 
-use \NEM\Tests\TestCase;
+use NEM\Tests\TestCase;
 use GuzzleHttp\Exception\ConnectException;
 use Psr\Http\Message\ResponseInterface;
 

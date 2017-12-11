@@ -68,7 +68,7 @@ class MosaicDefinition
      */
     public function creationFeeSink($address = null)
     {
-        return new Account($address ?: $this->attributes["creationFeeSink"]);
+        return new Account($address ?: $this->getAttribute("creationFeeSink"));
     }
 
     /**
@@ -81,6 +81,6 @@ class MosaicDefinition
      */
     public function mosaicDefinition(array $definition = null)
     {
-        return new MosaicDefinition($definition ?: $this->attributes["mosaicDefinition"]);
+        return new MosaicDefinition($definition ?: $this->getAttribute("mosaicDefinition"));
     }
 }

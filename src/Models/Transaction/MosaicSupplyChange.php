@@ -60,6 +60,6 @@ class MosaicSupplyChange
      */
     public function mosaic(array $mosaicId = null)
     {
-        return new Mosaic($mosaicId ?: $this->attributes["mosaicId"]);
+        return new Mosaic($mosaicId ?: $this->getAttribute("mosaicId"));
     }
 }

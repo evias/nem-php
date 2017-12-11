@@ -72,7 +72,7 @@ class MosaicLevy
      */
     public function mosaic(array $mosaicId = null)
     {
-        return new Mosaic($mosaicId ?: $this->attributes["mosaicId"]);
+        return new Mosaic($mosaicId ?: $this->getAttribute("mosaicId"));
     }
 
     /**
@@ -82,6 +82,6 @@ class MosaicLevy
      */
     public function recipient($address = null)
     {
-        return new Account(["address" => $address ?: $this->attributes["recipient"]]);
+        return new Account(["address" => $address ?: $this->getAttribute("recipient")]);
     }
 }

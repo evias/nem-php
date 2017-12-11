@@ -58,6 +58,7 @@ class MultisigAggregateModification
      */
     public function modifications(array $modifications = null)
     {
-        return (new CollectionMutator())->mutate("multisigModification", $modifications ?: $this->attributes["modifications"]);
+        $mods = $modifications ?: $this->getAttribute("modifications") ?: [];
+        return (new CollectionMutator())->mutate("multisigModification", $mods);
     }
 }

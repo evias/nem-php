@@ -72,7 +72,7 @@ class MosaicDefinition
      */
     public function mosaic(array $mosaicId = null)
     {
-        return new Mosaic($mosaicId ?: $this->attributes["mosaicId"]);
+        return new Mosaic($mosaicId ?: $this->getAttribute("mosaicId"));
     }
 
     /**
@@ -85,7 +85,7 @@ class MosaicDefinition
      */
     public function levy(array $levy = null)
     {
-        return new MosaicLevy($levy ?: $this->attributes["levy"]);
+        return new MosaicLevy($levy ?: $this->getAttribute("levy"));
     }
 
     /**
@@ -98,6 +98,6 @@ class MosaicDefinition
      */
     public function properties(array $properties = null)
     {
-        return MosaicProperties($properties ?: $this->attributes["properties"]);
+        return MosaicProperties($properties ?: $this->getAttribute("properties"));
     }
 }

@@ -55,6 +55,6 @@ class ImportanceTransfer
      */
     public function remoteAccount($address = null)
     {
-        return new Account($address ?: $this->attributes["remoteAccount"]);
+        return new Account($address ?: $this->getAttribute("remoteAccount"));
     }
 }

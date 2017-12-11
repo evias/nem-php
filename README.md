@@ -1,6 +1,6 @@
 # evias/nem-php
 
-[![Build Status](https://api.travis-ci.org/evias/nem-php.svg?branch=master)](https://travis-ci.com/evias/nem-php)
+[![Build Status](https://api.travis-ci.org/evias/nem-php.svg?branch=dev-1.0.0)](https://travis-ci.com/evias/nem-php)
 [![Latest Stable Version](https://poser.pugx.org/evias/nem-php/version)](https://packagist.org/packages/evias/nem-php)
 [![Latest Unstable Version](https://poser.pugx.org/evias/nem-php/v/unstable)](//packagist.org/packages/evias/nem-php)
 [![License](https://poser.pugx.org/evias/nem-php/license)](https://packagist.org/packages/evias/nem-php)
@@ -55,7 +55,7 @@ The library provides with a Unit Test Suite for the implemented SDK features.
 
 The unit test suite is also configured on Travis-CI with the current Build Status:
 
-- [![Build Status](https://api.travis-ci.org/evias/nem-php.svg?branch=master)](https://travis-ci.com/evias/nem-php)
+- [![Build Status](https://api.travis-ci.org/evias/nem-php.svg?branch=dev-1.0.0)](https://travis-ci.com/evias/nem-php)
 
 If you wish to run the unitary test suite, you can use the executable file provided by PHPUnit which is located
 under `vendor/phpunit/phpunit/phpunit`.

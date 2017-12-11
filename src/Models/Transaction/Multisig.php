@@ -108,6 +108,7 @@ class Multisig
      */
     public function signatures(array $signatures = null)
     {
-        return (new CollectionMutator())->mutate("Transaction\\Signature", $signatures ?: $this->attributes["signatures"]);
+        $transactions = $signatures ?: $this->getAttribute("signatures") ?: [];
+        return (new CollectionMutator())->mutate("Transaction\\Signature", $transactions);
     }
 }

@@ -49,7 +49,7 @@ class API
      *
      * @var string
      */
-    protected $handlerClass = \NEM\Handlers\GuzzleRequestHandler::class;
+    protected $handlerClass = "\NEM\Handlers\GuzzleRequestHandler";
 
     /**
      * The request handler use to send API calls over

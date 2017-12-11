@@ -19,7 +19,7 @@
 namespace NEM\Tests\SDK;
 
 use GuzzleHttp\Exception\ConnectException;
-use \NEM\Tests\TestCase;
+use NEM\Tests\TestCase;
 
 use NEM\API;
 use NEM\SDK;
@@ -36,13 +36,6 @@ class ServiceMutatorTest
     extends TestCase
 {
     /**
-     * The NIS API Client
-     *
-     * @var \NEM\API
-     */
-    protected $client;
-
-    /**
      * The NEM SDK instance
      *
      * @var \NEM\SDK
@@ -55,26 +48,19 @@ class ServiceMutatorTest
      * NIS testnet node.
      *
      * @see :Execution of this Test Case requires an Internet Connection
-	 * @return void
-	 */
+     * @return void
+     */
     public function setUp()
     {
         parent::setUp();
 
-        $config = [
+        $this->sdk = new SDK([
             "use_ssl"  => false,
             "protocol" => "http",
             "host" => "bigalice2.nem.ninja", // testing uses online NIS
             "port" => 7890,
             "endpoint" => "/",
-        ];
-
-        // each test should have its own API configured
-        $this->client = new API();
-        $this->client->setOptions($config);
-
-        $this->sdk = new SDK();
-        $this->sdk->setAPIClient($this->client);
+        ]);
     }
 
     /**

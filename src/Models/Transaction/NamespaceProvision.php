@@ -58,6 +58,6 @@ class NamespaceProvision
      */
     public function rentalFeeSink($address = null)
     {
-        return new Account($address ?: $this->attributes["rentalFeeSink"]);
+        return new Account($address ?: $this->getAttribute("rentalFeeSink"));
     }
 }

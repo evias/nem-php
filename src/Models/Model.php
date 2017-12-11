@@ -164,13 +164,41 @@ class Model
             elseif (in_array($attrib, $this->relations) || method_exists($this, $attrib)) {
                 // unparsed sub DTO passed - parse the DTO to make sure
                 // we are working with NEM *NIS compliant* objects *always*.
-                $attribDTO = ($this->resolveRelationship($attrib, $data))->toDTO();
+                $related   = $this->resolveRelationship($attrib, $data);
+                $attribDTO = $related->toDTO();
             }
 
             $dtos[$attrib] = $attribDTO;
         }
 
         return $dtos;
+    }
+
+    /**
+     * Setter for the `fillable` property.
+     *
+     * @param   array   $fieldNames     An array of field names
+     * @return  \NEM\Models\ModelInterface
+     */
+    public function setFields(array $fieldNames)
+    {
+        $this->fillable = $fieldNames;
+        $this->appends  = [];
+        return $this;
+    }
+
+    /**
+     * Getter for the model's field names.
+     *
+     * This method will merge the `fillable` property and the `appends`
+     * properties into one array of field names.
+     *
+     * @param   array   $fieldNames     An array of field names
+     * @return  \NEM\Models\ModelInterface
+     */
+    public function getFields()
+    {
+        return array_merge($this->fillable, $this->appends);
     }
 
     /**
@@ -188,6 +216,9 @@ class Model
 
     /**
      * Getter for the `attributes` property.
+     *
+     * The `attributes` property holds an array with key values representing
+     * the Data of this Model instance.
      *
      * @return array
      */
@@ -225,12 +256,65 @@ class Model
             $this->related[$name] = $this->resolveRelationship($name, $data);
             $this->attributes[$name] = $data; // attributes property contains scalar data
         }
-        elseif (empty($this->fillable) || in_array($name, $this->fillable)) {
+        elseif (empty($this->fillable) || in_array($name, $this->getFields())) {
             // attribute is fillable or any attribute is fillable.
             $this->attributes[$name] = $data;
         }
 
         return $this;
+    }
+
+    /**
+     * Setter for the `relations` property.
+     *
+     * The `relations` property should contain a list of field names
+     * which will automatically be resolved into relationships.
+     *
+     * @param   array   $relations      An array of field names which need to be parsed as relationships.
+     * @return  \NEM\Contracts\DataTransferObject
+     */
+    public function setRelations(array $relations)
+    {
+        $this->relations = $relations;
+        return $this;
+    }
+
+    /**
+     * Getter for the `relations` property.
+     *
+     * @return  array       An array of field names
+     */
+    public function getRelations()
+    {
+        return $this->relations;
+    }
+
+    /**
+     * Setter for the `appends` property.
+     *
+     * The `appends` property holds a *second* list of `fillable` fields.
+     *
+     * This list is used when extending models instances to provide with
+     * class specific field additions.
+     *
+     * @see \NEM\Models\Transaction
+     * @param   array   $relations      An array of field names which need to be parsed as relationships.
+     * @return  \NEM\Contracts\DataTransferObject
+     */
+    public function setAppends(array $appends)
+    {
+        $this->appends = $appends;
+        return $this;
+    }
+
+    /**
+     * Getter for the `appends` property.
+     *
+     * @return  array       An array of field names
+     */
+    public function getAppends()
+    {
+        return $this->appends;
     }
 
     /**

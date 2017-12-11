@@ -18,7 +18,7 @@
  */
 namespace NEM\Tests\API;
 
-use \NEM\Tests\TestCase;
+use NEM\Tests\TestCase;
 use NEM\API;
 
 class RequestHandlersConfigurationTest
@@ -34,7 +34,7 @@ class RequestHandlersConfigurationTest
      */
     public function testGuzzleConfiguration()
     {
-        $config = ["handler_class" => \NEM\Handlers\GuzzleRequestHandler::class];
+        $config = ["handler_class" => "\NEM\Handlers\GuzzleRequestHandler"];
 
         // each test should have its own API configured
         $client = new API();

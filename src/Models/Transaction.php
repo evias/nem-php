@@ -142,7 +142,7 @@ class Transaction
      */
     public function recipient($address = null)
     {
-        return new Account(["address" => $address ?: $this->attributes["recipient"]]);
+        return new Account(["address" => $address ?: $this->getAttribute("recipient")]);
     }
 
     /**
@@ -152,7 +152,7 @@ class Transaction
      */
     public function amount($amount = null)
     {
-        return new Amount(["amount" => $amount ?: $this->attributes["amount"]]);
+        return new Amount(["amount" => $amount ?: $this->getAttribute("amount")]);
     }
 
     /**
@@ -176,6 +176,6 @@ class Transaction
      */
     public function message($payload = null)
     {
-        return new Message(["payload" => $payload ?: $this->attributes["message"]]);
+        return new Message(["payload" => $payload ?: $this->getAttribute("message")]);
     }
 }

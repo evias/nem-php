@@ -19,6 +19,8 @@
  */
 namespace NEM\Models;
 
+use NEM\Models\Mutators\CollectionMutator;
+
 class Account
     extends Model
 {
@@ -63,16 +65,16 @@ class Account
         return [
             "account" => [
                 "address" => $this->address()->toClean(),
-                "balance" => (int) $this->attributes["balance"],
-                "vestedBalance" => (int) $this->attributes["balance"],
-                "importance" => (float) $this->attributes["importance"],
-                "publicKey" => $this->attributes["publicKey"],
-                "label" => $this->attributes["label"],
-                "harvestedBlocks" => (int) $this->attributes["harvestedBlocks"],
+                "balance" => (int) $this->balance,
+                "vestedBalance" => (int) $this->balance,
+                "importance" => (float) $this->importance,
+                "publicKey" => $this->publicKey,
+                "label" => $this->label,
+                "harvestedBlocks" => (int) $this->harvestedBlocks,
             ],
             "meta" => [
-                "status" => $this->attributes["status"],
-                "remoteStatus" => $this->attributes["remoteStatus"],
+                "status" => $this->status,
+                "remoteStatus" => $this->remoteStatus,
                 "cosignatoryOf" => $this->cosignatoryOf()->toDTO(),
                 "cosignatories" => $this->cosignatories()->toDTO(),
             ]
@@ -96,7 +98,8 @@ class Account
      */
     public function cosignatoryOf(array $data = null)
     {
-        return (new CollectionMutator())->mutate("account", $data ?: $this->attributes["cosignatoryOf"]);
+        $multisigs = $data ?: $this->getAttribute("cosignatoryOf") ?: [];
+        return (new CollectionMutator())->mutate("account", $multisigs);
     }
 
     /**
@@ -106,6 +109,7 @@ class Account
      */
     public function cosignatories(array $data = null)
     {
-        return (new CollectionMutator())->mutate("account", $data ?: $this->attributes["cosignatories"]);
+        $cosignatories = $data ?: $this->getAttribute("cosignatories") ?: [];
+        return (new CollectionMutator())->mutate("account", $cosignatories);
     }
 }

@@ -57,6 +57,6 @@ class Signature
      */
     public function otherAccount($address = null)
     {
-        return new Account($address ?: $this->attributes["otherAccount"]);
+        return new Account($address ?: $this->getAttribute("otherAccount"));
     }
 }
