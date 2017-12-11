@@ -111,6 +111,9 @@ class ModelAbstractionTest
     /**
      * Test basic methods of the SDK's model abstraction layer class `Model`.
      *
+     * This unit test will verify that attributes are correctly set when the
+     * field name is mutated through the model class' __call() method.
+     *
      * @return void
      */
     public function testSDKModelAttributesMutatorSetters()
@@ -127,7 +130,14 @@ class ModelAbstractionTest
 
         $this->assertEquals(1, $attributes["firstField"]);
         $this->assertEquals(2, $attributes["secondField"]);
+        $this->assertTrue(isset($model->firstField));
+        $this->assertTrue(isset($model->secondField));
+
+        // test unsetting attributes values
+        unset($model->firstField);
+        unset($model->secondField);
+
+        $this->assertFalse(isset($model->firstField));
+        $this->assertFalse(isset($model->secondField));
     }
-
-
 }

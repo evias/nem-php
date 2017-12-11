@@ -10,6 +10,8 @@ This project follows [Semantic Versioning](CONTRIBUTING.md).
 - implement necessary model abstraction layer
 - implement necessary infrastructure service abstraction layer (NIS Web Services)
 - implement NIS API requests
+- implement unit test suite for NEM\API and NEM\SDK
+- include examples into README.md as a first (will include examples/ folder later)s
 
 ### v0.0.3
 
