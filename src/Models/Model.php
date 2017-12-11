@@ -22,6 +22,8 @@ namespace NEM\Models;
 use \Illuminate\Support\Collection;
 use NEM\Infrastructure\ServiceInterface;
 
+use ArrayObject;
+
 /**
  * Generic Model class
  *

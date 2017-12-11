@@ -19,7 +19,12 @@
  */
 namespace NEM;
 
+use Illuminate\Support\Str;
+
 use NEM\Models\Mutators\ModelMutator;
+use NEM\Models\Mutators\CollectionMutator;
+
+use BadMethodCallException;
 
 class SDK
 {
@@ -58,7 +63,7 @@ class SDK
      * @param   \NEM\API    $api    An initialized NIS API instance.
      * @return  \NEM\SDK
      */
-    public function setNISWrapper(API $api)
+    public function setAPIClient(API $api)
     {
         $this->api = $api;
         return $this;
@@ -70,7 +75,7 @@ class SDK
      * @param   \NEM\API    $api    An initialized NIS API instance.
      * @return  \NEM\SDK
      */
-    public function getNISWrapper()
+    public function getAPIClient()
     {
         return $this->api;
     }
@@ -126,11 +131,30 @@ class SDK
      * echo $address->address; // "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ"
      * echo $address->toPretty(); // "TDWZ55-R5VIHS-H5WWK6-CEGAIP-7D35XV-FZ3RU2-S5UQ"
      *
-     * @see \NEM\Models\Mutator
-     * @return \NEM\Models\Mutator      The models mutator
+     * @see \NEM\Models\Mutators\ModelMutator
+     * @return \NEM\Models\Mutators\ModelMutator      The models mutator
      */
     public function models() 
     {
         return new ModelMutator();
+    }
+
+    /**
+     * The collect() method should implement an easy to use models collection mutator for the 
+     * SDK. This will help creating NEM compatible *LISTS* of objects.
+     *
+     * @example Example calls for \NEM\Models\CollectionMutator
+     *
+     * $sdk = new SDK();
+     * $sdk->collect("transaction", $transactions) // will automatically craft a ModelCollection with \NEM\Models\Transaction objects
+     *
+     * @see \NEM\Models\Mutator
+     * @param   string              $modelName      The model name to instantiate.
+     * @param   array               $elements       Elements to collect (DTO format).
+     * @return  \NEM\Models\Mutator                 The models mutator
+     */
+    public function collect($modelName, array $elements)
+    {
+        return (new CollectionMutator())->mutate($modelName, $elements);
     }
 }

@@ -23,10 +23,27 @@ use PHPUnit_Framework_TestCase;
 
 use NEM\API;
 use NEM\SDK;
+use NEM\Models\Mutators\ModelMutator;
+use NEM\Models\Mutators\CollectionMutator;
+use NEM\Models\ModelCollection;
 
 class ServiceMutatorTest
     extends PHPUnit_Framework_TestCase
 {
+    /**
+     * The NIS API Client
+     *
+     * @var \NEM\API
+     */
+    protected $client;
+
+    /**
+     * The NEM SDK instance
+     *
+     * @var \NEM\SDK
+     */
+    protected $sdk;
+
     /**
      * The setUp method of this test case will
      * instantiate the API using the bigalice2.nem.ninja
@@ -58,14 +75,32 @@ class ServiceMutatorTest
         catch (ConnectException $e) {
             $this->fail("Could not establish connection to NIS node \"bigalice2.nem.ninja:7890\".");
         }
+
+        $this->sdk = new SDK();
+        $this->sdk->setAPIClient($this->client);
     }
 
     /**
-     * Test the SDK instantiation
+     * Test basic details of the SDK instance
      *
      * @return void
      */
-    public function testSDKInstantiation()
+    public function testSDKBaseMethods()
     {
+        $this->assertTrue($this->sdk->getAPIClient() instanceof API);
+        $this->assertEquals("bigalice2.nem.ninja", $this->sdk->getAPIClient()->getRequestHandler()->getHost());
+        $this->assertTrue($this->sdk->models() instanceof ModelMutator);
+        $this->assertTrue($this->sdk->collect("model", []) instanceof ModelCollection);
+    }
+
+    /**
+     * Test invalid Service name error case.
+     *
+     * @expectedException \BadMethodCallException
+     * @expectedExceptionMessage Infrastructure class '\NEM\Infrastructure\InvalidServiceName' could not be found in \NEM\Infrastructure namespace.
+     */
+    public function testSDKServiceMutator()
+    {
+        $this->sdk->invalidServiceName();
     }
 }

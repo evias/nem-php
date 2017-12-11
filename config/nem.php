@@ -81,7 +81,7 @@ return [
         'testing' => [
         	"protocol" => "http",
             "use_ssl" => false,
-            "host" => "go.nem.ninja",
+            "host" => "bigalice2.nem.ninja",
             "port" => 7890,
             "endpoint" => "/",
         ],
@@ -109,7 +109,7 @@ return [
         ],
         'testing' => [
             "use_ssl" => false,
-            "host" => "go.nem.ninja",
+            "host" => "bigalice2.nem.ninja",
             "port" => 8989,
             "endpoint" => "/ncc/api",
         ],
