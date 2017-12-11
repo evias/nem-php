@@ -1,9 +1,9 @@
 <?php
 
 
-namespace evias\NEMBlockchain\Infrastructure;
+namespace NEM\Infrastructure;
 
-use evias\NEMBlockchain\NemSDK;
+use NEM\NemSDK;
 
 class Chain {
 
@@ -13,7 +13,6 @@ class Chain {
 	public function __construct( NemSDK $nemSDK ) {
 		$this->nemSDK = $nemSDK;
 	}
-
 
 	/**
 	 * Gets the current height of the block chain.
@@ -38,6 +37,14 @@ class Chain {
 	 */
 	public function getBlockchainLastBlock() {
 		return $this->nemSDK->api->getJSON( $this->endpoint . 'last-block', "" );
+	}
+
+	/**
+	 * Gets the current node information.
+	 * @returns Observable<Block>
+	 */
+	public function getNodeInfo() {
+		return json_decode( $this->nemSDK->api->getJSON( '/node/info', "" ) );
 	}
 
 }

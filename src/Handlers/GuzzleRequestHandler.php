@@ -1,6 +1,6 @@
 <?php
 /**
- * Part of the evias/php-nem-laravel package.
+ * Part of the evias/nem-php package.
  *
  * NOTICE OF LICENSE
  *
@@ -9,14 +9,14 @@
  * This source file is subject to the MIT License that is
  * bundled with this package in the LICENSE file.
  *
- * @package    evias/php-nem-laravel
- * @version    0.0.2
+ * @package    evias/nem-php
+ * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
- * @link       http://github.com/evias/php-nem-laravel
+ * @link       http://github.com/evias/nem-php
  */
-namespace evias\NEMBlockchain\Handlers;
+namespace NEM\Handlers;
 
 use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\ResponseInterface;
@@ -118,7 +118,7 @@ class GuzzleRequestHandler
      *   a RequestException object will be passed to this callable when
      *   the Request encounters an error
      *
-     * @see  \evias\NEMBlockchain\Contracts\RequestHandler
+     * @see  \NEM\Contracts\RequestHandler
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options      can contain "headers" array, "onSuccess" callable,
@@ -127,21 +127,23 @@ class GuzzleRequestHandler
      * @param  boolean  $usePromises
      * @return [type]
      */
-    public function get($uri, $bodyJSON, array $options = [], $usePromises = false)
+    public function get($uri, $bodyJSON = null, array $options = [], $usePromises = false)
     {
         $headers = [];
         if (!empty($options["headers"]))
             $headers = $options["headers"];
 
         // overwrite mandatory headers
-	    if(!is_array($bodyJSON)){
-		    $headers["Content-Length"] = strlen($bodyJSON);
-	    }
+        if (is_string($bodyJSON)){
+            $headers["Content-Length"] = strlen($bodyJSON);
+        }
+
+        // get generic headers
         $headers = $this->normalizeHeaders($headers);
 
         // prepare guzzle request options
         $options = array_merge($options, [
-            "body"    => $bodyJSON,
+            "body"    => $bodyJSON ?: "",
             "headers" => $headers,
         ]);
 
@@ -159,7 +161,8 @@ class GuzzleRequestHandler
      * This method triggers a POST request to the given
      * URI using the GuzzleHttp client.
      *
-     * @see  \evias\NEMBlockchain\Contracts\RequestHandler
+     * @todo Implement POST Promises features
+     * @see  \NEM\Contracts\RequestHandler
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options
@@ -173,29 +176,28 @@ class GuzzleRequestHandler
             $headers = $options["headers"];
 
         // overwrite mandatory headers
-	    if(!is_array($bodyJSON)){
-		    $headers["Content-Length"] = strlen($bodyJSON);
-	    }
+        if (is_string($bodyJSON)){
+            $headers["Content-Length"] = strlen($bodyJSON);
+        }
+
+        // get generic headers
         $headers = $this->normalizeHeaders($headers);
 
         // prepare guzzle request options
-
         $options = [
-        	"headers" => $headers,
-	        "json" => $bodyJSON,
+            "headers" => $headers,
+            "json" => $bodyJSON,
         ];
-
 
         $client  = new Client(["base_uri" => $this->getBaseUrl()]);
 
+        if (! $usePromises) {
+            // return the response object when the request is completed.
+            // this behaviour handles the request synchronously.
+            return $client->request('POST', $uri, $options);
+            //XXX return $response->getBody()->getContents();
+        }
 
-		if (! $usePromises){
-			$response = $client->request('POST', $uri, $options);
-			return $response->getBody()->getContents();
-		}
-
-		//TODO: Implement post promise
-	    throw new \Exception("Promises for POST is not implmented yet");
-
+        return $this->promiseResponse($client, $request, $options);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Part of the evias/php-nem-laravel package.
+ * Part of the evias/nem-php package.
  *
  * NOTICE OF LICENSE
  *
@@ -9,18 +9,18 @@
  * This source file is subject to the MIT License that is
  * bundled with this package in the LICENSE file.
  *
- * @package    evias/php-nem-laravel
- * @version    0.0.2
+ * @package    evias/nem-php
+ * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
- * @link       http://github.com/evias/php-nem-laravel
+ * @link       http://github.com/evias/nem-php
  */
-namespace evias\NEMBlockchain\Handlers;
+namespace NEM\Handlers;
 
 use GuzzleHttp\Client;
-use evias\NEMBlockchain\Contracts\RequestHandler;
-use evias\NEMBlockchain\Traits\Connectable;
+use NEM\Contracts\RequestHandler;
+use NEM\Traits\Connectable;
 
 /**
  * This is the AbstractRequestHandler abstract class
@@ -60,7 +60,7 @@ abstract class AbstractRequestHandler
      * This method triggers a GET request to the given
      * URI using the GuzzleHttp client.
      *
-     * @see  \evias\NEMBlockchain\Contracts\RequestHandler
+     * @see  \NEM\Contracts\RequestHandler
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options
@@ -73,7 +73,7 @@ abstract class AbstractRequestHandler
      * This method triggers a POST request to the given
      * URI using the GuzzleHttp client.
      *
-     * @see  \evias\NEMBlockchain\Contracts\RequestHandler
+     * @see  \NEM\Contracts\RequestHandler
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options

@@ -1,4 +1,4 @@
 formatter.name: pretty
 suites:
   nem_suite:
-    namespace: evias\NEMBlockchain
+    namespace: NEM

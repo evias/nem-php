@@ -1,6 +1,6 @@
 <?php
 /**
- * Part of the evias/php-nem-laravel package.
+ * Part of the evias/nem-php package.
  *
  * NOTICE OF LICENSE
  *
@@ -9,12 +9,12 @@
  * This source file is subject to the MIT License that is
  * bundled with this package in the LICENSE file.
  *
- * @package    evias/php-nem-laravel
- * @version    0.0.2
+ * @package    evias/nem-php
+ * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
- * @link       http://github.com/evias/php-nem-laravel
+ * @link       http://github.com/evias/nem-php
  */
 return [
     /*
@@ -26,7 +26,7 @@ return [
     |
     | Following libraries are currently available: "guzzle"
     */
-    'handler_class' => \evias\NEMBlockchain\Handlers\GuzzleRequestHandler::class,
+    'handler_class' => \NEM\Handlers\GuzzleRequestHandler::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -81,7 +81,7 @@ return [
         'testing' => [
         	"protocol" => "http",
             "use_ssl" => false,
-            "host" => "go.nem.ninja",
+            "host" => "bigalice2.nem.ninja",
             "port" => 7890,
             "endpoint" => "/",
         ],
@@ -109,7 +109,7 @@ return [
         ],
         'testing' => [
             "use_ssl" => false,
-            "host" => "go.nem.ninja",
+            "host" => "bigalice2.nem.ninja",
             "port" => 8989,
             "endpoint" => "/ncc/api",
         ],

@@ -1,325 +1,446 @@
 <?php
+/**
+ * Part of the evias/nem-php package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under MIT License.
+ *
+ * This source file is subject to the MIT License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    evias/nem-php
+ * @version    1.0.0
+ * @author     Grégory Saive <greg@evias.be>
+ * @author     Robin Pedersen (https://github.com/RobertoSnap)
+ * @license    MIT License
+ * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @link       http://github.com/evias/nem-php
+ */
+namespace NEM\Infrastructure;
 
-namespace evias\NEMBlockchain\Infrastructure;
+class Account
+    extends Service
+{
+    /**
+     * The Base URL for this endpoint.
+     *
+     * @var string
+     */
+    protected $baseUrl = "/account";
 
-use evias\NEMBlockchain\NemSDK;
+    /**
+     * Generate a new Account KeyPair.
+     *
+     * @return  object      Object with keys `address`, `publicKey` and `privateKey`.
+     */
+    public function generateAccount()
+    {
+        $params = [];
+        $apiUrl = $this->getPath('generate', $params);
+        $response = $this->api->getJSON($apiUrl);
 
-class Account {
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createAccountModel($object); //XXX brr => error/content validation first
+    }
 
-	public $nemSDK;
-	private $endpoint = "/account/";
+    /**
+     * Gets an [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair) for an account
+     * by its Base32 address representation (T-, N-, M- prefixed addresses).
+     *
+     * @param   string  $address    Base32 representation of the account address (T-, N-, M- prefixed addresses).
+     * @return  object              Instance with keys from [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair) objects.
+     */
+    public function getFromAddress($address)
+    {
+        $apiUrl = $this->getPath('get', ["address" => $address]);
+        $response = $this->api->getJSON($apiUrl);
 
-	public function __construct( NemSDK $nemSDK ) {
-		$this->nemSDK = $nemSDK;
-	}
-	
-	/**
-	 * Gets an AccountInfoWithMetaData for an account.
-	 *
-	 * @param address - Address
-	 *
-	 * @return Array<AccountInfoWithMetaData>
-	 */
-	public function getFromAddress( $address ) {
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'get?address=' . $address, "" ) );
-	}
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createAccountModel($object);
+    }
 
-	/**
-	 * Gets an AccountInfoWithMetaData for an account with publicKey
-	 *
-	 * @param publicKey - NEM
-	 *
-	 * @return Array<AccountInfoWithMetaData>
-	 */
-	public function getFromPublicKey( $publicKey ) {
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'get/from-public-key?publicKey=' . $publicKey, "" ) );
-	}
+    /**
+     * Gets an [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair) for an account
+     * by its public key hexadecimal representation.
+     *
+     * @param   string  $publicKey  Hexadecimal representation of the Public Key
+     * @return  object              Instance with keys from [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair) objects.
+     */
+    public function getFromPublicKey($publicKey)
+    {
+        $apiUrl = $this->getPath('get/from-public-key', ["publicKey" => $publicKey]);
+        $response = $this->api->getJSON($apiUrl);
 
-	/**
-	 * Given a delegate (formerly known as remote) account's address, gets the AccountMetaDataPair for the account for
-	 * which the given account is the delegate account. If the given account address is not a delegate account for any
-	 * account, the request returns the AccountMetaDataPair for the given address.
-	 *
-	 * @param address - Address
-	 *
-	 * @return Array<AccountInfoWithMetaData>
-	 */
-	public function getOriginalAccountDataFromDelegatedAccountAddress( $address ) {
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'get/forwarded?address=' . $address, "" ) );
-	}
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createAccountModel($object);
+    }
 
-	/**
-	 * retrieve the original account data by providing the public key of the delegate account.
-	 *
-	 * @param publicKey - string
-	 *
-	 * @return Array<AccountInfoWithMetaData>
-	 */
-	public function getOriginalAccountDataFromDelegatedAccountPublicKey( $publicKey ) {
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'get/forwarded/from-public-key?publicKey=' . $publicKey, "" ) );
-	}
+    /**
+     * Given a delegate (formerly known as remote) account's address, gets the [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair) for the account for
+     * which the given account is the delegate account. If the given account address is not a delegate account for any
+     * account, the request returns the [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair) for the given address.
+     *
+     * @param   string  $address    Base32 representation of the account address (T-, N-, M- prefixed addresses).
+     * @return  object              Instance with keys from [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair) objects.
+     */
+    public function getOriginalAccountDataFromDelegatedAccountAddress($address)
+    {
+        $apiUrl = $this->getPath('get/forwarded', ["address" => $address]);
+        $response = $this->api->getJSON($apiUrl);
 
-	/**
-	 * Gets the AccountMetaData from an account.
-	 *
-	 * @param address - NEM Address
-	 *
-	 * @return Array<AccountStatus>
-	 */
-	public function status( $address ) {
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'status?address=' . $address, "" ) );
-	}
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createAccountModel($object);
+    }
 
-	/**
-	 * A transaction is said to be incoming with respect to an account if the account is the recipient of the
-	 * transaction. In the same way outgoing transaction are the transactions where the account is the sender of the
-	 * transaction. Unconfirmed transactions are those transactions that have not yet been included in a block.
-	 * Unconfirmed transactions are not guaranteed to be included in any block
-	 *
-	 * @param address   - The address of the account.
-	 * @param hash      - (Optional) The 256 bit sha3 hash of the transaction up to which transactions are returned.
-	 * @param id        - (Optional) The transaction id up to which transactions are returned. This parameter will
-	 *                  prevail over hash.
-	 *
-	 * @return Array<Transaction[]>
-	 */
-	public function incomingTransactions( $address, $hash = null, $id = null ) {
-		$query = 'address=' . $address;
-		if ( $hash !== null ) {
-			$query .= '&hash=' . $hash;
-		}
-		if ( $id !== null ) {
-			$query .= '&id=' . $id;
-		}
+    /**
+     * Retrieve the original account data by providing the public key of the delegate account.
+     *
+     * @param   string  $publicKey  Hexadecimal representation of the Public Key
+     * @return  object              Instance with keys from [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair) objects.
+     */
+    public function getOriginalAccountDataFromDelegatedAccountPublicKey($publicKey) 
+    {
+        $apiUrl = $this->getPath('get/forwarded/from-public-key', ["publicKey" => $publicKey]);
+        $response = $this->api->getJSON($apiUrl);
 
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'transfers/incoming?' . $query, "" ) )->data;
-	}
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createAccountModel($object);
+    }
 
-	/**
-	 * Gets an array of transaction meta data pairs where the recipient has the address given as parameter to the
-	 * request. A maximum of 25 transaction meta data pairs is returned. For details about sorting and discussion of
-	 * the second parameter see Incoming transactions.
-	 *
-	 * @param address   - The address of the account.
-	 * @param hash      - (Optional) The 256 bit sha3 hash of the transaction up to which transactions are returned.
-	 * @param id        - (Optional) The transaction id up to which transactions are returned. This parameter will
-	 *                  prevail over hash.
-	 *
-	 * @return array
-	 */
-	public function outgoingTransactions( $address, $hash = null, $id = null ) {
+    /**
+     * Gets the [AccountMetaData](https://bob.nem.ninja/docs/#accountMetaData) from an account.
+     *
+     * @param   string  $address    Base32 representation of the account address (T-, N-, M- prefixed addresses).
+     * @return  object              Instance with keys from [AccountMetaData](https://bob.nem.ninja/docs/#accountMetaData) objects.
+     */
+    public function status($address)
+    {
+        $apiUrl = $this->getPath('status', ["address" => $address]);
+        $response = $this->api->getJSON($apiUrl);
 
-		$query = 'address=' . $address;
-		if ( $hash !== null ) {
-			$query .= '&hash=' . $hash;
-		}
-		if ( $id !== null ) {
-			$query .= '&id=' . $id;
-		}
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createBaseModel($object);
+    }
 
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'transfers/outgoing?' . $query, "" ) )->data;
-	}
+    /**
+     * A transaction is said to be incoming with respect to an account if the account is the recipient of the
+     * transaction. In the same way outgoing transaction are the transactions where the account is the sender of the
+     * transaction. Unconfirmed transactions are those transactions that have not yet been included in a block.
+     * Unconfirmed transactions are not guaranteed to be included in any block.
+     *
+     * @param   string  $address    Base32 representation of the account address (T-, N-, M- prefixed addresses).
+     * @param   string  $hash       (Optional) The 256 bit sha3 hash of the transaction up to which transactions are returned.
+     * @param   integer $id         (Optional) The transaction id up to which transactions are returned. This parameter will prevail over the hash parameter.
+     * @return array                Array of object with keys from [TransactionMetaDataPair](https://bob.nem.ninja/docs/#transactionMetaDataPair) objects.
+     */
+    public function incomingTransactions($address, $hash = null, $id = null) 
+    {
+        $params = ["address" => $address];
 
-	/**
-	 * Gets an array of transaction meta data pairs for which an account is the sender or receiver.
-	 * A maximum of 25 transaction meta data pairs is returned.
-	 * For details about sorting and discussion of the second parameter see Incoming transactions.
-	 *
-	 * @param address   - The address of the account.
-	 * @param hash      - (Optional) The 256 bit sha3 hash of the transaction up to which transactions are returned.
-	 * @param id        - (Optional) The transaction id up to which transactions are returned. This parameter will
-	 *                  prevail over hash.
-	 *
-	 * @return Array<Transaction[]>
-	 */
-	public function allTransactions( $address, $hash = null, $id = null ) {
+        if ($hash !== null)
+            $params["hash"] = $hash;
 
-		$query = 'address=' . $address;
-		if ( $hash !== null ) {
-			$query .= '&hash=' . $hash;
-		}
-		if ( $id !== null ) {
-			$query .= '&id=' . $id;
-		}
+        if ($id !== null)
+            $params["id"] = $id;
 
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'transfers/all?' . $query, "" ) )->data;
-	}
+        $apiUrl = $this->getPath('transfers/incoming', $params);
+        $response = $this->api->getJSON($apiUrl);
 
-	public function allTransactionsPageable( $address, $rows = 100 ) {
-		$transactions = $this->allTransactions( $address );
-		$lastHash     = ( end( $transactions ) )->meta->hash->data;
-		$complete     = false;
-		$count        = 1;
-		while ( $complete === false && $count < ( $rows / 25 ) ) {
-			$next = \NemSDK::account()->allTransactions( config( 'nem.nemventoryAddress' ), $lastHash );
-			if ( count( $next ) < 1 ) {
-				$complete = true;
-			}
-			$transactions = array_merge( $transactions, $next );
-			$lastHash     = ( end( $transactions ) )->meta->hash->data;
-			$count ++;
-		}
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createTransactionCollection($object->data); //XXX brr => error/content validation first
+    }
 
-		return $transactions;
-	}
+    /**
+     * Gets an array of transaction meta data pairs where the recipient has the address given as parameter to the
+     * request. A maximum of 25 transaction meta data pairs is returned. For details about sorting and discussion of
+     * the second parameter see Incoming transactions.
+     *
+     * @param   string  $address    Base32 representation of the account address (T-, N-, M- prefixed addresses).
+     * @param   string  $hash       (Optional) The 256 bit sha3 hash of the transaction up to which transactions are returned.
+     * @param   integer $id         (Optional) The transaction id up to which transactions are returned. This parameter will prevail over the hash parameter.
+     * @return array                Array of object with keys from [TransactionMetaDataPair](https://bob.nem.ninja/docs/#transactionMetaDataPair) objects.
+     */
+    public function outgoingTransactions($address, $hash = null, $id = null) 
+    {
+        $params = ["address" => $address];
 
-	/**
-	 * Gets the array of transactions for which an account is the sender or receiver and which have not yet been
-	 * included in a block
-	 *
-	 * @param address - NEM Address
-	 *
-	 * @return Array<Transaction[]>
-	 */
-	public function unconfirmedTransactions( $address ) {
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'unconfirmedTransactions?address=' . $address, "" ) );
-	}
+        if ($hash !== null)
+            $params["hash"] = $hash;
 
-	/**
-	 * Gets an array of harvest info objects for an account.
-	 *
-	 * @param address - Address
-	 * @param hash    - string
-	 *
-	 * @return Array<AccountHarvestInfo[]>
-	 */
-	public function getHarvestInfoDataForAnAccount( $address, $hash ) {
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'harvests?address=' . $address . '&hash=' . $hash, "" ) );
-	}
+        if ($id !== null)
+            $params["id"] = $id;
 
-	/**
-	 * Gets an array of account importance view model objects.
-	 * @return Array<AccountImportanceInfo[]>
-	 */
-	public function getAccountImportances( $address ) {
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'importances' . $address, "" ) );
-	}
+        $apiUrl = $this->getPath('transfers/outgoing', $params);
+        $response = $this->api->getJSON($apiUrl);
 
-	/**
-	 * Gets an array of namespace objects for a given account address.
-	 * The parent parameter is optional. If supplied, only sub-namespaces of the parent namespace are returned.
-	 *
-	 * @param address  - Address
-	 * @param parent   - The optional parent namespace id.
-	 * @param id       - The optional namespace database id up to which namespaces are returned.
-	 * @param pageSize - The (optional) number of namespaces to be returned.
-	 *
-	 * @return Array<Namespace[]>
-	 */
-	public function getNamespaceOwnedByAddress( $address, $parent = null, $id = null, $pageSize = null ) {
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createTransactionCollection($object->data); //XXX brr => error/content validation first
+    }
 
-		$query = 'address=' . $address;
-		if ( $parent !== null ) {
-			$query .= '&parent=' . $parent;
-		}
-		if ( $id !== null ) {
-			$query .= '&id=' . $id;
-		}
-		if ( $pageSize !== null ) {
-			$query .= '&pageSize=' . $pageSize;
-		}
+    /**
+     * Gets an array of transaction meta data pairs for which an account is the sender or receiver.
+     * A maximum of 25 transaction meta data pairs is returned.
+     * For details about sorting and discussion of the second parameter see Incoming transactions.
+     *
+     * @param   string  $address    Base32 representation of the account address (T-, N-, M- prefixed addresses).
+     * @param   string  $hash       (Optional) The 256 bit sha3 hash of the transaction up to which transactions are returned.
+     * @param   integer $id         (Optional) The transaction id up to which transactions are returned. This parameter will prevail over the hash parameter.
+     * @return array                Array of object with keys from [TransactionMetaDataPair](https://bob.nem.ninja/docs/#transactionMetaDataPair) objects.
+     */
+    public function allTransactions($address, $hash = null, $id = null)
+    {
+        $params = ["address" => $address];
 
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'namespace/page?' . $query, "" ) );
-	}
+        if ($hash !== null)
+            $params["hash"] = $hash;
 
-	/**
-	 * Gets an array of mosaic definition objects for a given account address. The parent parameter is optional.
-	 * If supplied, only mosaic definitions for the given parent namespace are returned.
-	 * The id parameter is optional and allows retrieving mosaic definitions in batches of 25 mosaic definitions.
-	 *
-	 * @param address - The address of the account.
-	 * @param parent  - The optional parent namespace id.
-	 * @param id      - The optional mosaic definition database id up to which mosaic definitions are returned.
-	 *
-	 * @return Array<MosaicDefinition[]>
-	 */
-	public function getMosaicCreatedByAddress( $address, $parent = null, $id = null ) {
+        if ($id !== null)
+            $params["id"] = $id;
 
-		$query = 'address=' . $address;
-		if ( $parent !== null ) {
-			$query .= '&parent=' . $parent;
-		}
-		if ( $id !== null ) {
-			$query .= '&id=' . $id;
-		}
+        $apiUrl = $this->getPath('transfers/all', $params);
+        $response = $this->api->getJSON($apiUrl);
 
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'mosaic/definition/page?' . $query, "" ) )->data;
-	}
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createTransactionCollection($object->data); //XXX brr => error/content validation first
+    }
 
-	/**
-	 * Gets an array of mosaic objects for a given account address.
-	 *
-	 * @param address - Address
-	 *
-	 * @return Array<Mosaic[]>
-	 */
-	public function getMosaicOwnedByAddress( $address ) {
-		$address = $this->nemSDK->models()->address($address)->plain();
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'mosaic/owned?address=' . $address, "" ) )->data;
-	}
+    /**
+     * Gets the array of transactions for which an account is the sender or receiver and which have not yet been
+     * included in a block
+     *
+     * @param   string  $address    Base32 representation of the account address (T-, N-, M- prefixed addresses).
+     * @param   string  $hash       (Optional) The 256 bit sha3 hash of the transaction up to which transactions are returned.
+     * @return array                Array of object with keys from [TransactionMetaDataPair](https://bob.nem.ninja/docs/#transactionMetaDataPair) objects.
+     */
+    public function unconfirmedTransactions($address, $hash = null)
+    {
+        $params = ["address" => $address];
 
-	/**
-	 * Unlocks an account (starts harvesting).
-	 *
-	 * @param host       - string
-	 * @param privateKey - string
-	 *
-	 * @return Array<boolean>
-	 */
-	public function unlockHarvesting( $host, $privateKey ) {
-		//todo create unlockHarvesting
-	}
+        if ($hash !== null)
+            $params["hash"] = $hash;
 
-	/**
-	 * Locks an account (stops harvesting).
-	 *
-	 * @param host       - string
-	 * @param privateKey - string
-	 *
-	 * @return Array<boolean>
-	 */
-	public function lockHarvesting( $host, $privateKey ) {
-		//todo lockHarvesting
-	}
+        $apiUrl = $this->getPath('unconfirmedTransactions', $params);
+        $response = $this->api->getJSON($apiUrl);
 
-	/**
-	 * Each node can allow users to harvest with their delegated key on that node.
-	 * The NIS configuration has entries for configuring the maximum number of allowed harvesters and optionally allow
-	 * harvesting only for certain account addresses. The unlock info gives information about the maximum number of
-	 * allowed harvesters and how many harvesters are already using the node.
-	 * @return Array<NodeHarvestInfo>
-	 */
-	public function unlockInfo() {
-		//Todo create unlockInfo
-	}
+        //XXX include Error checks
+        $data = json_decode($response);
+        return $this->createTransactionCollection($object->data); //XXX brr => error/content validation first
+    }
 
-	/**
-	 * Gets historical information for an account.
-	 *
-	 * @param address       - The address of the account.
-	 * @param startHeight   - The block height from which on the data should be supplied.
-	 * @param endHeight     - The block height up to which the data should be supplied. The end height must be greater
-	 *                      than or equal to the start height.
-	 * @param increment     - The value by which the height is incremented between each data point. The value must be
-	 *                      greater than 0. NIS can supply up to 1000 data points with one request. Requesting more
-	 *                      than 1000 data points results in an error.
-	 *
-	 * @return Array    <AccountHistoricalInfo[]>
-	 */
-	public function getHistoricalAccountData( $address, $startHeight, $endHeight, $increment ) {
+    /**
+     * Gets an array of harvest info objects for an account.
+     *
+     * @param   string  $address    The address of the account.
+     * @param   string  %hash       The 256 bit sha3 hash of the block up to which harvested blocks are returned.
+     * @return  object              Instance with keys from [HarvestInfo](https://bob.nem.ninja/docs/#harvestInfo) objects.
+     */
+    public function getHarvestInfo($address, $hash) 
+    {
+        $params = ["address" => $address];
 
-		$query = 'address=' . $address;
-		if ( $startHeight !== null ) {
-			$query .= '&startHeight=' . $startHeight;
-		}
-		if ( $endHeight !== null ) {
-			$query .= '&endHeight=' . $endHeight;
-		}
-		if ( $increment !== null ) {
-			$query .= '&increment=' . $increment;
-		}
+        if ($hash !== null)
+            $params["hash"] = $hash;
 
-		return json_decode( $this->nemSDK->api->getJSON( $this->endpoint . 'historical/get?' . $query, "" ) );
-	}
+        $apiUrl = $this->getPath('harvests', $params);
+        $response = $this->api->getJSON($apiUrl);
 
+        //XXX include Error checks
+        $data = json_decode($response);
+        return $this->createBaseModel($object); //XXX brr => error/content validation first
+    }
+
+    /**
+     * Gets an array of account importance view model objects.
+     *
+     * @param   string  $address    The address of the account.
+     * @return  array               Array of object with keys from [AccountImportanceViewModl](https://bob.nem.ninja/docs/#accountImportanceViewModel) objects.
+     */
+    public function getAccountImportances($address) 
+    {
+        $params = ["address" => $address];
+        $apiUrl = $this->getPath('importances', $params);
+        $response = $this->api->getJSON($apiUrl);
+
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createBaseCollection($object->data); //XXX brr => error/content validation first
+    }
+
+    /**
+     * Gets an array of namespace objects for a given account address.
+     * The parent parameter is optional. If supplied, only sub-namespaces of the parent namespace are returned.
+     *
+     * @param   string          $address    The address of the account.
+     * @param   null|string     $parent     The (optional) parent namespace id.
+     * @param   null|integer    $id         The (optional) namespace database id up to which namespaces are returned.
+     * @param   null|integer    $pageSize   The (optional) number of namespaces to be returned.
+     * @return  array                       Array of object with keys from [NamespaceMetaDataPair](https://bob.nem.ninja/docs/#namespaceMetaDataPair) objects.
+     */
+    public function getOwnedNamespaces($address, $parent = null, $id = null, $pageSize = null)
+    {
+        $params = ["address" => $address];
+
+        if ($hash !== null)
+            $params["hash"] = $hash;
+
+        if ($id !== null)
+            $params["id"] = $id;
+
+        if ($pageSize !== null)
+            $params["pageSize"] = $pageSize;
+
+        $apiUrl = $this->getPath('namespace/page', $params);
+        $response = $this->api->getJSON($apiUrl);
+
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createNamespaceCollection($object->data); //XXX brr => error/content validation first
+    }
+
+    /**
+     * Gets an array of mosaic definition objects for a given account address. The parent parameter is optional.
+     * If supplied, only mosaic definitions for the given parent namespace are returned.
+     * The id parameter is optional and allows retrieving mosaic definitions in batches of 25 mosaic definitions.
+     *
+     * @param   string          $address    The address of the account.
+     * @param   null|string     $parent     The (optional) parent namespace id.
+     * @param   null|integer    $id         The (optional) mosaic definition database id up to which mosaic definitions are returned.
+     * @return  array                       Array of object with keys from [MosaicDefinitionMetaDataPair](https://bob.nem.ninja/docs/#mosaicDefinitionMetaDataPair) objects.
+     */
+    public function getCreatedMosaics($address, $parent = null, $id = null) 
+    {
+        $params = ["address" => $address];
+
+        if ($parent !== null)
+            $params["parent"] = $parent;
+
+        if ($id !== null)
+            $params["id"] = $id;
+
+        $apiUrl = $this->getPath('mosaic/definition/page', $params);
+        $response = $this->api->getJSON($apiUrl);
+
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createMosaicCollection($object->data); //XXX brr => error/content validation first
+    }
+
+    /**
+     * Gets an array of mosaic objects for a given account address.
+     *
+     * @param   string          $address    The address of the account.
+     * @return  array                       Array of object with keys from [MosaicDefinitionMetaDataPair](https://bob.nem.ninja/docs/#mosaicDefinitionMetaDataPair) objects.
+     */
+    public function getOwnedMosaics($address) 
+    {
+        $params = ["address" => $address];
+
+        $apiUrl = $this->getPath('mosaic/owned', $params);
+        $response = $this->api->getJSON($apiUrl);
+
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createMosaicCollection($object->data); //XXX brr => error/content validation first
+    }
+
+    /**
+     * Gets historical information for an account.
+     *
+     * @param   string          $address        The address of the account.
+     * @param   integer         $startHeight    The block height from which on the data should be supplied.
+     * @param   integer         $endHeight      The block height up to which the data should be supplied. The end height must be greater than or equal to the start height.
+     * @param   integer         $increment      The value by which the height is incremented between each data point. The value must be
+     *                                          greater than 0. NIS can supply up to 1000 data points with one request. Requesting more
+     *                                          than 1000 data points results in an error.
+     * @return  array                           Array of object with keys from [Mosaic](https://bob.nem.ninja/docs/#mosaics) objects.
+     */
+    public function getHistoricalAccountData($address, $startHeight, $endHeight, $increment)
+    {
+        $params = ["address" => $address];
+
+        if ($startHeight !== null)
+            $params["startHeight"] = $startHeight;
+
+        if ($endHeight !== null)
+            $params["endHeight"] = $endHeight;
+
+        if ($increment !== null)
+            $params["increment"] = $increment;
+
+        $apiUrl = $this->getPath('historical/get', $params);
+        $response = $this->api->getJSON($apiUrl);
+
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createBaseCollection($object->data); //XXX brr => error/content validation first
+    }
+
+    /**
+     * Each node can allow users to harvest with their delegated key on that node.
+     * The NIS configuration has entries for configuring the maximum number of allowed harvesters and optionally allow
+     * harvesting only for certain account addresses. The unlock info gives information about the maximum number of
+     * allowed harvesters and how many harvesters are already using the node.
+     *
+     * @return  object      Object with num-unlocked and max-unlocked keys.
+     */
+    public function getUnlockInfo() 
+    {
+        $params = [];
+        $apiUrl = $this->getPath('unlocked/info', []);
+        $response = $this->api->post($apiUrl, $params);
+
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createBaseModel($object); //XXX brr => error/content validation first
+    }
+
+    /**
+     * Unlocks an account (starts harvesting).
+     *
+     * @param host       - string
+     * @param privateKey - string
+     *
+     * @return Array<boolean>
+     */
+    public function startHarvesting($privateKey) 
+    {
+        $params = ["value" => $privateKey];
+
+        $apiUrl = $this->getPath('unlock', $params);
+        $response = $this->api->post($apiUrl, []);
+
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createBaseModel($object); //XXX brr => error/content validation first
+    }
+
+    /**
+     * Locks an account (stops harvesting).
+     *
+     * @param host       - string
+     * @param privateKey - string
+     *
+     * @return Array<boolean>
+     */
+    public function stopHarvesting($privateKey) 
+    {
+        $params = ["value" => $privateKey];
+
+        $apiUrl = $this->getPath('lock', $params);
+        $response = $this->api->post($apiUrl, []);
+
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createBaseModel($object); //XXX brr => error/content validation first
+    }
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Part of the evias/php-nem-laravel package.
+ * Part of the evias/nem-php package.
  *
  * NOTICE OF LICENSE
  *
@@ -9,14 +9,14 @@
  * This source file is subject to the MIT License that is
  * bundled with this package in the LICENSE file.
  *
- * @package    evias/php-nem-laravel
- * @version    0.0.2
+ * @package    evias/nem-php
+ * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
- * @link       http://github.com/evias/php-nem-laravel
+ * @link       http://github.com/evias/nem-php
  */
-namespace evias\NEMBlockchain\Traits;
+namespace NEM\Traits;
 
 /**
  * This is the Connectable interface
@@ -75,7 +75,7 @@ trait Connectable
      *
      *     username:password@
      *
-     * @see  \evias\NEMBlockchain\Traits\Connectable@getBasicAuth()
+     * @see  \NEM\Traits\Connectable@getBasicAuth()
      * @var array   valid keys include: username, password
      */
     protected $basicAuth = [];
@@ -84,7 +84,7 @@ trait Connectable
      * Setter for `use_ssl` property.
      *
      * @param  string $host
-     * @return \evias\NEMBlockchain\API
+     * @return \NEM\API
      */
     public function setUseSsl($use_ssl)
     {
@@ -108,7 +108,7 @@ trait Connectable
      * which Protocol is used in the Base URL.
      *
      * @param  string $protocol
-     * @return \evias\NEMBlockchain\Contracts\HttpHandler
+     * @return \NEM\Contracts\HttpHandler
      */
     public function setProtocol($protocol)
     {
@@ -145,7 +145,7 @@ trait Connectable
      * Setter for `host` property.
      *
      * @param  string $host
-     * @return \evias\NEMBlockchain\API
+     * @return \NEM\API
      */
     public function setHost($host)
     {
@@ -167,7 +167,7 @@ trait Connectable
      * Setter for `port` property.
      *
      * @param  integer $port
-     * @return \evias\NEMBlockchain\API
+     * @return \NEM\API
      */
     public function setPort($port)
     {
@@ -189,7 +189,7 @@ trait Connectable
      * Setter for `endpoint` property.
      *
      * @param  string $endpoint
-     * @return \evias\NEMBlockchain\API
+     * @return \NEM\API
      */
     public function setEndpoint($endpoint)
     {

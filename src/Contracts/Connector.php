@@ -1,6 +1,6 @@
 <?php
 /**
- * Part of the evias/php-nem-laravel package.
+ * Part of the evias/nem-php package.
  *
  * NOTICE OF LICENSE
  *
@@ -9,14 +9,14 @@
  * This source file is subject to the MIT License that is
  * bundled with this package in the LICENSE file.
  *
- * @package    evias/php-nem-laravel
- * @version    0.0.2
+ * @package    evias/nem-php
+ * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
- * @link       http://github.com/evias/php-nem-laravel
+ * @link       http://github.com/evias/nem-php
  */
-namespace evias\NEMBlockchain\Contracts;
+namespace NEM\Contracts;
 
 /**
  * This is the Connector interface
@@ -27,7 +27,7 @@ namespace evias\NEMBlockchain\Contracts;
  * A "Connector" object must define the properties
  * `use_ssl`, `host`, `port` and `endpoint`.
  *
- * @see  \evias\NEMBlockchain\Contracts\ConnectionPolicy
+ * @see  \NEM\Contracts\ConnectionPolicy
  * @author Grégory Saive <greg@evias.be>
  */
 interface Connector
@@ -36,7 +36,7 @@ interface Connector
      * Setter for `use_ssl` property.
      *
      * @param  string $host
-     * @return \evias\NEMBlockchain\API
+     * @return \NEM\API
      */
     public function setUseSsl($use_ssl);
 
@@ -53,7 +53,7 @@ interface Connector
      * which Protocol is used in the Base URL.
      *
      * @param  string $protocol
-     * @return \evias\NEMBlockchain\Contracts\Connector
+     * @return \NEM\Contracts\Connector
      */
     public function setProtocol($protocol);
 
@@ -69,7 +69,7 @@ interface Connector
      * Setter for `host` property.
      *
      * @param  string $host
-     * @return \evias\NEMBlockchain\Contracts\Connector
+     * @return \NEM\Contracts\Connector
      */
     public function setHost($host);
 
@@ -84,7 +84,7 @@ interface Connector
      * Setter for `port` property.
      *
      * @param  integer $port
-     * @return \evias\NEMBlockchain\Contracts\Connector
+     * @return \NEM\Contracts\Connector
      */
     public function setPort($port);
 
@@ -99,7 +99,7 @@ interface Connector
      * Setter for `endpoint` property.
      *
      * @param  string $endpoint
-     * @return \evias\NEMBlockchain\Contracts\Connector
+     * @return \NEM\Contracts\Connector
      */
     public function setEndpoint($endpoint);
 
