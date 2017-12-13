@@ -52,13 +52,13 @@ use RuntimeException;
  *     // Relationship Method should return a DataTransferObject or ModelCollection!
  *     public function address($data = null)
  *     {
- *         return new Address($data ?: $this->address);
+ *         return new Address($data ?: $this->getAttribute("address"));
  *     }
  * }
  * ```
  * 
  * @example Example of One-to-Many relationship
- * 
+ *
  * ```
  * class MyNewModel {
  *     protected $relations = [
@@ -68,13 +68,13 @@ use RuntimeException;
  *     // Relationship Method should return a DataTransferObject or ModelCollection!
  *     public function cosignatories(array $data = null)
  *     {
- *         return new MosaicCollection($data ?: $this->cosignatories);
+ *         return new MosaicCollection($data ?: $this->getAttribute("cosignatories"));
  *     }
  * }
  * ```
  *
  * @example Example of automatic Relationship crafting
- * 
+ *
  * ```
  * class MyNewModel {
  *     protected $relations = [
@@ -82,6 +82,23 @@ use RuntimeException;
  *                    // instance with the data stored in this field.
  *     ];
  * }
+ * ```
+ *
+ * @example Example of aliased Attributes
+ *
+ * Settings a key-values array in the `fillable` property will trigger the 
+ * aliases attributes feature. This lets you give attribute names the desired
+ * aliases. The value in the `fillable` property should represent the dot
+ * notation of the exact path *to the value* in the corresponding NIS DTO.
+ *
+ * ```
+ * class MyAccountModel {
+ *     protected $fillable = [
+ *         "status" => "meta.status",
+ *         "address" => "account.address",
+ *     ];
+ * }
+ * ```
  */
 class Model
     extends ArrayObject
