@@ -92,7 +92,21 @@ class Amount
      */
     public function toMicro()
     {
-        return ($this->micro = ((int)$this->attributes["amount"]) * pow(10, $this->getDivisibility()));
+        $this->micro = ((int)$this->attributes["amount"]);
+        if ($this->micro < 0)
+            // not allowed: 0 in micro XEM is the minimum possible value!
+            $this->micro = 0;
+
+        return $this->micro;
+    }
+
+    public function toXEM()
+    {
+        if ($this->divisibility <= 0)
+            return $this->toMicro();
+
+        $div = pow(10, $this->getDivisibility());
+        return ($this->toMicro() / $div);
     }
 
     /**

@@ -77,7 +77,7 @@ class ModelRelationshipTest
 
         // try to call the relation will throw an error because
         // the relation method relationField() is not implemented.
-        $model->setAttributes(["relationField" => ["some" => "data"]]);
+        $model->setAttributes(["some" => ["relationField" => "data"]]);
     }
 
     /**

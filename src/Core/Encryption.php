@@ -16,9 +16,9 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Helpers;
+namespace NEM\Core;
 
-class Crypto
+class Encryption
 {
     /**
      * Helper for password derivation using `iterations` count iterations

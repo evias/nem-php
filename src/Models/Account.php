@@ -30,18 +30,23 @@ class Account
      * @var array
      */
     protected $fillable = [
-        "address",
-        "publicKey",
-        "privateKey",
-        "balance",
-        "vestedBalance",
-        "importance",
-        "label",
-        "harvestedBlocks",
-        "status",
-        "remoteStatus",
-        "cosignatoryOf",
-        "cosignatories",
+        // NIS "meta" sub DTO (AccountMetaData)
+        "status" => "meta.status",
+        "remoteStatus" => "meta.remoteStatus",
+        "cosignatoryOf" => "meta.cosignatoryOf",
+        "cosignatories" => "meta.cosignatories",
+        // NIS "account" sub DTO (AccountInfo)
+        "address" => "account.address",
+        "publicKey" => "account.publicKey",
+        "balance" => "account.balance",
+        "vestedBalance" => "account.vestedBalance",
+        "importance" => "account.importance",
+        "label" => "account.label",
+        "harvestedBlocks" => "account.harvestedBlocks",
+        // NIS "account.multisigInfo" sub DTO (@see \NEM\Models\MultisigInfo)
+        "multisigInfo" => "account.multisigInfo",
+        "cosignatoriesCount" => "account.multisigInfo.cosignatoriesCount",
+        "minCosignatories" => "account.multisigInfo.minCosignatories",
     ];
 
     /**
@@ -55,6 +60,18 @@ class Account
     ];
 
     /**
+     * List of automatic *value casts*.
+     *
+     * @var array
+     */
+    protected $casts = [
+        "balance" => "int",
+        "vestedBalance" => "int",
+        //"importance" => "double",
+        "harvestedBlocks" => "int", 
+    ];
+
+    /**
      * Account DTO represents NIS API's [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair).
      *
      * @see [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair)
@@ -65,12 +82,13 @@ class Account
         return [
             "account" => [
                 "address" => $this->address()->toClean(),
-                "balance" => (int) $this->balance,
-                "vestedBalance" => (int) $this->balance,
-                "importance" => (float) $this->importance,
+                "balance" => $this->balance()->toMicro(),
+                "vestedBalance" => $this->vestedBalance()->toMicro(),
+                "importance" => $this->importance/*()->toScientific()*/,
                 "publicKey" => $this->publicKey,
                 "label" => $this->label,
-                "harvestedBlocks" => (int) $this->harvestedBlocks,
+                "harvestedBlocks" => $this->harvestedBlocks,
+                "multisigInfo" => $this->multisigInfo()->toDTO(),
             ],
             "meta" => [
                 "status" => $this->status,
@@ -88,7 +106,37 @@ class Account
      */
     public function address($address = null)
     {
-        return new Address(["address" => $address ?: $this->attributes["address"]]);
+        return new Address(["address" => $address ?: $this->getAttribute("address")]);
+    }
+
+    /**
+     * Mutator for the balance object.
+     *
+     * @return \NEM\Models\Amount
+     */
+    public function balance($amount = null)
+    {
+        return new Amount(["amount" => $amount ?: $this->getAttribute("balance")]);
+    }
+
+    /**
+     * Mutator for the vestedBalance object.
+     *
+     * @return \NEM\Models\Amount
+     */
+    public function vestedBalance($amount = null)
+    {
+        return new Amount(["amount" => $amount ?: $this->getAttribute("vestedBalance")]);
+    }
+
+    /**
+     * Mutator for the multisigInfo object.
+     *
+     * @return \NEM\Models\MultisigInfo
+     */
+    public function multisigInfo(array $info = null)
+    {
+        return new MultisigInfo($info ?: $this->getAttribute("multisigInfo"));
     }
 
     /**

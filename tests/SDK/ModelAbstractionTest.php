@@ -28,9 +28,8 @@ use NEM\Models\Mutators\CollectionMutator;
 use NEM\Models\ModelCollection;
 use NEM\Contracts\DataTransferObject;
 use NEM\Models\Model;
-use NEM\Models\Account;
 use NEM\Models\Transaction;
-use NEM\Models\Address;
+use NEM\Models\Transaction\ImportanceTransfer;
 
 class ModelAbstractionTest
     extends TestCase
@@ -63,6 +62,33 @@ class ModelAbstractionTest
         ]);
     }
 
+    public function testSDKDotNotation()
+    {
+        $model = new Model([
+            "firstField" => [
+                "nestedField" => null
+            ],
+            "secondField" => "withValue",
+            "thirdField" => [
+                "nestedAgain" => [
+                    "deeperNest" => [
+                        "yetDeeper" => null
+                    ],
+                ],
+            ]
+        ]);
+
+        $attributes = $model->getAttributes();
+        $dataTransfer = $model->toDTO();
+        $dotAttribs = $model->getDotAttributes();
+
+        // test Getters
+        $this->assertEquals(3, count($attributes));
+        $this->assertTrue(is_array($dataTransfer));
+        $this->assertTrue(is_array($attributes));
+        $this->assertTrue(is_array($dotAttribs));
+    }
+
     /**
      * Test basic methods of the SDK's model abstraction layer class `Model`.
      *
@@ -70,24 +96,37 @@ class ModelAbstractionTest
      * a property is read which corresponds to one of the Model's fillable
      * attributes list
      *
+     * @depends testSDKDotNotation
      * @return void
      */
     public function testSDKModelAttributesMutatorGetters()
     {
         $model = new Model([
-            "firstField" => null,
-            "secondField" => "withValue"]);
+            "firstField" => [
+                "nestedField" => null
+            ],
+            "secondField" => "withValue",
+            "thirdField" => [
+                "nestedAgain" => [
+                    "deeperNest" => [
+                        "yetDeeper" => null
+                    ],
+                ],
+            ]
+        ]);
 
         $attributes = $model->getAttributes();
         $dataTransfer = $model->toDTO();
+        $dotAttribs = $model->getDotAttributes();
 
-        // test Getters
-        $this->assertEquals(2, count($attributes));
-        $this->assertTrue(is_array($dataTransfer));
-        $this->assertTrue(is_array($attributes));
-
-        $this->assertNull($attributes["firstField"]);
+        $this->assertNull($attributes["nestedField"]);
         $this->assertEquals("withValue", $attributes["secondField"]);
+
+        // test dot notation features
+        // - `attributes`'s keys are *aliases* (Example: in "x.y.zeta", the alias is "zeta")
+        // - `dotAttributes` contains the exact dot notation of attributes
+        $this->assertArrayHasKey("yetDeeper", $attributes);
+        $this->assertArrayHasKey("thirdField.nestedAgain.deeperNest.yetDeeper", $dotAttribs);
 
         // test Fields mutator
         $this->assertNull($model->firstField);
@@ -125,5 +164,19 @@ class ModelAbstractionTest
 
         $this->assertFalse(isset($model->firstField));
         $this->assertFalse(isset($model->secondField));
+    }
+
+    /**
+     * Test model attribute `appends` extension.
+     *
+     * @return void
+     */
+    public function testSDKModelAppends()
+    {
+        $tx = new Transaction();
+        $itx = new ImportanceTransfer();
+
+        $this->assertNotEquals($tx->getFields(), $itx->getFields());
+        $this->assertNotEmpty($itx->getAppends());
     }
 }

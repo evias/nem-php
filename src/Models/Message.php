@@ -19,7 +19,7 @@
  */
 namespace NEM\Models;
 
-use NEM\Helpers\Crypto as CryptoHelper;
+use NEM\Core\Encryption as CryptoHelper;
 use RuntimeException;
 
 class Message

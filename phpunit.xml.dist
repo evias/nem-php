@@ -22,6 +22,9 @@
         <testsuite name="NEM PHP SDK Test Suite">
             <directory suffix="Test.php">./tests/SDK</directory>
         </testsuite>
+        <testsuite name="NEM PHP NIS Compliance Test Suite">
+            <directory suffix="Test.php">./tests/NIS</directory>
+        </testsuite>
     </testsuites>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">

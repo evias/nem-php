@@ -22,6 +22,7 @@ namespace NEM\Models\Mutators;
 use Illuminate\Support\Str;
 use NEM\Models\Mutators\ModelMutator;
 use NEM\Models\ModelCollection;
+use NEM\Contracts\DataTransferObject;
 
 use BadMethodCallException;
 
@@ -47,10 +48,14 @@ class CollectionMutator
             throw new BadMethodCallException("Model class '" . $modelClass . "' could not be found in \\NEM\\Model namespace.");
         }
 
+        $mutator = new ModelMutator();
         $collection = new ModelCollection;
-        for ($i = 0, $m = count($items); $i < $m; $i++)
+        for ($i = 0, $m = count($items); $i < $m; $i++) {
+            $data = $items[$i] instanceof DataTransferObject ? $items[$i]->toDTO() : $items[$i];
+
             // load Model instance with item data
-            $collection->push((new ModelMutator())->mutate($name, $items[$i]));
+            $collection->push($mutator->mutate($name, $data));
+        }
 
         return $collection;
     }

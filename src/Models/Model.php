@@ -21,6 +21,7 @@ namespace NEM\Models;
 
 use \Illuminate\Support\Collection;
 use \Illuminate\Support\Str;
+use \Illuminate\Support\Arr;
 
 use NEM\Infrastructure\ServiceInterface;
 use NEM\Models\Mutators\ModelMutator;
@@ -29,6 +30,7 @@ use NEM\Contracts\DataTransferObject;
 use ArrayObject;
 use BadMethodCallException;
 use InvalidArgumentException;
+use RuntimeException;
 
 /**
  * Generic Model class
@@ -88,6 +90,11 @@ class Model
     /**
      * List of fillable attributes
      *
+     * When values are provided they should correspond to the *dot notation*
+     * of the value in the NIS Data Transfer Object reference.
+     *
+     * Values are optional.
+     *
      * @var array
      */
     protected $fillable = [];
@@ -105,13 +112,29 @@ class Model
      * @var array
      */
     protected $relations = [];
-    
+
     /**
      * List of additional fillable attributes
      *
      * @var array
      */
     protected $appends = [];
+
+    /**
+     * List of automatic *value casts*.
+     *
+     * @var array
+     */
+    protected $casts = [];
+
+    /**
+     * Attributes values stored in *dot notation*.
+     *
+     * @see https://laravel.com/api/4.2/Illuminate/Support/Arr.html#method_dot
+     * @internal
+     * @var array
+     */
+    protected $dotAttributes = [];
 
     /**
      * The model instance's RELATED OBJECTS.
@@ -131,9 +154,10 @@ class Model
      * @param   array   $attributes         Associative array where keys are attribute names and values are attribute values
      * @return  void
      */
-    public function __construct(array $attributes = [])
+    public function __construct($attributes = [])
     {
-        $this->setAttributes($attributes);
+        if (is_array($attributes))
+            $this->setAttributes($attributes);
     }
 
     /**
@@ -204,12 +228,53 @@ class Model
     /**
      * Setter for the `attributes` property.
      *
+     * This method uses a *dot notation* for attributes and resolves
+     * relationships automatically when needed.
+     *
+     * @internal
      * @return  \NEM\Contracts\DataTransferObject
      */
     public function setAttributes(array $attributes)
     {
-        foreach ($attributes as $attrib => $data)
-            $this->setAttribute($attrib, $data);
+        $this->dotAttributes = Arr::dot($attributes);
+        foreach ($this->dotAttributes as $dottedAttrib => $data) {
+            $parts = explode(".", $dottedAttrib);
+            $alias = array_pop($parts); // alias in "x.y.zeta" would be "zeta"
+
+            // $parts now only contains ["x", "y"], "zeta" was popped out.
+
+            if (count($parts) < 2) {
+                // simple value (not a sub-DTO attribute)
+                $this->setAttribute($alias, $data);
+                continue;
+            }
+
+            // subordinate DTO data, find relation alias
+            // and set attribute on sub DTO instance.
+
+            // relation alias is the last part available.
+            $relation = array_pop($parts);
+
+            if (!$this->hasRelation($relation)) {
+                // simple value (not a sub-DTO attribute)
+                $this->setAttribute($alias, $data);
+                continue;
+            }
+
+            // coming here means the attribute could not be resolved as
+            // a simple value, we will use the resolved subordinate DTO
+            // instance on which we will set the attribute.
+
+            // make sure relationship is resolved (and only once)!
+            if (! isset($this->related[$relation])) {
+                // resolve relationship and set current attribute
+                $this->related[$relation] = $this->resolveRelationship($relation, [$alias => $data]);
+                continue;
+            }
+
+            // set attribute on subordinate DTO (on the related object)
+            $this->related[$relation]->setAttribute($alias, $data);
+        }
 
         return $this;
     }
@@ -230,15 +295,32 @@ class Model
     /**
      * Getter for singular attribute values by name.
      *
-     * @param   string  $name   The attribute name.
+     * @param   string  $alias   The attribute field alias.
      * @return  mixed
      */
-    public function getAttribute($name)
+    public function getAttribute($alias)
     {
-        if (in_array($name, $this->attributes))
-            return $this->attributes[$name];
+        if (array_key_exists($alias, $this->attributes))
+            // value available
+            return $this->castValue($alias, $this->attributes[$alias]);
 
-        return null;
+        // check whether we have an aliased fillable fields list.
+        $fillableKeys = array_keys($this->fillable);
+        $aliasedFields = !empty($fillableKeys) && !is_integer($fillableKeys[0]);
+
+        if ($aliasedFields) {
+            // get the dot notation for the said `alias` alias (the dot notation is the full path).
+            $dotNotation = isset($this->fillable[$alias]) ? $this->fillable[$alias] : $alias;
+            if (array_key_exists($dotNotation, $this->dotAttributes))
+                return $this->castValue($alias, $this->dotAttributes[$dotNotation]);
+        }
+
+        if (! $this->hasRelation($alias) || ! isset($this->related[$alias]))
+            // no value available + no relation
+            return null;
+
+        // forward getAttribute on subordinate DTO (on the related object)
+        return $this->related[$alias]->getAttribute($alias);
     }
 
     /**
@@ -290,6 +372,21 @@ class Model
     }
 
     /**
+     * Helper method to check whether a *relationship can be resolved*
+     * or not.
+     *
+     * Relations are defined using *fields aliases*. The last part of the dot 
+     * notation of the attribute name should be the relation alias.
+     * 
+     * @param   string   $alias
+     * @return  boolean
+     */
+    public function hasRelation($alias)
+    {
+        return array_key_exists($alias, $this->related) || method_exists($this, $alias);
+    }
+
+    /**
      * Setter for the `appends` property.
      *
      * The `appends` property holds a *second* list of `fillable` fields.
@@ -318,6 +415,16 @@ class Model
     }
 
     /**
+     * Getter for the `dotAttributes` property.
+     *
+     * @return array
+     */
+    public function getDotAttributes()
+    {
+        return $this->dotAttributes;
+    }
+
+    /**
      * Helper for direct attributes/property access.
      *
      * @see ArrayObject
@@ -330,14 +437,8 @@ class Model
         if (array_key_exists($name, $this->related))
             return $this->related[$name]; // return
 
-        // attributes prevail over class properties
-        if (array_key_exists($name, $this->attributes))
-            return $this->attributes[$name];
-
-        if ($this->offsetExists($name))
-            return $this->offsetGet($name);
-
-        return null;
+        $attrib = $this->getAttribute($name);
+        return $attrib;
     }
 
     /**
@@ -381,6 +482,42 @@ class Model
     {
         // no need to unset class property values, they are the defaults
         unset($this->attributes[$name]);
+    }
+
+    /**
+     * This method will read the `casts` instance property and
+     * automatically cast the `value` provided in the set cast
+     * type.
+     *
+     * @see http://php.net/manual/en/function.settype.php
+     * @param   string      $field
+     * @param   mixed       $value
+     * @return  mixed
+     */
+    public function castValue($field, $value)
+    {
+        if (! array_key_exists($field, $this->casts))
+            // no cast configured for said field. Nothing done.
+            return $value;
+
+        $types = [
+            "boolean", "bool", "integer", "int", "float", "double",
+            "string", "array", "object", "null"
+        ];
+
+        // validate type cast is valid
+        $type = $this->casts[$field];
+        if (! in_array($type, $types)) {
+            throw new RuntimeException("Cast of field '" . $field . "' to type '" . $type . "' not possible. Please define only scalar type casts.");
+        }
+
+        $output = $value;
+        $result = settype($output, $type);
+
+        if ($result === true)
+            return $output;
+
+        return $value;
     }
 
     /**

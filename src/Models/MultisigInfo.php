@@ -19,7 +19,7 @@
  */
 namespace NEM\Models;
 
-class MultisigModification
+class MultisigInfo
     extends Model
 {
     /**
@@ -28,8 +28,8 @@ class MultisigModification
      * @var array
      */
     protected $fillable = [
-        "modificationType",
-        "cosignatoryAccount" // Public Key
+        "cosignatoriesCount",
+        "minCosignatories",
     ];
 
     /**
@@ -38,7 +38,8 @@ class MultisigModification
      * @var array
      */
     protected $casts = [
-        "modificationType" => "int",
+        "cosignatoriesCount" => "int",
+        "minCosignatories" => "int",
     ];
 
     /**
@@ -50,8 +51,8 @@ class MultisigModification
     public function toDTO()
     {
         return [
-            "modificationType" => $this->modificationType,
-            "cosignatoryAccount" => $this->cosignatoryAccount,
+            "cosignatoriesCount" => $this->cosignatoriesCount,
+            "minCosignatories" => $this->minCosignatories,
         ];
     }
 }
