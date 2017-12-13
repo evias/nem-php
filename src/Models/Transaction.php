@@ -111,7 +111,7 @@ class Transaction
      * @see [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair)
      * @return  array       Associative array containing a NIS *compliable* account representation.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
         $baseMeta = $this->meta();
         $baseEntity = [
@@ -129,10 +129,15 @@ class Transaction
         $meta = array_merge($baseMeta, $this->extendMeta());
         $entity = array_merge($baseEntity, $this->extend());
 
-        return [
+        $toDTO = [
             "meta" => $meta,
             "transaction" => $entity,
         ];
+
+        if ($filterByKey && isset($toDTO[$filterByKey]))
+            return $toDTO[$filterByKey];
+
+        return $toDTO;
     }
 
     /**

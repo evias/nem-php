@@ -20,10 +20,25 @@ namespace NEM\Tests;
 
 use PHPUnit\Framework\TestCase as BaseTest;
 use Mockery;
+use NEM\API;
+use NEM\SDK;
 
 abstract class TestCase 
     extends BaseTest
 {
+    /**
+     * The evias NEM Blockchain API Client
+     * @var \NEM\API
+     */
+    protected $client;
+
+    /**
+     * The NEM SDK instance
+     *
+     * @var \NEM\SDK
+     */
+    protected $sdk;
+
     /**
      * Setup unit test cases
      *
@@ -32,6 +47,21 @@ abstract class TestCase
     public function setUp()
     {
         parent::setUp();
+
+        $config = [
+            "use_ssl"  => false,
+            "protocol" => "http",
+            "host" => "bigalice2.nem.ninja", // testing uses online NIS
+            "port" => 7890,
+            "endpoint" => "/",
+        ];
+
+        // each test should have its own API configured
+        $this->client = new API();
+        $this->client->setOptions($config);
+
+        // each test should have its own SDK instance
+        $this->sdk = new SDK([], $this->client);
     }
 
     /**

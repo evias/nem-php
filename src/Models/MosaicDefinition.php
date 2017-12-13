@@ -51,7 +51,7 @@ class MosaicDefinition
      *
      * @return  array       Associative array with key `address` containing a NIS *compliable* address representation.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
         return [
             "creator" => $this->creator,

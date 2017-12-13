@@ -34,34 +34,6 @@ use NEM\Models\Transaction\ImportanceTransfer;
 class ModelAbstractionTest
     extends TestCase
 {
-    /**
-     * The NEM SDK instance
-     *
-     * @var \NEM\SDK
-     */
-    protected $sdk;
-
-    /**
-     * The setUp method of this test case will
-     * instantiate the API using the bigalice2.nem.ninja
-     * NIS testnet node.
-     *
-     * @see :Execution of this Test Case requires an Internet Connection
-     * @return void
-     */
-    public function setUp()
-    {
-        parent::setUp();
-
-        $this->sdk = new SDK([
-            "use_ssl"  => false,
-            "protocol" => "http",
-            "host" => "bigalice2.nem.ninja", // testing uses online NIS
-            "port" => 7890,
-            "endpoint" => "/",
-        ]);
-    }
-
     public function testSDKDotNotation()
     {
         $model = new Model([

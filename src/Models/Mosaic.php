@@ -38,7 +38,7 @@ class Mosaic
      *
      * @return  array       Associative array with key `namespaceId` and `name` required for a NIS *compliable* mosaic identification.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
         return [
             "namespaceId" => $this->namespaceId,

@@ -78,9 +78,14 @@ class Amount
      *
      * @return  array       Associative array with key `address` containing a NIS *compliable* address representation.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
-        return ["amount" => $this->toMicro()];
+        $toDTO = ["amount" => $this->toMicro()];
+
+        if ($filterByKey && isset($toDTO[$filterByKey]))
+            return $toDTO[$filterByKey];
+
+        return $toDTO;
     }
 
     /**

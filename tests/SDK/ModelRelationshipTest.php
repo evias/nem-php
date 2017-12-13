@@ -19,8 +19,7 @@
 namespace NEM\Tests\SDK;
 
 use GuzzleHttp\Exception\ConnectException;
-use NEM\Tests\TestCase;
-
+use NEM\Tests\NIS\NISComplianceTestCase;
 use NEM\API;
 use NEM\SDK;
 use NEM\Models\Mutators\ModelMutator;
@@ -33,36 +32,8 @@ use NEM\Models\Transaction;
 use NEM\Models\Address;
 
 class ModelRelationshipTest
-    extends TestCase
+    extends NISComplianceTestCase
 {
-    /**
-     * The NEM SDK instance
-     *
-     * @var \NEM\SDK
-     */
-    protected $sdk;
-
-    /**
-     * The setUp method of this test case will
-     * instantiate the API using the bigalice2.nem.ninja
-     * NIS testnet node.
-     *
-     * @see :Execution of this Test Case requires an Internet Connection
-     * @return void
-     */
-    public function setUp()
-    {
-        parent::setUp();
-
-        $this->sdk = new SDK([
-            "use_ssl"  => false,
-            "protocol" => "http",
-            "host" => "bigalice2.nem.ninja", // testing uses online NIS
-            "port" => 7890,
-            "endpoint" => "/",
-        ]);
-    }
-
     /**
      * Test basic relationship creation with the SDK Models.
      *
@@ -99,5 +70,27 @@ class ModelRelationshipTest
         // test simple DTO content
         $this->assertArrayHasKey("account", $accountDTO);
         $this->assertArrayHasKey("meta", $accountDTO);
+    }
+
+    /**
+     * Test relationship crafting for Model Collections using subordinate DTOs.
+     *
+     * @return void
+     */
+    public function testSDKModelRelationshipCraftingCollections()
+    {
+        $account = new Account($this->mockAccounts(1));
+
+        // test related object
+        $this->assertTrue($account->address() instanceof Address);
+        $this->assertNotEmpty($account->address()->toClean());
+
+        $cosigs = $this->mockAccounts(5, false); // meta=false
+
+        // test collection mutator (relationship method)
+        $collection = $account->cosignatories($cosigs);
+
+        $this->assertFalse($collection->isEmpty());
+        $this->assertEquals(5, $collection->count());
     }
 }

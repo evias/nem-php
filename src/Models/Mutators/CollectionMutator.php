@@ -51,6 +51,9 @@ class CollectionMutator
         $mutator = new ModelMutator();
         $collection = new ModelCollection;
         for ($i = 0, $m = count($items); $i < $m; $i++) {
+            if (!isset($items[$i]))
+                dd($items, $name);
+
             $data = $items[$i] instanceof DataTransferObject ? $items[$i]->toDTO() : $items[$i];
 
             // load Model instance with item data

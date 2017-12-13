@@ -19,45 +19,14 @@
 namespace NEM\Tests\NIS;
 
 use GuzzleHttp\Exception\ConnectException;
-use NEM\Tests\TestCase;
 
-use NEM\API;
-use NEM\SDK;
 use NEM\Models\Account;
 use NEM\Models\Amount;
 use NEM\Models\MultisigInfo;
 
 class AccountMetaDataPairTest
-    extends TestCase
+    extends NISComplianceTestCase
 {
-    /**
-     * The NEM SDK instance
-     *
-     * @var \NEM\SDK
-     */
-    protected $sdk;
-
-    /**
-     * The setUp method of this test case will
-     * instantiate the API using the bigalice2.nem.ninja
-     * NIS testnet node.
-     *
-     * @see :Execution of this Test Case requires an Internet Connection
-     * @return void
-     */
-    public function setUp()
-    {
-        parent::setUp();
-
-        $this->sdk = new SDK([
-            "use_ssl"  => false,
-            "protocol" => "http",
-            "host" => "bigalice2.nem.ninja", // testing uses online NIS
-            "port" => 7890,
-            "endpoint" => "/",
-        ]);
-    }
-
     /**
      * Test *NIS Compliance* of class \NEM\Models\Account.
      *
@@ -111,7 +80,7 @@ class AccountMetaDataPairTest
      * - expectedImportance:    The expected importance given the `importance` input.
      * - expectedVested:        The expected vested balance given the `vestedBalance` input.
      */
-    public function accountVectorsProvider()
+    public function contentVectorsProvider()
     {
         return [
             [27334285012, "1.5913243112976873E-4", 27334277908,         27334285012, "1.5913243112976873E-4", 27334277908],
@@ -125,7 +94,7 @@ class AccountMetaDataPairTest
      * Test content initialization for Account DTO.
      *
      * @depends testNISAccountMetaDataPairDTOStructure
-     * @dataProvider accountVectorsProvider
+     * @dataProvider contentVectorsProvider
      * @see https://bob.nem.ninja/docs/#accountMetaDataPair
      * @param       integer         $balance
      * @param       string          $importance
@@ -192,5 +161,73 @@ class AccountMetaDataPairTest
         // Make sure *aliased* attributes are set correctly
         $this->assertEquals(2, $account->cosignatoriesCount);
         $this->assertEquals(1, $account->minCosignatories);
+    }
+
+    /**
+     * Data provider for `testNISAccountMetaDataPairDTORelationships` Unit Test.
+     *
+     * Each row should contain 6 fields in following *strict* order:
+     *
+     * - address:               NEM Account Address in Base32 format.
+     * - cosignatories:         Array of cosignatories Accounts.
+     * - cosignatoryOf:         Micro XEM Account representing the Account's VESTED XEM balance.
+     * - multisigInfo:       The expected balance given the `balance` input.
+     *
+     * @see \NEM\Tests\NIS\NISComplianceTestCase
+     * @return array
+     */
+    public function relationshipVectorsProvider()
+    {
+        return [
+            ["TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ", $this->mockAccounts(2), $this->mockAccounts(0), $this->mockMultisigInfo(2, 3)],
+            ["TATKHV5JJTQXCUCXPXH2WPHLAYE73REUMGDOZKUW", $this->mockAccounts(0), $this->mockAccounts(2), $this->mockMultisigInfo(2, 3)],
+            ["TAEPNTY3Z6YJSU3AKM3UE7ZJUOO42OZBOX444H3N", $this->mockAccounts(5), $this->mockAccounts(5), $this->mockMultisigInfo(2, 3)],
+            ["TCVGH6UJ2TOJVRHRRKFJHZYGRJVTYJ3QM4NS4VGM", $this->mockAccounts(1), $this->mockAccounts(0), $this->mockMultisigInfo(2, 3)],
+            ["TDVA6KUEMTBMA5DVFURWCLXPOOOJEUGLGFQPM35Z", $this->mockAccounts(3), $this->mockAccounts(-1), $this->mockMultisigInfo(2, 3)],
+            ["TCYUEV7UGUKIH6ZJLRR2ACNU3FFXBQN7Z4NGW3FM", $this->mockAccounts(-1), $this->mockAccounts(null), $this->mockMultisigInfo(2, 3)],
+            ["TDWMSBBXGN62GCP3WYDGGR5DS353KKMZBNEZENFO", $this->mockAccounts(null), $this->mockAccounts(null), $this->mockMultisigInfo(null, null)],
+            ["TBYOFADTLLVZCTF3B5WCD7GPZGGQ3JRVYD2N76KG", $this->mockAccounts(100), $this->mockAccounts(50), $this->mockMultisigInfo(50, 100)],
+            ["TCZWOCUT4RKDE6KQUJZQLCKW2THNZVJ2I222VJAQ", $this->mockAccounts(4), $this->mockAccounts(0), $this->mockMultisigInfo(2, 3)],
+        ];
+    }
+
+    /**
+     * Test relationship initialization for Account DTO.
+     *
+     * @depends testNISAccountMetaDataPairDTOStructure
+     * @dataProvider relationshipVectorsProvider
+     * @see https://bob.nem.ninja/docs/#accountMetaDataPair
+     * @param       string         $address
+     * @param       array          $cosignatories
+     * @param       array          $cosignatoryOf
+     * @param       array          $multisigInfo
+     * @return void
+     */
+    public function testNISAccountMetaDataPairDTORelationships($address, $cosignatories, $cosignatoryOf, $multisigInfo)
+    {
+        $randomBytes = unpack("H*", random_bytes(32));
+        $randomPublicHex = $randomBytes[1];
+
+        $account = new Account([
+            "meta" => [
+                "cosignatories" => $cosignatories,
+                "cosignatoryOf" => $cosignatoryOf,
+                "status" => "LOCKED",
+                "remoteStatus" => "INACTIVE"
+            ],
+            "account" => [
+                "address" => $address,
+                "harvestedBlocks" => 0,
+                "balance" => 0,
+                "importance" => 0,
+                "vestedBalance" => 0,
+                "publicKey" => $randomPublicHex,
+                "label" => null,
+                "multisigInfo" => $multisigInfo->toDTO()
+            ]
+        ]);
+
+        $this->assertEquals($address, $account->getAttribute("address"));
+        //$this->assertEquals(count($cosignatories), $account->cosignatories()->count());
     }
 }

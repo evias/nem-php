@@ -52,7 +52,7 @@ class MosaicLevy
      *
      * @return  array       Associative array with fields present in `$fillable` property.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
         return [
             "type" => $this->type,

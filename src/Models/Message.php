@@ -66,7 +66,7 @@ class Message
      * @see [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair)
      * @return  array       Associative array containing a NIS *compliable* account representation.
      */
-    public function toDTO() 
+    public function toDTO($filterByKey = null) 
     {
         // CryptoHelper will store a KeyPair when necessary
         // to allow encryption (needs private + public keys)

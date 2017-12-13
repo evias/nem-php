@@ -189,7 +189,7 @@ class Model
      * @see http://bob.nem.ninja/docs/  NIS API Documentation
      * @return  array       Associative array representation of the object *compliable* with NIS definition.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
         $dtos = [];
         foreach ($this->getAttributes() as $attrib => $data) {
@@ -211,6 +211,9 @@ class Model
 
             $dtos[$attrib] = $attribDTO;
         }
+
+        if ($filterByKey && isset($dtos[$filterByKey]))
+            return $dtos[$filterByKey];
 
         return $dtos;
     }
@@ -282,15 +285,11 @@ class Model
             // a simple value, we will use the resolved subordinate DTO
             // instance on which we will set the attribute.
 
-            // make sure relationship is resolved (and only once)!
-            if (! isset($this->related[$relation])) {
-                // resolve relationship and set current attribute
-                $this->related[$relation] = $this->resolveRelationship($relation, [$alias => $data]);
-                continue;
-            }
+            $this->related[$relation] = $this->resolveRelationship($relation, $attributes);
 
-            // set attribute on subordinate DTO (on the related object)
-            $this->related[$relation]->setAttribute($alias, $data);
+            if ($this->related[$relation] instanceof Model)
+                // set attribute on subordinate DTO (on the related object)
+                $this->related[$relation]->setAttribute($alias, $data);
         }
 
         return $this;

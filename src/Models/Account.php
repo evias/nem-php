@@ -31,32 +31,22 @@ class Account
      */
     protected $fillable = [
         // NIS "meta" sub DTO (AccountMetaData)
-        "status" => "meta.status",
-        "remoteStatus" => "meta.remoteStatus",
+        "status"        => "meta.status",
+        "remoteStatus"  => "meta.remoteStatus",
         "cosignatoryOf" => "meta.cosignatoryOf",
         "cosignatories" => "meta.cosignatories",
         // NIS "account" sub DTO (AccountInfo)
-        "address" => "account.address",
-        "publicKey" => "account.publicKey",
-        "balance" => "account.balance",
+        "address"       => "account.address",
+        "publicKey"     => "account.publicKey",
+        "balance"       => "account.balance",
+        "label"         => "account.label",
         "vestedBalance" => "account.vestedBalance",
-        "importance" => "account.importance",
-        "label" => "account.label",
+        "importance"    => "account.importance",
         "harvestedBlocks" => "account.harvestedBlocks",
         // NIS "account.multisigInfo" sub DTO (@see \NEM\Models\MultisigInfo)
-        "multisigInfo" => "account.multisigInfo",
+        "multisigInfo"       => "account.multisigInfo",
         "cosignatoriesCount" => "account.multisigInfo.cosignatoriesCount",
-        "minCosignatories" => "account.multisigInfo.minCosignatories",
-    ];
-
-    /**
-     * The model instance's relations configuration
-     *
-     * @var array
-     */
-    protected $relations = [
-        "cosignatoryOf",
-        "cosignatories",
+        "minCosignatories"   => "account.multisigInfo.minCosignatories",
     ];
 
     /**
@@ -65,9 +55,6 @@ class Account
      * @var array
      */
     protected $casts = [
-        "balance" => "int",
-        "vestedBalance" => "int",
-        //"importance" => "double",
         "harvestedBlocks" => "int", 
     ];
 
@@ -77,9 +64,9 @@ class Account
      * @see [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair)
      * @return  array       Associative array containing a NIS *compliable* account representation.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
-        return [
+        $toDTO = [
             "account" => [
                 "address" => $this->address()->toClean(),
                 "balance" => $this->balance()->toMicro(),
@@ -97,6 +84,11 @@ class Account
                 "cosignatories" => $this->cosignatories()->toDTO(),
             ]
         ];
+
+        if ($filterByKey && isset($toDTO[$filterByKey]))
+            return $toDTO[$filterByKey];
+
+        return $toDTO;
     }
 
     /**

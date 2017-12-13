@@ -34,9 +34,14 @@ class Address
      *
      * @return  array       Associative array with key `address` containing a NIS *compliable* address representation.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
-        return ["address" => $this->toClean()];
+        $toDTO = ["address" => $this->toClean()];
+
+        if ($filterByKey && isset($toDTO[$filterByKey]))
+            return $toDTO[$filterByKey];
+
+        return $toDTO;
     }
 
     /**
