@@ -16,17 +16,13 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Tests\SDK;
+namespace NEM\Tests\SDK\Abstraction;
 
 use GuzzleHttp\Exception\ConnectException;
 use NEM\Tests\TestCase;
 
 use NEM\API;
 use NEM\SDK;
-use NEM\Models\Mutators\ModelMutator;
-use NEM\Models\Mutators\CollectionMutator;
-use NEM\Models\ModelCollection;
-use NEM\Contracts\DataTransferObject;
 use NEM\Models\Model;
 use NEM\Models\Transaction;
 use NEM\Models\Transaction\ImportanceTransfer;

@@ -16,9 +16,7 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Tests\NIS;
-
-use GuzzleHttp\Exception\ConnectException;
+namespace NEM\Tests\SDK\Compliance;
 
 use NEM\Models\Account;
 use NEM\Models\Address;
@@ -88,8 +86,14 @@ class AccountMetaDataPairTest
             [27334285012, "1.5913243112976873E-4", 27334277908,             27334285012, "1.5913243112976873E-4", 27334277908],
             [-1, "1.5913243112976873E-4", -1,                               0, "1.5913243112976873E-4", 0],
             [5, "0", 6,                                                     5, "0", 6],
+            // valid BigInteger
             [878273342850120, "1.5913243112976873E-4", 878273342850110,     878273342850120, "1.5913243112976873E-4", 878273342850110],
+            // test empty data
             [null, null, null,                                              0, null, 0],
+            // integer type limit for PHP is maximum: 9_223_372_036_854_775_807
+            [9223372036854775807, "1.5913243112976873E-4", 9223372036854775807,     9223372036854775807, "1.5913243112976873E-4", 9223372036854775807],
+            // test integer type overflow!
+            [9223372036854775808, null, 9223372036854775808,                        0, null, 0],
         ];
     }
 

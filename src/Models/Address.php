@@ -27,16 +27,29 @@ class Address
      *
      * @var array
      */
-    protected $fillable = ["address"];
+    protected $fillable = [
+        "address",
+        "publicKey",
+        "privateKey"
+    ];
 
     /**
      * Address DTO automatically cleans address representation.
      *
+     * @see [KeyPairViewModel](https://nemproject.github.io/#keyPairViewModel)
      * @return  array       Associative array with key `address` containing a NIS *compliable* address representation.
      */
     public function toDTO($filterByKey = null)
     {
         $toDTO = ["address" => $this->toClean()];
+
+        // KeyPair's public key/private key not always set
+        // because \NEM\Models\Address is used for simple Address formatting
+        if (!empty($this->publicKey))
+            $toDTO["publicKey"] = $this->publicKey;
+
+        if (!empty($this->privateKey))
+            $toDTO["privateKey"] = $this->privateKey;
 
         if ($filterByKey && isset($toDTO[$filterByKey]))
             return $toDTO[$filterByKey];
@@ -52,10 +65,7 @@ class Address
      */
     public function toClean()
     {
-        if (empty($this->attributes["address"]))
-            return "";
-
-        return strtoupper(preg_replace("/[^a-zA-Z0-9]+/", "", $this->attributes["address"]));
+        return strtoupper(preg_replace("/[^a-zA-Z0-9]+/", "", $this->getAttribute("address")));
     }
 
     /**
@@ -65,9 +75,7 @@ class Address
      */
     public function toPretty()
     {
-        if (empty($this->attributes["address"]))
-            return "";
-
-        return trim(chunk_split($this->attributes["address"], 6, '-'), " -");
+        $clean = $this->toClean();
+        return trim(chunk_split($clean, 6, '-'), " -");
     }
 }

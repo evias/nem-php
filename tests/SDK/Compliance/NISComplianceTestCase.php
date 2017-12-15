@@ -16,7 +16,7 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Tests\NIS;
+namespace NEM\Tests\SDK\Compliance;
 
 use NEM\Tests\TestCase;
 use NEM\Models\Account;
