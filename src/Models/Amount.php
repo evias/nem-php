@@ -97,7 +97,7 @@ class Amount
      */
     public function toMicro()
     {
-        $this->micro = ((int)$this->attributes["amount"]);
+        $this->micro = ((int)$this->getAttribute("amount"));
         if ($this->micro < 0)
             // not allowed: 0 in micro XEM is the minimum possible value!
             $this->micro = 0;

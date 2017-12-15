@@ -39,7 +39,7 @@ class CollectionMutator
      * @param  array    $items          The collection's items data.
      * @return \Illuminate\Support\Collection
      */
-    public function mutate($name, array $items)
+    public function mutate($name, $items)
     {
         // snake_case to camelCase
         $modelClass = "\\NEM\\Models\\" . Str::studly($name);
@@ -48,13 +48,19 @@ class CollectionMutator
             throw new BadMethodCallException("Model class '" . $modelClass . "' could not be found in \\NEM\\Model namespace.");
         }
 
+        if ($items instanceof ModelCollection)
+            // collection already provided
+            return $items;
+
         $mutator = new ModelMutator();
         $collection = new ModelCollection;
         for ($i = 0, $m = count($items); $i < $m; $i++) {
             if (!isset($items[$i]))
-                dd($items, $name);
-
-            $data = $items[$i] instanceof DataTransferObject ? $items[$i]->toDTO() : $items[$i];
+                $data = $items;
+            elseif ($items[$i] instanceof DataTransferObject)
+                $data = $items[$i]->toDTO();
+            else
+                $data = $items[$i];
 
             // load Model instance with item data
             $collection->push($mutator->mutate($name, $data));

@@ -94,8 +94,8 @@ class ModelCollectionTest
      */
     public function testSDKCollectionDTOBuilder()
     {
-        $model1 = new Model(["firstField" => null, "secondField" => "withValue"]);
-        $model2 = new Model(["thirdField" => "alsoValued","fourthField" => null]);
+        $model1 = new Model(["firstField" => true, "secondField" => "withValue"]);
+        $model2 = new Model(["thirdField" => "alsoValued","fourthField" => false]);
         $model3 = new Account(["address" => "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ"]);
 
         $collection = new ModelCollection;

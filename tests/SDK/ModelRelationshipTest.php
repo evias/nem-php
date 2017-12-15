@@ -30,6 +30,7 @@ use NEM\Models\Model;
 use NEM\Models\Account;
 use NEM\Models\Transaction;
 use NEM\Models\Address;
+use NEM\Models\MultisigInfo;
 
 class ModelRelationshipTest
     extends NISComplianceTestCase
@@ -46,9 +47,10 @@ class ModelRelationshipTest
         $model->setFields(["firstField", "secondField", "relationField"]);
         $model->setRelations(["relationField"]);
 
+        
         // try to call the relation will throw an error because
         // the relation method relationField() is not implemented.
-        $model->setAttributes(["some" => ["relationField" => "data"]]);
+        $model->resolveRelationship("relationField", []);
     }
 
     /**
@@ -65,6 +67,7 @@ class ModelRelationshipTest
 
         // test related object
         $this->assertTrue($account->address() instanceof Address);
+        $this->assertTrue($account->multisigInfo() instanceof MultisigInfo);
         $this->assertEquals($testAddress, $account->address()->toClean());
 
         // test simple DTO content
@@ -75,22 +78,52 @@ class ModelRelationshipTest
     /**
      * Test relationship crafting for Model Collections using subordinate DTOs.
      *
+     * This test will check initialization of objects with *field aliases*, with
+     * DTOs (from NIS) and using the `setAttribute` method directly.
+     *
+     * This makes sure that *whichever method of initialization is used*, the produced
+     * objects and DTOs stay the same.
+     *
      * @return void
      */
     public function testSDKModelRelationshipCraftingCollections()
     {
         $account = new Account($this->mockAccounts(1));
 
-        // test related object
+        // test simple relationship
         $this->assertTrue($account->address() instanceof Address);
         $this->assertNotEmpty($account->address()->toClean());
 
         $cosigs = $this->mockAccounts(5, false); // meta=false
 
+        // test initialization with sub-DTO-collection through exact path
+        $new = new Account(["meta" => ["cosignatories" => $cosigs]]);
+
+        // strict dependency and deep dependency
+        $this->assertTrue($new->cosignatories() instanceof ModelCollection);
+        $this->assertFalse($new->cosignatories()->isEmpty());
+        $this->assertEquals(5, $new->cosignatories()->count());
+        $this->assertTrue($new->cosignatories()->get(0) instanceof Account);
+
+        // test initialization with sub-DTO-collection through alias
+        $new = new Account(["cosignatories" => $cosigs]);
+        $this->assertTrue($new->cosignatories() instanceof ModelCollection);
+        $this->assertFalse($new->cosignatories()->isEmpty());
+        $this->assertEquals(5, $new->cosignatories()->count());
+        $this->assertTrue($new->cosignatories()->get(0) instanceof Account);
+
         // test collection mutator (relationship method)
         $collection = $account->cosignatories($cosigs);
 
+        $this->assertTrue($collection instanceof ModelCollection);
         $this->assertFalse($collection->isEmpty());
         $this->assertEquals(5, $collection->count());
+        $this->assertTrue($collection->get(0) instanceof Account);
+
+        // test attributes setter for relations
+        $account->setAttribute("cosignatories", $cosigs);
+
+        $this->assertFalse($account->cosignatories()->isEmpty());
+        $this->assertEquals(5, $account->cosignatories()->count());
     }
 }

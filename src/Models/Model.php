@@ -242,7 +242,11 @@ class Model
      */
     public function getFields()
     {
-        return array_merge($this->fillable, $this->appends);
+        $fields = array_keys($this->fillable);
+        if (!empty($fields) && is_integer($fields[0]))
+            $fields = array_values($this->fillable);
+
+        return array_merge($fields, $this->appends, array_keys($this->attributes));
     }
 
     /**
@@ -256,41 +260,28 @@ class Model
      */
     public function setAttributes(array $attributes)
     {
-        $this->dotAttributes = Arr::dot($attributes);
-        foreach ($this->dotAttributes as $dottedAttrib => $data) {
-            $parts = explode(".", $dottedAttrib);
-            $alias = array_pop($parts); // alias in "x.y.zeta" would be "zeta"
+        $flattened = array_dot($attributes);
+        $fields = $this->getFields();
+        if (empty($fields))
+            $fields = array_keys($attributes);
 
-            // $parts now only contains ["x", "y"], "zeta" was popped out.
+        foreach ($fields as $field) : 
 
-            if (count($parts) < 2) {
-                // simple value (not a sub-DTO attribute)
-                $this->setAttribute($alias, $data);
+            // make sure we have an aliased fields list
+            $fillableKeys   = array_keys($this->fillable);
+            $aliasedFields  = !empty($fillableKeys) && !is_integer($fillableKeys[0]);
+
+            // read full path to attribute (get dot notation if available).
+            $attribFullPath = isset($this->fillable[$field]) ? $this->fillable[$field] : $field;
+
+            if (null === ($attribValue = array_get($attributes, $attribFullPath))
+             && null === ($attribValue = array_get($attributes, $field))) {
+                // no value provided for this field.
                 continue;
             }
 
-            // subordinate DTO data, find relation alias
-            // and set attribute on sub DTO instance.
-
-            // relation alias is the last part available.
-            $relation = array_pop($parts);
-
-            if (!$this->hasRelation($relation)) {
-                // simple value (not a sub-DTO attribute)
-                $this->setAttribute($alias, $data);
-                continue;
-            }
-
-            // coming here means the attribute could not be resolved as
-            // a simple value, we will use the resolved subordinate DTO
-            // instance on which we will set the attribute.
-
-            $this->related[$relation] = $this->resolveRelationship($relation, $attributes);
-
-            if ($this->related[$relation] instanceof Model)
-                // set attribute on subordinate DTO (on the related object)
-                $this->related[$relation]->setAttribute($alias, $data);
-        }
+            $this->setAttribute($field, $attribValue);
+        endforeach ;
 
         return $this;
     }
@@ -333,10 +324,13 @@ class Model
 
         if (! $this->hasRelation($alias) || ! isset($this->related[$alias]))
             // no value available + no relation
-            return null;
+            return isset($this->dotAttributes[$alias]) ? $this->dotAttributes[$alias] : null;
 
-        // forward getAttribute on subordinate DTO (on the related object)
-        return $this->related[$alias]->getAttribute($alias);
+        if ($this->related[$alias] instanceof Model)
+            // forward getAttribute on subordinate DTO (on the related object)
+            return $this->related[$alias]->getAttribute($alias);
+
+        return $this->related[$alias];
     }
 
     /**
@@ -358,6 +352,10 @@ class Model
             // attribute is fillable or any attribute is fillable.
             $this->attributes[$name] = $data;
         }
+
+        // get the dot notation for the said `name` alias (the dot notation is the full path).
+        $dotNotation = isset($this->fillable[$name]) ? $this->fillable[$name] : $name;
+        $this->dotAttributes[$dotNotation] = $data;
 
         return $this;
     }
@@ -552,7 +550,7 @@ class Model
     public function resolveRelationship($alias, $data)
     {
         if (! in_array($alias, $this->relations) && ! method_exists($this, $alias)) {
-            throw new InvalidArgumentException("Relationship for field '" . $alias . "' not configured in " . get_class($this));
+            throw new BadMethodCallException("Relationship for field '" . $alias . "' not configured in " . get_class($this));
         }
 
         if (method_exists($this, $alias)) {

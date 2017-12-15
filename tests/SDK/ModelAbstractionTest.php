@@ -91,17 +91,19 @@ class ModelAbstractionTest
         $dataTransfer = $model->toDTO();
         $dotAttribs = $model->getDotAttributes();
 
-        $this->assertNull($attributes["nestedField"]);
+        // test returned structure
+        $this->assertArrayHasKey("firstField", $attributes);
+        $this->assertArrayHasKey("secondField", $attributes);
+        $this->assertArrayHasKey("thirdField", $attributes);
+
+        // test content for validation
+        $this->assertTrue(is_array($attributes["firstField"]));
+        $this->assertNotEmpty($attributes["firstField"]);
+        $this->assertNull($attributes["firstField"]["nestedField"]);
         $this->assertEquals("withValue", $attributes["secondField"]);
 
-        // test dot notation features
-        // - `attributes`'s keys are *aliases* (Example: in "x.y.zeta", the alias is "zeta")
-        // - `dotAttributes` contains the exact dot notation of attributes
-        $this->assertArrayHasKey("yetDeeper", $attributes);
-        $this->assertArrayHasKey("thirdField.nestedAgain.deeperNest.yetDeeper", $dotAttribs);
-
         // test Fields mutator
-        $this->assertNull($model->firstField);
+        $this->assertTrue(is_array($model->firstField));
         $this->assertEquals("withValue", $model->secondField);
     }
 
