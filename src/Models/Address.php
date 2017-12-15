@@ -42,12 +42,12 @@ class Address
      * @param   string  $alias   The attribute field alias.
      * @return  mixed
      */
-    public function getAttribute($alias)
+    public function getAttribute($alias, $doCast = true)
     {
         if ($alias === 'address')
             return $this->toClean();
 
-        return parent::getAttribute($alias);
+        return parent::getAttribute($alias, $doCast);
     }
 
     /**

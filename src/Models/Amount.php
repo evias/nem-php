@@ -115,6 +115,10 @@ class Amount
         elseif (is_string($inner)) {
             $attrib = (int) $inner;
         }
+        elseif (is_array($inner)) {
+            // try to read first value of array
+            $attrib = array_shift($inner);
+        }
         else {
             $attrib = (int) $inner;
         }
