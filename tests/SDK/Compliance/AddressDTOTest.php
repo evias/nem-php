@@ -93,9 +93,18 @@ class AddressDTOTest
         $this->assertTrue(is_string($addressOnly));
         $this->assertEmpty($addressOnly);
 
-        $clean  = new Address(["address" => "TC72N5Y5WFA7KMI2VG3B7T67EQXGB4ATDXCTJGKE"]);
-        $pretty = new Address(["address" => "TC72N5-Y5WFA7-KMI2VG-3B7T67-EQXGB4-ATDXCT-JGKE"]);
+        $testClean  = "TC72N5Y5WFA7KMI2VG3B7T67EQXGB4ATDXCTJGKE";
+        $testPretty = "TC72N5-Y5WFA7-KMI2VG-3B7T67-EQXGB4-ATDXCT-JGKE";
 
+        $clean  = new Address(["address" => $testClean]);
+        $pretty = new Address(["address" => $testPretty]);
+
+        // Address' `address` attribute should always return clean
+        // version of the input address.
+        $this->assertEquals($testClean, $clean->address);
+        $this->assertEquals($testClean, $pretty->address);
+
+        // test toClean() and toPretty() formatting
         $this->assertEquals($clean->toClean(), $pretty->toClean());
         $this->assertEquals($pretty->toPretty(), $clean->toPretty());
     }

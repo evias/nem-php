@@ -67,7 +67,7 @@ class Amount
      */
     static public function fromMicro($amount, $divisibility = 6)
     {
-        $amt = new Amount($amount);
+        $amt = new Amount(["amount" => $amount]);
         $amt->setDivisibility($divisibility);
 
         return $amt;
@@ -89,7 +89,7 @@ class Amount
     }
 
     /**
-     * Helper to return a MICRO amount. This means to get the smalles unit
+     * Helper to return a MICRO amount. This means to get the smallest unit
      * of an Amount on the NEM Blockchain. Maximum Divisibility is up to 6
      * decimal places.
      *
@@ -97,7 +97,14 @@ class Amount
      */
     public function toMicro()
     {
-        $this->micro = ((int)$this->getAttribute("amount"));
+        $attrib = $this->getAttribute("amount");
+        if (is_float($attrib)) {
+            // we want only integer!
+            $div = $this->getDivisibility();
+            $attrib = $attrib * pow(10, $div);
+        }
+
+        $this->micro = (int) $attrib;
         if ($this->micro < 0)
             // not allowed: 0 in micro XEM is the minimum possible value!
             $this->micro = 0;
@@ -105,7 +112,14 @@ class Amount
         return $this->micro;
     }
 
-    public function toXEM()
+    /**
+     * Helper to return UNITs amounts. This method will return floating
+     * point numbers. The divisibility can be set using `setDivisibility`
+     * in case of different mosaics.
+     *
+     * @return float
+     */
+    public function toUnit()
     {
         if ($this->divisibility <= 0)
             return $this->toMicro();

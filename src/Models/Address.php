@@ -34,6 +34,23 @@ class Address
     ];
 
     /**
+     * Getter for singular attribute values by name.
+     *
+     * Overloaded to provide with specific CLEAN FORMATTING
+     * always when trying to read address attributes.
+     *
+     * @param   string  $alias   The attribute field alias.
+     * @return  mixed
+     */
+    public function getAttribute($alias)
+    {
+        if ($alias === 'address')
+            return $this->toClean();
+
+        return parent::getAttribute($alias);
+    }
+
+    /**
      * Address DTO automatically cleans address representation.
      *
      * @see [KeyPairViewModel](https://nemproject.github.io/#keyPairViewModel)
@@ -63,9 +80,13 @@ class Address
      *
      * @return string
      */
-    public function toClean()
+    public function toClean($string = null)
     {
-        return strtoupper(preg_replace("/[^a-zA-Z0-9]+/", "", $this->getAttribute("address")));
+        $attrib = $string;
+        if (! $attrib && isset($this->attributes["address"])) 
+            $attrib = $this->attributes["address"];
+
+        return strtoupper(preg_replace("/[^a-zA-Z0-9]+/", "", $attrib));
     }
 
     /**

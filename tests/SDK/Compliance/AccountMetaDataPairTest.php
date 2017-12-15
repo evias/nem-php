@@ -153,9 +153,9 @@ class AccountMetaDataPairTest
 
         // Amounts can never be negative
         $this->assertTrue($account->balance()->toMicro() >= 0);
-        $this->assertTrue($account->balance()->toXEM() >= 0);
+        $this->assertTrue($account->balance()->toUnit() >= 0);
         $this->assertTrue($account->vestedBalance()->toMicro() >= 0);
-        $this->assertTrue($account->vestedBalance()->toXEM() >= 0);
+        $this->assertTrue($account->vestedBalance()->toUnit() >= 0);
 
         // Make sure importance *was not parsed*.
         $this->assertTrue(!is_float($account->importance));
