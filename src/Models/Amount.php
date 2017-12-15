@@ -27,14 +27,14 @@ class Amount
      *
      * @var integer
      */
-    public const XEM = 1000000;
+    const XEM = 1000000;
 
     /**
      * Define the value of 1 micro XEM.
      *
      * @var integer
      */
-    public const MICRO_XEM = 1;
+    const MICRO_XEM = 1;
 
     /**
      * List of fillable attributes
