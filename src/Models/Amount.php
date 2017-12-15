@@ -97,11 +97,26 @@ class Amount
      */
     public function toMicro()
     {
-        $attrib = $this->getAttribute("amount");
-        if (is_float($attrib)) {
+        $inner = $this->getAttribute("amount", false);
+        $decimals = $this->getDivisibility();
+
+        if (is_integer($inner)) {
+            $attrib = $inner;
+        }
+        elseif (is_float($inner)) {
             // we want only integer!
-            $div = $this->getDivisibility();
-            $attrib = $attrib * pow(10, $div);
+            $attrib = $inner * pow(10, $decimals);
+        }
+        elseif (is_string($inner) && false !== strpos($inner, ".")) {
+            // parse number string representation. Parsing to float.
+            $number = (float) $inner;
+            $attrib = $number * pow(10, $decimals);
+        }
+        elseif (is_string($inner)) {
+            $attrib = (int) $inner;
+        }
+        else {
+            $attrib = (int) $inner;
         }
 
         $this->micro = (int) $attrib;

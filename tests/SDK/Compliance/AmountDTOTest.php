@@ -81,6 +81,7 @@ class AmountDTOTest
      * Each row should contain 2 fields in following *strict* order:
      *
      * - amount:               Micro XEM amounts to be represented in a DTO.
+     * - divisibility:         The number of decimals for the amount.
      * - expectedAmount:       Expected amount returned by the Amount model.
      *
      * @return array
@@ -88,19 +89,23 @@ class AmountDTOTest
     public function contentVectorsProvider()
     {
         return [
-            [12345678,                  12345678],
-            [-10,                       0],
-            [null,                      0],
-            [false,                     0],
-            [878273342850120,           878273342850120],
+            [12345678, 6,                  12345678],
+            [-10, 6,                       0],
+            [null, null,                   0],
+            [false, false,                 0],
+            [878273342850120, 6,           878273342850120],
             // integer type limit
-            [9223372036854775807,       9223372036854775807],
-            [9223372036854775808,       0], // PHP_INT_MAX overflow
-            [-(-150),                     150],
-            [true,                      1],
-            [0.00000013,                0],
-            [0.000001,                  1],
-            [1000000,                   1000000],
+            [9223372036854775807, 6,       9223372036854775807],
+            [9223372036854775808, 6,       0], // PHP_INT_MAX overflow
+            [-(-150), 0,                   150],
+            [true, false,                  1],
+            [0.00000013, 6,                0],
+            [0.000001, 6,                  1],
+            [1000000, 0,                   1000000],
+            ["10", 1,                      10],
+            ["10", 2,                      10],
+            ["10.10", 2,                   1010],
+            ["10.10", 4,                   101000],
         ];
     }
 
@@ -115,9 +120,10 @@ class AmountDTOTest
      * @param       integer         $expectedAmount
      * @return void
      */
-    public function testNISAmountDTOContent($amount, $expectedAmount)
+    public function testNISAmountDTOContent($amount, $divisibility, $expectedAmount)
     {
         $amountA = new Amount(["amount" => $amount]);
+        $amountA->setDivisibility($divisibility);
 
         $this->assertEquals($expectedAmount, $amountA->toMicro());
     }

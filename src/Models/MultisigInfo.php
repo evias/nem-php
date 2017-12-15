@@ -48,7 +48,7 @@ class MultisigInfo
      *
      * @return  array       Associative array with key `modificationType` integer and `cosignatoryAccount` public key.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
         return [
             "cosignatoriesCount" => $this->cosignatoriesCount,

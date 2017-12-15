@@ -308,11 +308,11 @@ class Model
      * @param   string  $alias   The attribute field alias.
      * @return  mixed
      */
-    public function getAttribute($alias)
+    public function getAttribute($alias, $doCast = true)
     {
         if (array_key_exists($alias, $this->attributes))
             // value available
-            return $this->castValue($alias, $this->attributes[$alias]);
+            return $this->castValue($alias, $this->attributes[$alias], $doCast);
 
         // check whether we have an aliased fillable fields list.
         $fillableKeys = array_keys($this->fillable);
@@ -322,12 +322,12 @@ class Model
             // get the dot notation for the said `alias` alias (the dot notation is the full path).
             $dotNotation = isset($this->fillable[$alias]) ? $this->fillable[$alias] : $alias;
             if (array_key_exists($dotNotation, $this->dotAttributes))
-                return $this->castValue($alias, $this->dotAttributes[$dotNotation]);
+                return $this->castValue($alias, $this->dotAttributes[$dotNotation], $doCast);
         }
 
         if (! $this->hasRelation($alias) || ! isset($this->related[$alias]))
             // no value available + no relation
-            return isset($this->dotAttributes[$alias]) ? $this->dotAttributes[$alias] : null;
+            return isset($this->dotAttributes[$alias]) ? $this->castValue($alias, $this->dotAttributes[$alias], $doCast) : null;
 
         if ($this->related[$alias] instanceof Model)
             // forward getAttribute on subordinate DTO (on the related object)
@@ -511,9 +511,9 @@ class Model
      * @param   mixed       $value
      * @return  mixed
      */
-    public function castValue($field, $value)
+    public function castValue($field, $value, $cast = true)
     {
-        if (! array_key_exists($field, $this->casts))
+        if (! array_key_exists($field, $this->casts) || ! $cast)
             // no cast configured for said field. Nothing done.
             return $value;
 
