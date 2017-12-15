@@ -21,8 +21,10 @@ namespace NEM\Tests\NIS;
 use GuzzleHttp\Exception\ConnectException;
 
 use NEM\Models\Account;
+use NEM\Models\Address;
 use NEM\Models\Amount;
 use NEM\Models\MultisigInfo;
+use NEM\Models\ModelCollection;
 
 class AccountMetaDataPairTest
     extends NISComplianceTestCase
@@ -83,10 +85,11 @@ class AccountMetaDataPairTest
     public function contentVectorsProvider()
     {
         return [
-            [27334285012, "1.5913243112976873E-4", 27334277908,         27334285012, "1.5913243112976873E-4", 27334277908],
-            [-1, "1.5913243112976873E-4", -1,                           0, "1.5913243112976873E-4", 0],
-            [5, "0", 6,                                                 5, "0", 6],
-            [878273342850120, "1.5913243112976873E-4", 878273342850110,         878273342850120, "1.5913243112976873E-4", 878273342850110],
+            [27334285012, "1.5913243112976873E-4", 27334277908,             27334285012, "1.5913243112976873E-4", 27334277908],
+            [-1, "1.5913243112976873E-4", -1,                               0, "1.5913243112976873E-4", 0],
+            [5, "0", 6,                                                     5, "0", 6],
+            [878273342850120, "1.5913243112976873E-4", 878273342850110,     878273342850120, "1.5913243112976873E-4", 878273342850110],
+            [null, null, null,                                              0, null, 0],
         ];
     }
 
@@ -151,7 +154,7 @@ class AccountMetaDataPairTest
         $this->assertTrue($account->vestedBalance()->toXEM() >= 0);
 
         // Make sure importance *was not parsed*.
-        $this->assertTrue(is_string($account->importance));
+        $this->assertTrue(!is_float($account->importance));
 
         // More content validation
         $this->assertEquals($expectedBalance, $account->balance()->toMicro());
@@ -202,7 +205,7 @@ class AccountMetaDataPairTest
      * @param       array          $cosignatoryOf
      * @param       array          $multisigInfo
      * @return void
-     
+     */
     public function testNISAccountMetaDataPairDTORelationships($address, $cosignatories, $cosignatoryOf, $multisigInfo)
     {
         $randomBytes = unpack("H*", random_bytes(32));
@@ -227,8 +230,21 @@ class AccountMetaDataPairTest
             ]
         ]);
 
+        // test simple aliased field reader
         $this->assertEquals($address, $account->getAttribute("address"));
+
+        // test relationship methods
+        $this->assertTrue($account->address() instanceof Address);
+        $this->assertTrue($account->multisigInfo() instanceof MultisigInfo);
+        $this->assertTrue($account->balance() instanceof Amount);
+        $this->assertTrue($account->vestedBalance() instanceof Amount);
+        $this->assertTrue($account->cosignatories() instanceof ModelCollection);
+        $this->assertTrue($account->cosignatoryOf() instanceof ModelCollection);
+
+        // test subordinate DTOs
         $this->assertEquals(count($cosignatories), $account->cosignatories()->count());
+        $this->assertEquals(count($cosignatoryOf), $account->cosignatoryOf()->count());
+        $this->assertEquals($multisigInfo->cosignatoriesCount, $account->multisigInfo()->cosignatoriesCount);
+        $this->assertEquals($multisigInfo->minCosignatories, $account->multisigInfo()->minCosignatories);
     }
-    */
 }

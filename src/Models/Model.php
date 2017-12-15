@@ -274,11 +274,14 @@ class Model
             // read full path to attribute (get dot notation if available).
             $attribFullPath = isset($this->fillable[$field]) ? $this->fillable[$field] : $field;
 
-            if (null === ($attribValue = array_get($attributes, $attribFullPath))
-             && null === ($attribValue = array_get($attributes, $field))) {
-                // no value provided for this field.
+            $hasByPath  = array_has($attributes, $attribFullPath);
+            $hasByAlias = array_has($attributes, $field);
+            if (! $hasByPath && ! $hasByAlias) {
                 continue;
             }
+
+            $attribValue = $hasByPath ? array_get($attributes, $attribFullPath)
+                                      : array_get($attributes, $field);
 
             $this->setAttribute($field, $attribValue);
         endforeach ;

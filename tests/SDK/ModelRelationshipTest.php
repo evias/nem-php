@@ -125,5 +125,6 @@ class ModelRelationshipTest
 
         $this->assertFalse($account->cosignatories()->isEmpty());
         $this->assertEquals(5, $account->cosignatories()->count());
+        $this->assertTrue($account->cosignatories()->get(0) instanceof Account);
     }
 }
