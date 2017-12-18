@@ -521,4 +521,30 @@ class Buffer
 
         return $items;
     }
+
+    /**
+     * Buffer::hash()
+     *
+     * Create HMAC out of buffer using said `algorithm`.
+     *
+     * Currently supported algorithm include, but are not limited to:
+     *
+     * - sha256 (32 bytes)
+     * - sha512 (64 bytes)
+     * - sha1 (20 bytes)
+     *
+     * @param   string  $algorithm      Hash algorithm (Example: sha512)
+     * @return  \NEM\Core\Buffer
+     */
+    public function hash($algorithm = "sha512")
+    {
+        if (! in_array($algorithm, hash_algos())) {
+            throw new InvalidArgumentException("Hash algorithm '" . $algorithm . "' not supported.");
+        }
+
+        $byteSize = $algorithm === "sha512" ? 64 : 32;
+        if ($algorithm === "sha1") $byteSize = 20;
+
+        return new Buffer(hash($algorithm, $data->getBinary(), true), $byteSize);
+    }
 }
