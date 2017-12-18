@@ -19,6 +19,8 @@
  */
 namespace NEM\Models;
 
+use NEM\Errors\NISAmountOverflowException;
+
 class Amount
     extends Model
 {
@@ -35,6 +37,13 @@ class Amount
      * @var integer
      */
     const MICRO_XEM = 1;
+
+    /**
+     * Define the MAXIMUM AMOUNT.
+     *
+     * @var integer
+     */
+    const MAX_AMOUNT = 9000000000000000;
 
     /**
      * List of fillable attributes
@@ -74,6 +83,30 @@ class Amount
     }
 
     /**
+     * Setter for singular attribute values by name.
+     *
+     * Overload takes care of TOO BIG amounts.
+     *
+     * @param   string  $name   The attribute name.
+     * @param   mixed   $data   The attribute data.
+     * @return  mixed
+     * @throws  \NEM\Errors\NISAmountOverflowException
+     */
+    public function setAttribute($name, $data)
+    {
+        if ($name === 'amount') {
+            $this->attributes["amount"] = $data;
+
+            // parse provided data and check for overflow
+            $micro = $this->toMicro();
+            if ($micro >= Amount::MAX_AMOUNT)
+                throw new NISAmountOverflowException("Amounts cannot exceed " . Amount::MAX_AMOUNT . ".");
+        }
+
+        return parent::setAttribute($name, $data);
+    }
+
+    /**
      * Amount DTO automatically returns MICRO amount.
      *
      * @return  array       Associative array with key `address` containing a NIS *compliable* address representation.
@@ -97,7 +130,7 @@ class Amount
      */
     public function toMicro()
     {
-        $inner = $this->getAttribute("amount", false);
+        $inner = $this->getAttribute("amount", false); //cast=false
         $decimals = $this->getDivisibility();
 
         if (is_integer($inner)) {
@@ -107,13 +140,12 @@ class Amount
             // we want only integer!
             $attrib = $inner * pow(10, $decimals);
         }
-        elseif (is_string($inner) && false !== strpos($inner, ".")) {
-            // parse number string representation. Parsing to float.
-            $number = (float) $inner;
-            $attrib = $number * pow(10, $decimals);
-        }
         elseif (is_string($inner)) {
-            $attrib = (int) $inner;
+            // parse number string representation. Parsing to float.
+            $isFloat = false !== strpos($inner, ".");
+            $number = $isFloat ? (float) $inner : (int) $inner;
+            $multi  = $isFloat ? pow(10, $decimals) : 1;
+            $attrib = $number * $multi;
         }
         elseif (is_array($inner)) {
             // try to read first value of array

@@ -81,6 +81,7 @@ class Message
 
             // hexadecimal message content
             $payload = "fe" . $plain;
+            $this->type = Message::TYPE_SIMPLE;
         }
         elseif ($this->type == Message::TYPE_SIMPLE) {
             // simple message, unencrypted
@@ -139,6 +140,6 @@ class Message
             $plain  .= chr($decimal);
         }
 
-        return $plain;
+        return ($this->plain = $plain);
     }
 }

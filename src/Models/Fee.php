@@ -108,6 +108,9 @@ class Fee
      * Calculate the needed fee for a provided `$transaction` NEM transaction
      * object.
      *
+     * This method can be used to calculate all needed fees for a given
+     * `transaction` object.
+     *
      * @param   \NEM\Models\Transaction     $transaction
      * @return  \NEM\Models\Fee
      */
@@ -121,18 +124,34 @@ class Fee
      *
      * Messages are more expensive when they are encrypted.
      *
-     * @param   string     $message
+     * This method is used internally to calculate a transactions's
+     * message fees.
+     *
+     * @internal
+     * @param   Message     $message
      * @return  \NEM\Models\Fee
      */
-    static public function calculateForMessage($message)
+    static public function calculateForMessage(Message $message)
     {
-        return 0.00;
+        $dto = $message->toDTO();
+
+        if (empty($dto["payload"]))
+            return 0.00;
+
+        // message fee is 0.05 (current fee factor) multiplied
+        // by the count of *started* 31 characters chunks.
+        $chunks = floor((strlen($dto["payload"]) / 2) / 32);
+        return Fee::FEE_FACTOR * ($chunks + 1);
     }
 
     /**
      * Calculate the needed fee for a provided `$mosaics` mosaics
      * attachments array.
      *
+     * This method is used internally to calculate a mosaic transfer
+     * transaction's needed fees.
+     *
+     * @internal
      * @param   string     $message
      * @return  \NEM\Models\Fee
      */
@@ -144,7 +163,7 @@ class Fee
     /**
      * Calculate the minimum needed fee for a provided `$amountXEM` amount
      * of XEM to transfer.
-     * 
+     *
      * This method is used internally to calculate a transaction's base fee.
      *
      * @internal
@@ -153,6 +172,7 @@ class Fee
      */
     static public function calculateMinimum($amountXEM = Amount::XEM)
     {
-        return 0.00;
+        $fee = floor(max([1, $amountXEM / 10000]));
+        return $fee > 25 ? 25 : $fee;
     }
 }

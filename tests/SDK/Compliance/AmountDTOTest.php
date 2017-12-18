@@ -76,44 +76,74 @@ class AmountDTOTest
     }
 
     /**
+     * Test Amount boundaries features.
+     *
+     * @depends testNISAmountDTOStructure
+     * @expectedException \NEM\Errors\NISAmountOverflowException
+     * @return void
+     */
+    public function testNISAmountOverflowError()
+    {
+        $amount = new Amount(["amount" => Amount::MAX_AMOUNT + 1]);
+    }
+
+    /**
+     * Test Negative amounts parsing.
+     *
+     * Negative amounts are not allowed and should be parsed as ZERO.
+     *
+     * @depends testNISAmountDTOStructure
+     * @return void
+     */
+    public function testNISAmountNegativeValuesToZero()
+    {
+        $amount = new Amount(["amount" => -1]);
+
+        $this->assertEquals(0, $amount->toMicro());
+        $this->assertEquals(0, $amount->toUnit());
+    }
+
+    /**
      * Data provider for `testNISAmountDTOContent` Unit Test.
      *
      * Each row should contain 2 fields in following *strict* order:
      *
      * - amount:               Micro XEM amounts to be represented in a DTO.
      * - divisibility:         The number of decimals for the amount.
-     * - expectedAmount:       Expected amount returned by the Amount model.
+     * - expectedAmount:       Expected amount returned by the Amount model in MICRO XEM.
+     * - expectedUnit:         Expected amount returned by the Amount model in UNIT (1 XEM = 1 mio. MICRO XEM).
      *
      * @return array
      */
     public function contentVectorsProvider()
     {
         return [
-            [12345678, 6,                  12345678],
-            [-10, 6,                       0],
-            [null, null,                   0],
-            [false, false,                 0],
-            [878273342850120, 6,           878273342850120],
-            // integer type limit
-            [9223372036854775807, 6,       9223372036854775807],
-            [9223372036854775808, 6,       0], // PHP_INT_MAX overflow
-            [-(-150), 0,                   150],
-            [true, false,                  1],
-            [0.00000013, 6,                0],
-            [0.000001, 6,                  1],
-            [1000000, 0,                   1000000],
-            ["10", 1,                      10],
-            ["10", 2,                      10],
-            ["10.10", 2,                   1010],
-            ["10.10", 4,                   101000],
-            ["10.10000000", 6,             10100000],
-            ["10000000", 6,                10000000],
-            [[0x10], 6,                    16],
-            [[0x10, 0x20], 6,              16],
-            [[null], 6,                    0],
+            [12345678, 6,                  12345678, 12.345678],
+            [-10, 6,                       0, 0],
+            [null, null,                   0, 0],
+            [false, false,                 0, 0],
+            [878273342850120, 6,           878273342850120, 878273342.850120],
+            [-(-150), 0,                   150, 150],
+            [true, false,                  1, 0.000001],
+            [0.00000013, 6,                0, 0],
+            [0.000001, 6,                  1, 0.000001],
+            [1000000, 0,                   1000000, 1000000],
+            ["10", 1,                      10, 1],
+            ["10", 2,                      10, 0.1],
+            ["10.10", 2,                   1010, 10.1],
+            ["10.10", 4,                   101000, 10.1],
+            ["10.10000000", 6,             10100000, 10.1],
+            ["10000000", 6,                10000000, 10.000000],
+            [[0x10], 6,                    16, 0.000016],
+            [[0x10, 0x20], 6,              16, 0.000016],
+            [[null], 6,                    0, 0],
+            [10.18, 1,                     101, 10.1],
+            [10.18, 0,                     10, 10],
+            [10.9999, 0,                   10, 10],
+            ["10.99", 1,                   109, 10.9],
+            ["10.99", 0,                   10, 10],
         ];
     }
-
 
     /**
      * Test content initialization for Amount DTO.
@@ -122,14 +152,17 @@ class AmountDTOTest
      * @dataProvider contentVectorsProvider
      *
      * @param       integer         $amount
+     * @param       integer         $divisibility
      * @param       integer         $expectedAmount
+     * @param       integer         $expectedUnit
      * @return void
      */
-    public function testNISAmountDTOContent($amount, $divisibility, $expectedAmount)
+    public function testNISAmountDTOContent($amount, $divisibility, $expectedAmount, $expectedUnit)
     {
         $amountA = new Amount(["amount" => $amount]);
         $amountA->setDivisibility($divisibility);
 
         $this->assertEquals($expectedAmount, $amountA->toMicro());
+        $this->assertEquals($expectedUnit, $amountA->toUnit());
     }
 }
