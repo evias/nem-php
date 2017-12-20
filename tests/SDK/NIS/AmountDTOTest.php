@@ -16,7 +16,7 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Tests\SDK\Compliance;
+namespace NEM\Tests\SDK\NIS;
 
 use NEM\Models\Amount;
 

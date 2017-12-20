@@ -18,7 +18,7 @@
  */
 namespace NEM\Tests\SDK\Abstraction;
 
-use NEM\Tests\SDK\Compliance\NISComplianceTestCase;
+use NEM\Tests\SDK\NIS\NISComplianceTestCase;
 use NEM\API;
 use NEM\SDK;
 use NEM\Models\ModelCollection;
