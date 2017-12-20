@@ -25,6 +25,10 @@
         <testsuite name="NEM PHP SDK Buffering Test Suite">
             <directory suffix="Test.php">./tests/SDK/Buffer</directory>
         </testsuite>
+        <testsuite name="NEM PHP SDK NIS Core Layer Test Suite">
+            <directory suffix="Test.php">./tests/SDK/Core</directory>
+        </testsuite>
+
         <testsuite name="NEM PHP SDK NIS Compliance Test Suite">
             <directory suffix="Test.php">./tests/SDK/NIS</directory>
         </testsuite>

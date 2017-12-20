@@ -545,6 +545,7 @@ class Buffer
         $byteSize = $algorithm === "sha512" ? 64 : 32;
         if ($algorithm === "sha1") $byteSize = 20;
 
-        return new Buffer(hash($algorithm, $data->getBinary(), true), $byteSize);
+        $hashed = new Buffer(hash($algorithm, $this->getBinary(), true), $byteSize);
+        return $hashed->getHex();
     }
 }
