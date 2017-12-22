@@ -28,9 +28,11 @@ class KeyPair
     implements KeyPairContract
 {
     /**
+     * The Key Generator instance.
      * 
+     * @var \NEM\Core\KeyGenerator
      */
-    protected $engine;
+    protected $keygen;
 
     /**
      * The *hexadecimal* data of the public key.
@@ -55,7 +57,7 @@ class KeyPair
 
     /**
      * This method creates a KeyPair out of a private key.
-     * 
+     *
      * The `privateKey` argument must be 64 bytes long or 66 bytes
      * long 
      *
@@ -66,58 +68,22 @@ class KeyPair
      */
     static public function create($privateKey = null)
     {
-        $kp = new static;
-        if (is_string($privateKey)) {
-            // provided a string, must check if it contains 64 or 66 characters.
-            // and whether it is valid hexadecimal data.
-
-            $keySize = strlen($privateKey);
-            if ($keySize !== 64 && $keySize !== 66) {
-                throw new NISInvalidPrivateKeySizeException("Private keys must be 64 or 66 characters exactly.");
-            }
-            elseif (! ctype_xdigit($privateKey)) {
-                throw new NISInvalidPrivateKeyContentException("Argument 'privateKey' in KeyPair::create must contain only Hexadecimal data.");
-            }
-
-            $kp->privateKey = Buffer::fromHex(substr($privateKey, -64));
-        }
-        elseif ($privateKey instanceof KeyPair) {
-            // copy construction - clone the KeyPair object
-            $kp = clone $privateKey;
-        }
-        elseif ($privateKey instanceof Buffer) {
-            // copy construction - clone the buffer (binary data of the private key)
-            $kp->privateKey = clone $privateKey;
-        }
-        elseif (null === $privateKey) {
-            // no `privateKey` provided, generate a new KeyPair
-            $kp->privateKey = new Buffer(random_bytes(32), 32);
-        }
-        elseif ($privateKey !== null) {
-            // `privateKey` could not be interpreted.
-            throw new RuntimeException("Invalid Private key for KeyPair creation. Please use hexadecimal notation (in a string) or the \\NEM\\Core\\Buffer class.");
-        }
-
-        // secretKey is the reversed private key hexadecimal representation
-        $kp->secretKey = $kp->privateKey->flip();
-
-        // public key is derived using libsodium
-        // @link https://github.com/jedisct1/libsodium-php
-        $kp->publicKey = $kp->derivePublicKey();
+        $kp = new static($privateKey);
         return $kp;
     }
 
-    protected function derivePublicKey()
+    /**
+     * KeyPair object constructor.
+     *
+     * @param   null|string|\NEM\Core\Buffer|\NEM\Core\KeyPair   $privateKey      The private key in hexadecimal format (or in Buffer).
+     * @return  void
+     */
+    public function __construct($privateKey = null)
     {
-        $keypair = sodium_crypto_sign_seed_keypair($this->secretKey->getBinary());
-        $keypairBuf = new Buffer($keypair, SODIUM_CRYPTO_SIGN_KEYPAIRBYTES);
+        $this->keygen = new KeyGenerator;
+        $this->preparePrivateKey($privateKey);
 
-        $secret = sodium_crypto_sign_secretkey($keypair);
-        $secretBuf = new Buffer($secret, SODIUM_CRYPTO_SIGN_SECRETKEYBYTES);
-
-        $public = sodium_crypto_sign_publickey_from_secretkey($secretBuf->getBinary());
-        $publicKey = new Buffer($public, SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES);
-        return $publicKey;
+        $this->publicKey = $this->keygen->derivePublicKey($this);
     }
 
     /**
@@ -159,5 +125,54 @@ class KeyPair
     public function getSecretKey()
     {
         return $this->secretKey->getHex();
+    }
+
+    /**
+     * This method will parse a given `privateKey` such that we
+     * store the binary representation of the private key *always*.
+     *
+     * @param   null|string|\NEM\Core\Buffer|\NEM\Core\KeyPair   $privateKey      The private key in hexadecimal format (or in Buffer).
+     * @return  \NEM\Core\KeyPair
+     * @throws  \NEM\Errors\NISInvalidPrivateKeySizeException       On string key size with wrong length. (strictly 64 or 66 characters)
+     * @throws  \NEM\Errors\NISInvalidPrivateKeyContentException    On string key invalid content. (non hexadecimal characters)
+     */
+    protected function preparePrivateKey($privateKey = null)
+    {
+        if (is_string($privateKey)) {
+            // provided a string, must check if it contains 64 or 66 characters.
+            // and whether it is valid hexadecimal data.
+
+            $keySize = strlen($privateKey);
+            if ($keySize !== 64 && $keySize !== 66) {
+                throw new NISInvalidPrivateKeySizeException("Private keys must be 64 or 66 characters exactly.");
+            }
+            elseif (! ctype_xdigit($privateKey)) {
+                throw new NISInvalidPrivateKeyContentException("Argument 'privateKey' in KeyPair::create must contain only Hexadecimal data.");
+            }
+
+            $this->privateKey = Buffer::fromHex(substr($privateKey, -64));
+        }
+        elseif ($privateKey instanceof KeyPair) {
+            // copy construction - copy the KeyPair object
+            $this->privateKey = $privateKey->privateKey;
+            $this->secretKey = $privateKey->secretKey;
+            $this->publicKey = $privateKey->publicKey;
+        }
+        elseif ($privateKey instanceof Buffer) {
+            // copy construction - clone the buffer (binary data of the private key)
+            $this->privateKey = clone $privateKey;
+        }
+        elseif (null === $privateKey) {
+            // no `privateKey` provided, generate a new KeyPair
+            $this->privateKey = new Buffer(random_bytes(32), 32);
+        }
+        elseif ($privateKey !== null) {
+            // `privateKey` could not be interpreted.
+            throw new RuntimeException("Invalid Private key for KeyPair creation. Please use hexadecimal notation (in a string) or the \\NEM\\Core\\Buffer class.");
+        }
+
+        // secretKey is the reversed private key hexadecimal representation
+        $this->secretKey = $this->privateKey->flip();
+        return $this;
     }
 }
