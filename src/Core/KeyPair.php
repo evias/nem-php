@@ -84,6 +84,9 @@ class KeyPair
         $this->preparePrivateKey($privateKey);
 
         $this->publicKey = $this->keygen->derivePublicKey($this);
+
+        // concatenate public key to secret
+        //$this->secretKey = $this->secretKey->concat($this->publicKey);
     }
 
     /**

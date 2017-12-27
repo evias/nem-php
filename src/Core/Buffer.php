@@ -288,9 +288,13 @@ class Buffer
      *
      * @return \GMP
      */
-    public function getGmp($base = 16)
+    public function getGmp($base = null)
     {
-        $gmp = gmp_init($this->getHex(), $base);
+        $gmp = gmp_init($this->getHex(), 16);
+
+        if (null !== $base)
+            return gmp_strval($gmp, (int) $base);
+
         return $gmp;
     }
 
@@ -309,10 +313,16 @@ class Buffer
         return gmp_strval($this->getGmp(), 10);
     }
 
+    /**
+     * Buffer::getLong()
+     *
+     * Get Base10 Integer32 representation (signed long).
+     *
+     * @return int|string
+     */
     public function getLong()
     {
-        dd(pack("s", $this->getBinary()));
-        return pack("l", $this->getBinary())[1];
+        return pack("l", $this->getBinary());
     }
 
     /**
@@ -509,9 +519,9 @@ class Buffer
      * @see getUInt8Array
      * @return array
      */
-    public function ua2words()
+    public function ua2words(array $uint8 = null)
     {
-        $uint8 = $this->toUInt8();
+        $uint8 = $uint8 ?: $this->toUInt8();
         $int32 = [];
         // 4 bytes in a row ! => 4 times uint8 is an int32.
         for ($i = 0, $bytes = count($uint8); $i < $bytes; $i += 4) {
@@ -534,7 +544,7 @@ class Buffer
         return $int32;
     }
 
-    public function words2ua()
+    public function words2ua(array $words = null)
     {
         $unsignedRShift = function($a, $b)
         {
@@ -542,7 +552,7 @@ class Buffer
             return ($a >> $b) & ~(1<<(8*PHP_INT_SIZE-1)>>($b-1));
         };
 
-        $int32 = $this->ua2words();
+        $int32 = $words ?: $this->ua2words();
         $uint8 = [];
         for ($i = 0, $words = count($int32); $i < $words; $i += 4) {
             $v = $int32[$i / 4];
@@ -557,9 +567,9 @@ class Buffer
         return $uint8;
     }
 
-    public function words2hex()
+    public function words2hex(array $words = null)
     {
-        $int32 = $this->ua2words();
+        $int32 = $words ?: $this->ua2words();
         $sigBytes = count($int32) * 4;
         $hex = [];
 
@@ -573,7 +583,7 @@ class Buffer
         return implode("", $hex);
     }
 
-    public function ua2hex()
+    public function ua2hex(array $uint8 = null)
     {
         $unsignedRShift = function($a, $b)
         {
@@ -581,7 +591,7 @@ class Buffer
             return ($a >> $b) & ~(1<<(8*PHP_INT_SIZE-1)>>($b-1));
         };
 
-        $uint8 = $this->toUInt8();
+        $uint8 = $uint8 ?: $this->toUInt8();
         $hex = "";
         $enc = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
         for ($i = 0, $bytes = count($uint8); $i < $bytes; $i++) {
@@ -605,7 +615,9 @@ class Buffer
      */
     public function concat(Buffer $buffer, $size = null)
     {
-        $size = $size ?: $this->getSize() + $buffer->getSize();
+        if (null === $size || $size < $this->getSize() + $buffer->getSize())
+            $size = $this->getSize() + $buffer->getSize();
+
         return new Buffer($this->getBinary() . $buffer->getBinary(), $size);
     }
 
