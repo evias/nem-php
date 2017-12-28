@@ -17,7 +17,7 @@
         "illuminate/contracts": "5.0.33|5.1.*|5.2.*|5.3.*|5.4.*|5.5.*",
         "illuminate/support": "5.0.33|5.1.*|5.2.*|5.3.*|5.4.*|5.5.*",
         "guzzlehttp/guzzle": "5.3.1|6.*",
-        "mdanter/ecc": "^0.4.5",
+        "mdanter/ecc": "^0.5.0",
         "kornrunner/keccak": "~1.0.1",
         "paragonie/sodium_compat": "~1.4.0"
     },
