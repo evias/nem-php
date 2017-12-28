@@ -21,9 +21,12 @@ namespace NEM\Core;
 
 use NEM\Contracts\KeyPair as KeyPairContract;
 use NEM\Core\Buffer;
-
-use Mdanter\Ecc\EccFactory;
+use NEM\Core\Encoder;
 use kornrunner\Keccak;
+
+use \ParagonIE_Sodium_Compat;
+use \ParagonIE_Sodium_Crypto;
+use \ParagonIE_Sodium_Core_Ed25519;
 
 class KeyGenerator
 {
@@ -42,18 +45,18 @@ class KeyGenerator
 
         // hash the secret key with Keccak SHA3 variation with 512-bit output (64 bytes)
         $hashedSecret = Keccak::hash($secretBuf->getBinary(), 512, true);
-        $eccSecret = sodium_crypto_sign_ed25519_sk_to_curve25519($hashedSecret);
+        $hashedBuffer = new Buffer($hashedSecret, 64);
+        $clampSecret  = $hashedBuffer->toUInt8();
 
-        // crypto_box_publickey_from_secretkey() = sodium_crypto_scalarmult_base()
-        $publicKey = sodium_crypto_box_publickey_from_secretkey($eccSecret);
+        $clampSecret[0] &= 0xf8;
+        $clampSecret[31] &= 0x7f;
+        $clampSecret[31] |= 0x40;
 
-        // public key is `basePoint` * `publicKey`
-        $basePoint = Buffer::fromHex("5866666666666666666666666666666666666666666666666666666666666666", 32);
-        $eccPublic = sodium_crypto_scalarmult($basePoint->getBinary(), $publicKey);
+        $encoder = new Encoder;
+        $publicKey = ParagonIE_Sodium_Core_Ed25519::sk_to_pk($encoder->ua2bin($clampSecret)->getBinary());
+        $publicBuf = new Buffer($publicKey, SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES);
 
-        dd(bin2hex($publicKey), bin2hex($eccPublic));
-
-        assert(SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES === $eccPublic->getSize());
-        return $eccPublic;
+        assert(SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES === $publicBuf->getSize());
+        return $publicBuf;
     }
 }

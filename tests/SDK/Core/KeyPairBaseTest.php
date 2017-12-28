@@ -19,9 +19,10 @@
 namespace NEM\Tests\SDK\Core;
 
 use NEM\Tests\TestCase;
-use NEM\Core\KeyPair;
 use NEM\Contracts\KeyPair as KeyPairContract;
+use NEM\Core\KeyPair;
 use NEM\Core\Buffer;
+use NEM\Core\Encoder;
 
 class KeyPairBaseTest
     extends TestCase
@@ -104,7 +105,7 @@ class KeyPairBaseTest
     {
         $kp1 = KeyPair::create("e77c84331edbfa3d209c4e68809c98a634ad6e8891e4174455c33be9dd25fce5");
 
-        $int32WordArray = [
+        $expected = [
             -436460067, 
             -381959339, 
             1142416529, 
@@ -115,7 +116,9 @@ class KeyPairBaseTest
             864320743
         ];
 
-        $this->assertEquals($int32WordArray, Buffer::fromHex($kp1->getSecretKey())->ua2words());
+        $encoder = new Encoder;
+        $actual  = $encoder->ua2words(Buffer::fromHex($kp1->getSecretKey())->toUInt8());
+        $this->assertEquals($expected, $actual);
     }
 
     /**
