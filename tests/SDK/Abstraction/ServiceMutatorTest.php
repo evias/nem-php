@@ -16,15 +16,13 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Tests\SDK;
+namespace NEM\Tests\SDK\Abstraction;
 
-use GuzzleHttp\Exception\ConnectException;
 use NEM\Tests\TestCase;
 
 use NEM\API;
 use NEM\SDK;
 use NEM\Models\Mutators\ModelMutator;
-use NEM\Models\Mutators\CollectionMutator;
 use NEM\Models\ModelCollection;
 use NEM\Contracts\DataTransferObject;
 use NEM\Models\Model;
@@ -35,34 +33,6 @@ use NEM\Models\Address;
 class ServiceMutatorTest
     extends TestCase
 {
-    /**
-     * The NEM SDK instance
-     *
-     * @var \NEM\SDK
-     */
-    protected $sdk;
-
-    /**
-     * The setUp method of this test case will
-     * instantiate the API using the bigalice2.nem.ninja
-     * NIS testnet node.
-     *
-     * @see :Execution of this Test Case requires an Internet Connection
-     * @return void
-     */
-    public function setUp()
-    {
-        parent::setUp();
-
-        $this->sdk = new SDK([
-            "use_ssl"  => false,
-            "protocol" => "http",
-            "host" => "bigalice2.nem.ninja", // testing uses online NIS
-            "port" => 7890,
-            "endpoint" => "/",
-        ]);
-    }
-
     /**
      * Test basic details of the SDK instance
      *

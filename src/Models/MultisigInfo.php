@@ -19,7 +19,7 @@
  */
 namespace NEM\Models;
 
-class Mosaic
+class MultisigInfo
     extends Model
 {
     /**
@@ -28,21 +28,31 @@ class Mosaic
      * @var array
      */
     protected $fillable = [
-        "namespaceId",
-        "name"
+        "cosignatoriesCount",
+        "minCosignatories",
     ];
 
     /**
-     * Mosaic DTO build a package with offsets `namespaceId` and
-     * `name` as required by NIS for the mosaic identification.
+     * List of automatic *value casts*.
      *
-     * @return  array       Associative array with key `namespaceId` and `name` required for a NIS *compliable* mosaic identification.
+     * @var array
+     */
+    protected $casts = [
+        "cosignatoriesCount" => "int",
+        "minCosignatories" => "int",
+    ];
+
+    /**
+     * MultisigModification DTO automatically builds a *NIS compliant*
+     * [MultisigCosignatoryModification](https://bob.nem.ninja/docs/#multisigCosignatoryModification)
+     *
+     * @return  array       Associative array with key `modificationType` integer and `cosignatoryAccount` public key.
      */
     public function toDTO($filterByKey = null)
     {
         return [
-            "namespaceId" => $this->namespaceId,
-            "name" => $this->name,
+            "cosignatoriesCount" => $this->cosignatoriesCount,
+            "minCosignatories" => $this->minCosignatories,
         ];
     }
 }

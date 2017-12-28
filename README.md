@@ -19,6 +19,16 @@ Package licensed under [MIT](LICENSE) License.
 
 Reader-friendly Documentation will be added in development period and will be available on the Github Wiki at [evias/nem-php Wiki](https://github.com/evias/nem-php/wiki).
 
+Currently phpdocumentor is integrated to the project in order to automatically generate API documentation from the source code. You must run the `phpdoc` and `phpdocmd` command if you wish to generate the Documentation, the first stable release will include a generated Documentation version.
+
+```bash
+# First build the API documentation
+./vendor/bin/phpdoc -d src/ -t build/ --template="xml"
+
+# Then generate the Markdown
+./vendor/bin/phpdocmd build/structure.xml docs/
+```
+
 ## Pot de vin
 
 If you like the initiative, and for the sake of good mood, I recommend you take a few minutes to Donate a beer or Three [because belgians like that] by sending some XEM (or whatever Mosaic you think pays me a few beers someday!) to my Wallet:

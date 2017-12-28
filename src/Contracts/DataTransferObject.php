@@ -41,5 +41,5 @@ interface DataTransferObject
      *
      * @return array
      */
-    public function toDTO();
+    public function toDTO($filterByKey = null);
 }

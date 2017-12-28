@@ -19,6 +19,8 @@
  */
 namespace NEM\Models;
 
+use NEM\Errors\NISAmountOverflowException;
+
 class Amount
     extends Model
 {
@@ -27,14 +29,21 @@ class Amount
      *
      * @var integer
      */
-    public const XEM = 1000000;
+    const XEM = 1000000;
 
     /**
      * Define the value of 1 micro XEM.
      *
      * @var integer
      */
-    public const MICRO_XEM = 1;
+    const MICRO_XEM = 1;
+
+    /**
+     * Define the MAXIMUM AMOUNT.
+     *
+     * @var integer
+     */
+    const MAX_AMOUNT = 9000000000000000;
 
     /**
      * List of fillable attributes
@@ -67,10 +76,34 @@ class Amount
      */
     static public function fromMicro($amount, $divisibility = 6)
     {
-        $amt = new Amount($amount);
+        $amt = new Amount(["amount" => $amount]);
         $amt->setDivisibility($divisibility);
 
         return $amt;
+    }
+
+    /**
+     * Setter for singular attribute values by name.
+     *
+     * Overload takes care of TOO BIG amounts.
+     *
+     * @param   string  $name   The attribute name.
+     * @param   mixed   $data   The attribute data.
+     * @return  mixed
+     * @throws  \NEM\Errors\NISAmountOverflowException
+     */
+    public function setAttribute($name, $data)
+    {
+        if ($name === 'amount') {
+            $this->attributes["amount"] = $data;
+
+            // parse provided data and check for overflow
+            $micro = $this->toMicro();
+            if ($micro >= Amount::MAX_AMOUNT)
+                throw new NISAmountOverflowException("Amounts cannot exceed " . Amount::MAX_AMOUNT . ".");
+        }
+
+        return parent::setAttribute($name, $data);
     }
 
     /**
@@ -78,13 +111,18 @@ class Amount
      *
      * @return  array       Associative array with key `address` containing a NIS *compliable* address representation.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
-        return ["amount" => $this->toMicro()];
+        $toDTO = ["amount" => $this->toMicro()];
+
+        if ($filterByKey && isset($toDTO[$filterByKey]))
+            return $toDTO[$filterByKey];
+
+        return $toDTO;
     }
 
     /**
-     * Helper to return a MICRO amount. This means to get the smalles unit
+     * Helper to return a MICRO amount. This means to get the smallest unit
      * of an Amount on the NEM Blockchain. Maximum Divisibility is up to 6
      * decimal places.
      *
@@ -92,7 +130,53 @@ class Amount
      */
     public function toMicro()
     {
-        return ($this->micro = ((int)$this->attributes["amount"]) * pow(10, $this->getDivisibility()));
+        $inner = $this->getAttribute("amount", false); //cast=false
+        $decimals = $this->getDivisibility();
+
+        if (is_integer($inner)) {
+            $attrib = $inner;
+        }
+        elseif (is_float($inner)) {
+            // we want only integer!
+            $attrib = $inner * pow(10, $decimals);
+        }
+        elseif (is_string($inner)) {
+            // parse number string representation. Parsing to float.
+            $isFloat = false !== strpos($inner, ".");
+            $number = $isFloat ? (float) $inner : (int) $inner;
+            $multi  = $isFloat ? pow(10, $decimals) : 1;
+            $attrib = $number * $multi;
+        }
+        elseif (is_array($inner)) {
+            // try to read first value of array
+            $attrib = array_shift($inner);
+        }
+        else {
+            $attrib = (int) $inner;
+        }
+
+        $this->micro = (int) $attrib;
+        if ($this->micro < 0)
+            // not allowed: 0 in micro XEM is the minimum possible value!
+            $this->micro = 0;
+
+        return $this->micro;
+    }
+
+    /**
+     * Helper to return UNITs amounts. This method will return floating
+     * point numbers. The divisibility can be set using `setDivisibility`
+     * in case of different mosaics.
+     *
+     * @return float
+     */
+    public function toUnit()
+    {
+        if ($this->divisibility <= 0)
+            return $this->toMicro();
+
+        $div = pow(10, $this->getDivisibility());
+        return ($this->toMicro() / $div);
     }
 
     /**

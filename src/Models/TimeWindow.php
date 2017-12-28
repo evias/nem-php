@@ -48,7 +48,7 @@ class TimeWindow
      *
      * @return  integer         Seconds since NEM genesis block.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
         return $this->toNIS();
     }

@@ -16,20 +16,11 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Helpers;
+namespace NEM\Errors;
 
-class Crypto
+use RuntimeException;
+
+class NISInvalidPrivateKeySizeException
+    extends RuntimeException
 {
-    /**
-     * Helper for password derivation using `iterations` count iterations
-     * of SHA3-256.
-     *
-     * @param   string      $password
-     * @param   integer     $iterations
-     * @return  string
-     */
-    public function derive($password, $iterations = 6000) // 6000=NanoWallet
-    {
-
-    }
 }

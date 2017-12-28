@@ -25,47 +25,47 @@ class TransactionType
      * @internal
      * @var integer
      */
-    public const TRANSFER = 0x101; // 257
+    const TRANSFER = 0x101; // 257
 
     /**
      * @internal
      * @var integer
      */
-    public const IMPORTANCE_TRANSFER = 0x801; // 2049
+    const IMPORTANCE_TRANSFER = 0x801; // 2049
 
     /**
      * @internal
      * @var integer
      */
-    public const MULTISIG_MODIFICATION = 0x1001; // 4097
+    const MULTISIG_MODIFICATION = 0x1001; // 4097
 
     /**
      * @internal
      * @var integer
      */
-    public const MULTISIG_SIGNATURE = 0x1002; // 4098
+    const MULTISIG_SIGNATURE = 0x1002; // 4098
 
     /**
      * @internal
      * @var integer
      */
-    public const MULTISIG = 0x1004; // 4100
+    const MULTISIG = 0x1004; // 4100
 
     /**
      * @internal
      * @var integer
      */
-    public const PROVISION_NAMESPACE = 0x2001; // 8193
+    const PROVISION_NAMESPACE = 0x2001; // 8193
 
     /**
      * @internal
      * @var integer
      */
-    public const MOSAIC_DEFINITION = 0x4001; // 16385
+    const MOSAIC_DEFINITION = 0x4001; // 16385
 
     /**
      * @internal
      * @var integer
      */
-    public const MOSAIC_SUPPLY_CHANGE = 0x4002; // 16386
+    const MOSAIC_SUPPLY_CHANGE = 0x4002; // 16386
 }

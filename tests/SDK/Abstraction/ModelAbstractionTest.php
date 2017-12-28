@@ -16,51 +16,45 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Tests\SDK;
+namespace NEM\Tests\SDK\Abstraction;
 
 use GuzzleHttp\Exception\ConnectException;
 use NEM\Tests\TestCase;
 
 use NEM\API;
 use NEM\SDK;
-use NEM\Models\Mutators\ModelMutator;
-use NEM\Models\Mutators\CollectionMutator;
-use NEM\Models\ModelCollection;
-use NEM\Contracts\DataTransferObject;
 use NEM\Models\Model;
-use NEM\Models\Account;
 use NEM\Models\Transaction;
-use NEM\Models\Address;
+use NEM\Models\Transaction\ImportanceTransfer;
 
 class ModelAbstractionTest
     extends TestCase
 {
-    /**
-     * The NEM SDK instance
-     *
-     * @var \NEM\SDK
-     */
-    protected $sdk;
-
-    /**
-     * The setUp method of this test case will
-     * instantiate the API using the bigalice2.nem.ninja
-     * NIS testnet node.
-     *
-     * @see :Execution of this Test Case requires an Internet Connection
-     * @return void
-     */
-    public function setUp()
+    public function testSDKDotNotation()
     {
-        parent::setUp();
-
-        $this->sdk = new SDK([
-            "use_ssl"  => false,
-            "protocol" => "http",
-            "host" => "bigalice2.nem.ninja", // testing uses online NIS
-            "port" => 7890,
-            "endpoint" => "/",
+        $model = new Model([
+            "firstField" => [
+                "nestedField" => null
+            ],
+            "secondField" => "withValue",
+            "thirdField" => [
+                "nestedAgain" => [
+                    "deeperNest" => [
+                        "yetDeeper" => null
+                    ],
+                ],
+            ]
         ]);
+
+        $attributes = $model->getAttributes();
+        $dataTransfer = $model->toDTO();
+        $dotAttribs = $model->getDotAttributes();
+
+        // test Getters
+        $this->assertEquals(3, count($attributes));
+        $this->assertTrue(is_array($dataTransfer));
+        $this->assertTrue(is_array($attributes));
+        $this->assertTrue(is_array($dotAttribs));
     }
 
     /**
@@ -70,27 +64,42 @@ class ModelAbstractionTest
      * a property is read which corresponds to one of the Model's fillable
      * attributes list
      *
+     * @depends testSDKDotNotation
      * @return void
      */
     public function testSDKModelAttributesMutatorGetters()
     {
         $model = new Model([
-            "firstField" => null,
-            "secondField" => "withValue"]);
+            "firstField" => [
+                "nestedField" => null
+            ],
+            "secondField" => "withValue",
+            "thirdField" => [
+                "nestedAgain" => [
+                    "deeperNest" => [
+                        "yetDeeper" => null
+                    ],
+                ],
+            ]
+        ]);
 
         $attributes = $model->getAttributes();
         $dataTransfer = $model->toDTO();
+        $dotAttribs = $model->getDotAttributes();
 
-        // test Getters
-        $this->assertEquals(2, count($attributes));
-        $this->assertTrue(is_array($dataTransfer));
-        $this->assertTrue(is_array($attributes));
+        // test returned structure
+        $this->assertArrayHasKey("firstField", $attributes);
+        $this->assertArrayHasKey("secondField", $attributes);
+        $this->assertArrayHasKey("thirdField", $attributes);
 
-        $this->assertNull($attributes["firstField"]);
+        // test content for validation
+        $this->assertTrue(is_array($attributes["firstField"]));
+        $this->assertNotEmpty($attributes["firstField"]);
+        $this->assertNull($attributes["firstField"]["nestedField"]);
         $this->assertEquals("withValue", $attributes["secondField"]);
 
         // test Fields mutator
-        $this->assertNull($model->firstField);
+        $this->assertTrue(is_array($model->firstField));
         $this->assertEquals("withValue", $model->secondField);
     }
 
@@ -125,5 +134,19 @@ class ModelAbstractionTest
 
         $this->assertFalse(isset($model->firstField));
         $this->assertFalse(isset($model->secondField));
+    }
+
+    /**
+     * Test model attribute `appends` extension.
+     *
+     * @return void
+     */
+    public function testSDKModelAppends()
+    {
+        $tx = new Transaction();
+        $itx = new ImportanceTransfer();
+
+        $this->assertNotEquals($tx->getFields(), $itx->getFields());
+        $this->assertNotEmpty($itx->getAppends());
     }
 }

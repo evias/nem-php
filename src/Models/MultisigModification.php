@@ -33,15 +33,24 @@ class MultisigModification
     ];
 
     /**
+     * List of automatic *value casts*.
+     *
+     * @var array
+     */
+    protected $casts = [
+        "modificationType" => "int",
+    ];
+
+    /**
      * MultisigModification DTO automatically builds a *NIS compliant*
      * [MultisigCosignatoryModification](https://bob.nem.ninja/docs/#multisigCosignatoryModification)
      *
      * @return  array       Associative array with key `modificationType` integer and `cosignatoryAccount` public key.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
         return [
-            "modificationType" => (int) $this->modificationType,
+            "modificationType" => $this->modificationType,
             "cosignatoryAccount" => $this->cosignatoryAccount,
         ];
     }

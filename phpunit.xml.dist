@@ -19,8 +19,18 @@
         <testsuite name="NEM PHP API Wrapper Test Suite">
             <directory suffix="Test.php">./tests/API</directory>
         </testsuite>
-        <testsuite name="NEM PHP SDK Test Suite">
-            <directory suffix="Test.php">./tests/SDK</directory>
+        <testsuite name="NEM PHP SDK Abstraction Layer Test Suite">
+            <directory suffix="Test.php">./tests/SDK/Abstraction</directory>
+        </testsuite>
+        <testsuite name="NEM PHP SDK Buffering Test Suite">
+            <directory suffix="Test.php">./tests/SDK/Buffer</directory>
+        </testsuite>
+        <testsuite name="NEM PHP SDK NIS Core Layer Test Suite">
+            <directory suffix="Test.php">./tests/SDK/Core</directory>
+        </testsuite>
+
+        <testsuite name="NEM PHP SDK NIS Compliance Test Suite">
+            <directory suffix="Test.php">./tests/SDK/NIS</directory>
         </testsuite>
     </testsuites>
     <filter>

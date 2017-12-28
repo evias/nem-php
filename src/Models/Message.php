@@ -19,7 +19,7 @@
  */
 namespace NEM\Models;
 
-use NEM\Helpers\Crypto as CryptoHelper;
+use NEM\Core\Encryption as CryptoHelper;
 use RuntimeException;
 
 class Message
@@ -66,7 +66,7 @@ class Message
      * @see [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair)
      * @return  array       Associative array containing a NIS *compliable* account representation.
      */
-    public function toDTO() 
+    public function toDTO($filterByKey = null) 
     {
         // CryptoHelper will store a KeyPair when necessary
         // to allow encryption (needs private + public keys)
@@ -81,6 +81,7 @@ class Message
 
             // hexadecimal message content
             $payload = "fe" . $plain;
+            $this->type = Message::TYPE_SIMPLE;
         }
         elseif ($this->type == Message::TYPE_SIMPLE) {
             // simple message, unencrypted
@@ -139,6 +140,6 @@ class Message
             $plain  .= chr($decimal);
         }
 
-        return $plain;
+        return ($this->plain = $plain);
     }
 }

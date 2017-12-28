@@ -21,6 +21,7 @@ namespace NEM\Models;
 
 use \Illuminate\Support\Collection;
 use \Illuminate\Support\Str;
+use \Illuminate\Support\Arr;
 
 use NEM\Infrastructure\ServiceInterface;
 use NEM\Models\Mutators\ModelMutator;
@@ -29,6 +30,7 @@ use NEM\Contracts\DataTransferObject;
 use ArrayObject;
 use BadMethodCallException;
 use InvalidArgumentException;
+use RuntimeException;
 
 /**
  * Generic Model class
@@ -50,13 +52,13 @@ use InvalidArgumentException;
  *     // Relationship Method should return a DataTransferObject or ModelCollection!
  *     public function address($data = null)
  *     {
- *         return new Address($data ?: $this->address);
+ *         return new Address($data ?: $this->getAttribute("address"));
  *     }
  * }
  * ```
  * 
  * @example Example of One-to-Many relationship
- * 
+ *
  * ```
  * class MyNewModel {
  *     protected $relations = [
@@ -66,13 +68,13 @@ use InvalidArgumentException;
  *     // Relationship Method should return a DataTransferObject or ModelCollection!
  *     public function cosignatories(array $data = null)
  *     {
- *         return new MosaicCollection($data ?: $this->cosignatories);
+ *         return new MosaicCollection($data ?: $this->getAttribute("cosignatories"));
  *     }
  * }
  * ```
  *
  * @example Example of automatic Relationship crafting
- * 
+ *
  * ```
  * class MyNewModel {
  *     protected $relations = [
@@ -80,6 +82,23 @@ use InvalidArgumentException;
  *                    // instance with the data stored in this field.
  *     ];
  * }
+ * ```
+ *
+ * @example Example of aliased Attributes
+ *
+ * Settings a key-values array in the `fillable` property will trigger the 
+ * aliases attributes feature. This lets you give attribute names the desired
+ * aliases. The value in the `fillable` property should represent the dot
+ * notation of the exact path *to the value* in the corresponding NIS DTO.
+ *
+ * ```
+ * class MyAccountModel {
+ *     protected $fillable = [
+ *         "status" => "meta.status",
+ *         "address" => "account.address",
+ *     ];
+ * }
+ * ```
  */
 class Model
     extends ArrayObject
@@ -87,6 +106,11 @@ class Model
 {
     /**
      * List of fillable attributes
+     *
+     * When values are provided they should correspond to the *dot notation*
+     * of the value in the NIS Data Transfer Object reference.
+     *
+     * Values are optional.
      *
      * @var array
      */
@@ -105,13 +129,29 @@ class Model
      * @var array
      */
     protected $relations = [];
-    
+
     /**
      * List of additional fillable attributes
      *
      * @var array
      */
     protected $appends = [];
+
+    /**
+     * List of automatic *value casts*.
+     *
+     * @var array
+     */
+    protected $casts = [];
+
+    /**
+     * Attributes values stored in *dot notation*.
+     *
+     * @see https://laravel.com/api/4.2/Illuminate/Support/Arr.html#method_dot
+     * @internal
+     * @var array
+     */
+    protected $dotAttributes = [];
 
     /**
      * The model instance's RELATED OBJECTS.
@@ -131,9 +171,10 @@ class Model
      * @param   array   $attributes         Associative array where keys are attribute names and values are attribute values
      * @return  void
      */
-    public function __construct(array $attributes = [])
+    public function __construct($attributes = [])
     {
-        $this->setAttributes($attributes);
+        if (is_array($attributes))
+            $this->setAttributes($attributes);
     }
 
     /**
@@ -148,7 +189,7 @@ class Model
      * @see http://bob.nem.ninja/docs/  NIS API Documentation
      * @return  array       Associative array representation of the object *compliable* with NIS definition.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
         $dtos = [];
         foreach ($this->getAttributes() as $attrib => $data) {
@@ -170,6 +211,9 @@ class Model
 
             $dtos[$attrib] = $attribDTO;
         }
+
+        if ($filterByKey && isset($dtos[$filterByKey]))
+            return $dtos[$filterByKey];
 
         return $dtos;
     }
@@ -198,18 +242,49 @@ class Model
      */
     public function getFields()
     {
-        return array_merge($this->fillable, $this->appends);
+        $fields = array_keys($this->fillable);
+        if (!empty($fields) && is_integer($fields[0]))
+            $fields = array_values($this->fillable);
+
+        return array_merge($fields, $this->appends, array_keys($this->attributes));
     }
 
     /**
      * Setter for the `attributes` property.
      *
+     * This method uses a *dot notation* for attributes and resolves
+     * relationships automatically when needed.
+     *
+     * @internal
      * @return  \NEM\Contracts\DataTransferObject
      */
     public function setAttributes(array $attributes)
     {
-        foreach ($attributes as $attrib => $data)
-            $this->setAttribute($attrib, $data);
+        $flattened = array_dot($attributes);
+        $fields = $this->getFields();
+        if (empty($fields))
+            $fields = array_keys($attributes);
+
+        foreach ($fields as $field) : 
+
+            // make sure we have an aliased fields list
+            $fillableKeys   = array_keys($this->fillable);
+            $aliasedFields  = !empty($fillableKeys) && !is_integer($fillableKeys[0]);
+
+            // read full path to attribute (get dot notation if available).
+            $attribFullPath = isset($this->fillable[$field]) ? $this->fillable[$field] : $field;
+
+            $hasByPath  = array_has($attributes, $attribFullPath);
+            $hasByAlias = array_has($attributes, $field);
+            if (! $hasByPath && ! $hasByAlias) {
+                continue;
+            }
+
+            $attribValue = $hasByPath ? array_get($attributes, $attribFullPath)
+                                      : array_get($attributes, $field);
+
+            $this->setAttribute($field, $attribValue);
+        endforeach ;
 
         return $this;
     }
@@ -230,15 +305,35 @@ class Model
     /**
      * Getter for singular attribute values by name.
      *
-     * @param   string  $name   The attribute name.
+     * @param   string  $alias   The attribute field alias.
      * @return  mixed
      */
-    public function getAttribute($name)
+    public function getAttribute($alias, $doCast = true)
     {
-        if (in_array($name, $this->attributes))
-            return $this->attributes[$name];
+        if (array_key_exists($alias, $this->attributes))
+            // value available
+            return $this->castValue($alias, $this->attributes[$alias], $doCast);
 
-        return null;
+        // check whether we have an aliased fillable fields list.
+        $fillableKeys = array_keys($this->fillable);
+        $aliasedFields = !empty($fillableKeys) && !is_integer($fillableKeys[0]);
+
+        if ($aliasedFields) {
+            // get the dot notation for the said `alias` alias (the dot notation is the full path).
+            $dotNotation = isset($this->fillable[$alias]) ? $this->fillable[$alias] : $alias;
+            if (array_key_exists($dotNotation, $this->dotAttributes))
+                return $this->castValue($alias, $this->dotAttributes[$dotNotation], $doCast);
+        }
+
+        if (! $this->hasRelation($alias) || ! isset($this->related[$alias]))
+            // no value available + no relation
+            return isset($this->dotAttributes[$alias]) ? $this->castValue($alias, $this->dotAttributes[$alias], $doCast) : null;
+
+        if ($this->related[$alias] instanceof Model)
+            // forward getAttribute on subordinate DTO (on the related object)
+            return $this->related[$alias]->getAttribute($alias);
+
+        return $this->related[$alias];
     }
 
     /**
@@ -260,6 +355,10 @@ class Model
             // attribute is fillable or any attribute is fillable.
             $this->attributes[$name] = $data;
         }
+
+        // get the dot notation for the said `name` alias (the dot notation is the full path).
+        $dotNotation = isset($this->fillable[$name]) ? $this->fillable[$name] : $name;
+        $this->dotAttributes[$dotNotation] = $data;
 
         return $this;
     }
@@ -287,6 +386,21 @@ class Model
     public function getRelations()
     {
         return $this->relations;
+    }
+
+    /**
+     * Helper method to check whether a *relationship can be resolved*
+     * or not.
+     *
+     * Relations are defined using *fields aliases*. The last part of the dot 
+     * notation of the attribute name should be the relation alias.
+     * 
+     * @param   string   $alias
+     * @return  boolean
+     */
+    public function hasRelation($alias)
+    {
+        return array_key_exists($alias, $this->related) || method_exists($this, $alias);
     }
 
     /**
@@ -318,6 +432,16 @@ class Model
     }
 
     /**
+     * Getter for the `dotAttributes` property.
+     *
+     * @return array
+     */
+    public function getDotAttributes()
+    {
+        return $this->dotAttributes;
+    }
+
+    /**
      * Helper for direct attributes/property access.
      *
      * @see ArrayObject
@@ -330,14 +454,8 @@ class Model
         if (array_key_exists($name, $this->related))
             return $this->related[$name]; // return
 
-        // attributes prevail over class properties
-        if (array_key_exists($name, $this->attributes))
-            return $this->attributes[$name];
-
-        if ($this->offsetExists($name))
-            return $this->offsetGet($name);
-
-        return null;
+        $attrib = $this->getAttribute($name);
+        return $attrib;
     }
 
     /**
@@ -384,6 +502,42 @@ class Model
     }
 
     /**
+     * This method will read the `casts` instance property and
+     * automatically cast the `value` provided in the set cast
+     * type.
+     *
+     * @see http://php.net/manual/en/function.settype.php
+     * @param   string      $field
+     * @param   mixed       $value
+     * @return  mixed
+     */
+    public function castValue($field, $value, $cast = true)
+    {
+        if (! array_key_exists($field, $this->casts) || ! $cast)
+            // no cast configured for said field. Nothing done.
+            return $value;
+
+        $types = [
+            "boolean", "bool", "integer", "int", "float", "double",
+            "string", "array", "object", "null"
+        ];
+
+        // validate type cast is valid
+        $type = $this->casts[$field];
+        if (! in_array($type, $types)) {
+            throw new RuntimeException("Cast of field '" . $field . "' to type '" . $type . "' not possible. Please define only scalar type casts.");
+        }
+
+        $output = $value;
+        $result = settype($output, $type);
+
+        if ($result === true)
+            return $output;
+
+        return $value;
+    }
+
+    /**
      * Build a Model Relationship between \NEM\Contracts\DataTransferObject objects.
      *
      * Relation can be defined with the `$relations` property on extending classes.
@@ -399,7 +553,7 @@ class Model
     public function resolveRelationship($alias, $data)
     {
         if (! in_array($alias, $this->relations) && ! method_exists($this, $alias)) {
-            throw new InvalidArgumentException("Relationship for field '" . $alias . "' not configured in " . get_class($this));
+            throw new BadMethodCallException("Relationship for field '" . $alias . "' not configured in " . get_class($this));
         }
 
         if (method_exists($this, $alias)) {

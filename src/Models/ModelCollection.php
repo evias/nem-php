@@ -19,9 +19,11 @@
  */
 namespace NEM\Models;
 
-use \Illuminate\Support\Collection;
-use \Illuminate\Support\Arr as ArrayHelper;
-use \NEM\Infrastructure\ServiceInterface;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Arr as ArrayHelper;
+use NEM\Infrastructure\ServiceInterface;
+use NEM\Contracts\DataTransferObject;
+
 use BadMethodCallException;
 
 class ModelCollection
@@ -51,7 +53,7 @@ class ModelCollection
     {
         $dtos = [];
         foreach ($this->all() as $ix => $item) {
-            if ($item instanceof ModelInterface)
+            if ($item instanceof DataTransferObject)
                 array_push($dtos, $item->toDTO());
             else
                 array_push($dtos, $item);

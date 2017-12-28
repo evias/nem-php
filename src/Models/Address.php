@@ -27,16 +27,51 @@ class Address
      *
      * @var array
      */
-    protected $fillable = ["address"];
+    protected $fillable = [
+        "address",
+        "publicKey",
+        "privateKey"
+    ];
+
+    /**
+     * Getter for singular attribute values by name.
+     *
+     * Overloaded to provide with specific CLEAN FORMATTING
+     * always when trying to read address attributes.
+     *
+     * @param   string  $alias   The attribute field alias.
+     * @return  mixed
+     */
+    public function getAttribute($alias, $doCast = true)
+    {
+        if ($alias === 'address')
+            return $this->toClean();
+
+        return parent::getAttribute($alias, $doCast);
+    }
 
     /**
      * Address DTO automatically cleans address representation.
      *
+     * @see [KeyPairViewModel](https://nemproject.github.io/#keyPairViewModel)
      * @return  array       Associative array with key `address` containing a NIS *compliable* address representation.
      */
-    public function toDTO()
+    public function toDTO($filterByKey = null)
     {
-        return ["address" => $this->toClean()];
+        $toDTO = ["address" => $this->toClean()];
+
+        // KeyPair's public key/private key not always set
+        // because \NEM\Models\Address is used for simple Address formatting
+        if (!empty($this->publicKey))
+            $toDTO["publicKey"] = $this->publicKey;
+
+        if (!empty($this->privateKey))
+            $toDTO["privateKey"] = $this->privateKey;
+
+        if ($filterByKey && isset($toDTO[$filterByKey]))
+            return $toDTO[$filterByKey];
+
+        return $toDTO;
     }
 
     /**
@@ -45,12 +80,13 @@ class Address
      *
      * @return string
      */
-    public function toClean()
+    public function toClean($string = null)
     {
-        if (empty($this->attributes["address"]))
-            return "";
+        $attrib = $string;
+        if (! $attrib && isset($this->attributes["address"])) 
+            $attrib = $this->attributes["address"];
 
-        return strtoupper(preg_replace("/[^a-zA-Z0-9]+/", "", $this->attributes["address"]));
+        return strtoupper(preg_replace("/[^a-zA-Z0-9]+/", "", $attrib));
     }
 
     /**
@@ -60,9 +96,7 @@ class Address
      */
     public function toPretty()
     {
-        if (empty($this->attributes["address"]))
-            return "";
-
-        return trim(chunk_split($this->attributes["address"], 6, '-'), " -");
+        $clean = $this->toClean();
+        return trim(chunk_split($clean, 6, '-'), " -");
     }
 }
