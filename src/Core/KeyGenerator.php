@@ -40,14 +40,11 @@ class KeyGenerator
     {
         $buffer = new Buffer;
 
-        // secret key is the byte-level-reversed representation of the private key.
-        $secretBuf = Buffer::fromHex($keyPair->getSecretKey(), 32);
-
         // hash the secret key with Keccak SHA3 variation with 512-bit output (64 bytes)
-        $hashedSecret = Keccak::hash($secretBuf->getBinary(), 512, true); // raw=true
+        $hashedSecret = Keccak::hash($keyPair->getSecretKey()->getBinary(), 512, true); // raw=true
 
         // clamp bits of the scalar *before* scalar multiplication
-        $safeSecret   = $this->clampBits($hashedSecret);
+        $safeSecret = $this->clampBits($hashedSecret);
 
         // do scalar multiplication for: `basePoint` * `safeSecret`
         // the result of this multiplication is the `publicKey`.
@@ -60,7 +57,7 @@ class KeyGenerator
     }
 
     /**
-     * Convert 32 Bytes into a Secret Key.
+     * Convert 64 Bytes Keccak SHA3-512 Hashes into a Secret Key.
      * 
      * @param   string  $unsafeSecret   A 64 bytes (512 bits) Keccak hash produced from a KeyPair's Secret Key.
      * @return  string                  Byte-level representation of the Secret Key.

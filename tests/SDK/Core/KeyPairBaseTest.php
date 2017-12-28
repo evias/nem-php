@@ -52,7 +52,7 @@ class KeyPairBaseTest
             221, 37, 252, 229
         ];
 
-        $this->assertEquals($unsignedCharRepresentation, Buffer::fromHex($kp1->getPrivateKey())->toUInt8());
+        $this->assertEquals($unsignedCharRepresentation, Buffer::fromHex($kp1->getPrivateKey("hex"))->toUInt8());
     }
 
     /**
@@ -85,7 +85,7 @@ class KeyPairBaseTest
             51, 132, 124, 231
         ];
 
-        $this->assertEquals($unsignedCharRepresentation, Buffer::fromHex($kp1->getSecretKey())->toUInt8());
+        $this->assertEquals($unsignedCharRepresentation, Buffer::fromHex($kp1->getSecretKey("hex"))->toUInt8());
     }
 
     /**
@@ -117,7 +117,7 @@ class KeyPairBaseTest
         ];
 
         $encoder = new Encoder;
-        $actual  = $encoder->ua2words(Buffer::fromHex($kp1->getSecretKey())->toUInt8());
+        $actual  = $encoder->ua2words(Buffer::fromHex($kp1->getSecretKey("hex"))->toUInt8());
         $this->assertEquals($expected, $actual);
     }
 

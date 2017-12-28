@@ -37,12 +37,12 @@ class KeyPairCreateTest
         $kp2 = KeyPair::create("e77c84331edbfa3d209c4e68809c98a634ad6e8891e4174455c33be9dd25fce5");
 
         // should always create the same KeyPair content !
-        $this->assertEquals($kp1->getPrivateKey(), $kp2->getPrivateKey());
-        $this->assertEquals($kp1->getSecretKey(), $kp2->getSecretKey());
-        $this->assertEquals($kp1->getPublicKey(), $kp2->getPublicKey());
+        $this->assertEquals($kp1->getPrivateKey("hex"), $kp2->getPrivateKey("hex"));
+        $this->assertEquals($kp1->getSecretKey("hex"), $kp2->getSecretKey("hex"));
+        $this->assertEquals($kp1->getPublicKey("hex"), $kp2->getPublicKey("hex"));
 
         $publicShouldBe = "d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04";
-        $this->assertEquals($publicShouldBe, $kp1->getPublicKey());
+        $this->assertEquals($publicShouldBe, $kp1->getPublicKey("hex"));
     }
 
     /**
@@ -62,27 +62,27 @@ class KeyPairCreateTest
         $this->assertInstanceOf(KeyPairContract::class, $kp);
 
         // check KeyPair content
-        $this->assertEquals(64, strlen($kp->getPrivateKey()));
-        $this->assertEquals(64, strlen($kp->getSecretKey()));
-        $this->assertEquals(64, strlen($kp->getPublicKey()));
-        $this->assertTrue(ctype_xdigit($kp->getPrivateKey()));
-        $this->assertTrue(ctype_xdigit($kp->getSecretKey()));
-        $this->assertTrue(ctype_xdigit($kp->getPublicKey()));
+        $this->assertEquals(64, strlen($kp->getPrivateKey("hex")));
+        $this->assertEquals(64, strlen($kp->getSecretKey("hex")));
+        $this->assertEquals(64, strlen($kp->getPublicKey("hex")));
+        $this->assertTrue(ctype_xdigit($kp->getPrivateKey("hex")));
+        $this->assertTrue(ctype_xdigit($kp->getSecretKey("hex")));
+        $this->assertTrue(ctype_xdigit($kp->getPublicKey("hex")));
 
         // validate SECRET KEY creation. The secret key contains
         // the *reversed hexadecimal representation* of the private key.
-        $buf = Buffer::fromHex($kp->getPrivateKey());
+        $buf = Buffer::fromHex($kp->getPrivateKey("hex"));
         $flipped = $buf->flip();
 
-        $this->assertEquals($flipped->getHex(), $kp->getSecretKey());
+        $this->assertEquals($flipped->getHex(), $kp->getSecretKey("hex"));
 
         // should *deterministically* create keys.
-        $priv = $kp->getPrivateKey();
+        $priv = $kp->getPrivateKey("hex");
         $newKp = KeyPair::create($priv); // create from private key hex
 
-        $this->assertEquals($kp->getPrivateKey(), $newKp->getPrivateKey());
-        $this->assertEquals($kp->getSecretKey(), $newKp->getSecretKey());
-        $this->assertEquals($kp->getPublicKey(), $newKp->getPublicKey());
+        $this->assertEquals($kp->getPrivateKey("hex"), $newKp->getPrivateKey("hex"));
+        $this->assertEquals($kp->getSecretKey("hex"), $newKp->getSecretKey("hex"));
+        $this->assertEquals($kp->getPublicKey("hex"), $newKp->getPublicKey("hex"));
     }
 
     /**
@@ -97,9 +97,9 @@ class KeyPairCreateTest
         $clone = KeyPair::create($kp);
 
         // validate internal KeyPair content cloning
-        $this->assertEquals($kp->getPrivateKey(), $clone->getPrivateKey());
-        $this->assertEquals($kp->getSecretKey(), $clone->getSecretKey());
-        $this->assertEquals($kp->getPublicKey(), $clone->getPublicKey());
+        $this->assertEquals($kp->getPrivateKey("hex"), $clone->getPrivateKey("hex"));
+        $this->assertEquals($kp->getSecretKey("hex"), $clone->getSecretKey("hex"));
+        $this->assertEquals($kp->getPublicKey("hex"), $clone->getPublicKey("hex"));
     }
 
     /**
@@ -115,10 +115,10 @@ class KeyPairCreateTest
         $clone = KeyPair::create($privateBuffer);
 
         // validate internal buffer content cloning
-        $this->assertEquals($privateBuffer->getHex(), $clone->getPrivateKey());
-        $this->assertEquals($kp->getPrivateKey(), $clone->getPrivateKey());
-        $this->assertEquals($kp->getSecretKey(), $clone->getSecretKey());
-        $this->assertEquals($kp->getPublicKey(), $clone->getPublicKey());
+        $this->assertEquals($privateBuffer->getHex(), $clone->getPrivateKey("hex"));
+        $this->assertEquals($kp->getPrivateKey("hex"), $clone->getPrivateKey("hex"));
+        $this->assertEquals($kp->getSecretKey("hex"), $clone->getSecretKey("hex"));
+        $this->assertEquals($kp->getPublicKey("hex"), $clone->getPublicKey("hex"));
     }
 
     /**
@@ -148,6 +148,6 @@ class KeyPairCreateTest
     public function testKeyPairVectors($privateKey, $expectedPublicKey)
     {
         $kp = KeyPair::create($privateKey);
-        $this->assertEquals($expectedPublicKey, $kp->getPublicKey());
+        $this->assertEquals($expectedPublicKey, $kp->getPublicKey("hex"));
     }
 }

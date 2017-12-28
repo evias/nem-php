@@ -83,10 +83,8 @@ class KeyPair
         $this->keygen = new KeyGenerator;
         $this->preparePrivateKey($privateKey);
 
+        // use key generator for public key derivation
         $this->publicKey = $this->keygen->derivePublicKey($this);
-
-        // concatenate public key to secret
-        //$this->secretKey = $this->secretKey->concat($this->publicKey);
     }
 
     /**
@@ -95,11 +93,12 @@ class KeyPair
      *
      * Binary data should and will only be used internally.
      *
-     * @return  string
+     * @param   string|integer                  Which encoding to use (One of: "hex", "uint8", "int32")
+     * @return  \NEM\Core\Buffer|string|array   Returns either of Buffer, string hexadecimal representation, or UInt8 or Int32 array.
      */
-    public function getPublicKey()
+    public function getPublicKey($enc = null)
     {
-        return $this->publicKey->getHex();
+        return $this->encodeKey($this->publicKey, $enc);
     }
 
     /**
@@ -108,11 +107,12 @@ class KeyPair
      *
      * Binary data should and will only be used internally.
      *
-     * @return  string
+     * @param   string|integer                  Which encoding to use (One of: "hex", "uint8", "int32")
+     * @return  \NEM\Core\Buffer|string|array   Returns either of Buffer, string hexadecimal representation, or UInt8 or Int32 array.
      */
-    public function getPrivateKey()
+    public function getPrivateKey($enc = null)
     {
-        return $this->privateKey->getHex();
+        return $this->encodeKey($this->privateKey, $enc);
     }
 
     /**
@@ -123,11 +123,12 @@ class KeyPair
      * class represents the given hexadecimal payload in binary form and flips
      * the bytes of the buffer.
      *
-     * @return string
+     * @param   string|integer                  Which encoding to use (One of: "hex", "uint8", "int32")
+     * @return  \NEM\Core\Buffer|string|array   Returns either of Buffer, string hexadecimal representation, or UInt8 or Int32 array.
      */
-    public function getSecretKey()
+    public function getSecretKey($enc = null)
     {
-        return $this->secretKey->getHex();
+        return $this->encodeKey($this->secretKey, $enc);
     }
 
     /**
@@ -174,8 +175,31 @@ class KeyPair
             throw new RuntimeException("Invalid Private key for KeyPair creation. Please use hexadecimal notation (in a string) or the \\NEM\\Core\\Buffer class.");
         }
 
-        // secretKey is the reversed private key hexadecimal representation
+        // secret key is the byte-level-reversed representation of the private key.
         $this->secretKey = $this->privateKey->flip();
         return $this;
+    }
+
+    /**
+     * This method encodes a given `key` to the given 
+     * `enc` codec or returns the Buffer itself if no
+     * encoding was specified.
+     *
+     * @param   \NEM\Core\Buffer|string|array   Returns either Buffer, string hexadecimal representation, or UInt8 or Int32 array.
+     */
+    protected function encodeKey(Buffer $key, $enc = null)
+    {
+        if ("hex" === $enc || (int) $enc == 16) {
+            return $key->getHex();
+        }
+        elseif ("uint8" === $enc || (int) $enc == 8) {
+            return $key->toUInt8();
+        }
+        elseif ("int32" === $enc || (int) $enc == 32) {
+            $encoder = new Encoder;
+            return $encoder->ua2words($key->toUInt8());
+        }
+
+        return $key;
     }
 }

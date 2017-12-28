@@ -38,9 +38,10 @@ interface KeyPair
      * Binary data should and will only be used internally.
      *
      * @internal
-     * @return  string
+     * @param   string|integer                  Which encoding to use (One of: "hex", "uint8", "int32")
+     * @return  \NEM\Core\Buffer|string|array
      */
-    public function getPublicKey();
+    public function getPublicKey($enc = null);
 
     /**
      * This method should return a Hexadecimal representation
@@ -49,7 +50,8 @@ interface KeyPair
      * Binary data should and will only be used internally.
      *
      * @internal
-     * @return  string
+     * @param   string|integer                  Which encoding to use (One of: "hex", "uint8", "int32")
+     * @return  \NEM\Core\Buffer|string|array
      */
-    public function getPrivateKey();
+    public function getPrivateKey($enc = null);
 }
