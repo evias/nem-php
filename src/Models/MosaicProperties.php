@@ -62,6 +62,6 @@ class MosaicProperties
             $props[$index]["value"] = $item->value;
         }
 
-        return $dtos;
+        return $props;
     }
 }

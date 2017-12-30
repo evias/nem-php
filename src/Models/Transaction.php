@@ -28,18 +28,24 @@ class Transaction
      * @var array
      */
     protected $fillable = [
-        "timeStamp", // NIS is fault for the "S" not me. :P
-        "amount",
-        "fee",
-        "recipient",
-        "type",
-        "deadline",
-        "message",
-        "version",
-        "signer",
-        "id",
-        "height",
-        "hash",
+        // NIS "meta" sub DTO (TransactionMetaData)
+        "id"     => "meta.id",
+        "height" => "meta.height",
+        "hash"   => "meta.hash",
+        // NIS "meta.hash" and "meta.innerHash" sub DTOs
+        "outerHash" => "meta.hash.data",
+        "innerHash" => "meta.innerHash.data",
+        // NIS "transaction" sub DTO (Transaction)
+        "timeStamp" => "transaction.timeStamp",
+        "amount"    => "transaction.amount",
+        "fee"       => "transaction.fee",
+        "recipient" => "transaction.recipient",
+        "type"      => "transaction.type",
+        "deadline"  => "transaction.deadline",
+        "message"   => "transaction.message",
+        "version"   => "transaction.version",
+        "signer"    => "transaction.signer",
+        "mosaics"   => "transaction.mosaics",
     ];
 
     /**
@@ -53,7 +59,7 @@ class Transaction
         "fee",
         "recipient",
         "message",
-        "signatures"
+        "signatures",
     ];
 
     /**

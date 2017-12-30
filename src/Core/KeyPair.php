@@ -123,7 +123,7 @@ class KeyPair
      * class represents the given hexadecimal payload in binary form and flips
      * the bytes of the buffer.
      *
-     * @param   string|integer                  Which encoding to use (One of: "hex", "uint8", "int32")
+     * @param   string|integer      $enc        Which encoding to use (One of: "hex", "uint8", "int32")
      * @return  \NEM\Core\Buffer|string|array   Returns either of Buffer, string hexadecimal representation, or UInt8 or Int32 array.
      */
     public function getSecretKey($enc = null)
@@ -154,6 +154,7 @@ class KeyPair
                 throw new NISInvalidPrivateKeyContentException("Argument 'privateKey' in KeyPair::create must contain only Hexadecimal data.");
             }
 
+            // remove NIS negative "00" prefix if available.
             $this->privateKey = Buffer::fromHex(substr($privateKey, -64));
         }
         elseif ($privateKey instanceof KeyPair) {
@@ -172,7 +173,7 @@ class KeyPair
         }
         elseif ($privateKey !== null) {
             // `privateKey` could not be interpreted.
-            throw new RuntimeException("Invalid Private key for KeyPair creation. Please use hexadecimal notation (in a string) or the \\NEM\\Core\\Buffer class.");
+            throw new RuntimeException("Invalid Private key for KeyPair creation. Please use hexadecimal notation (64|66 characters string) or the \\NEM\\Core\\Buffer class.");
         }
 
         // secret key is the byte-level-reversed representation of the private key.
@@ -181,11 +182,13 @@ class KeyPair
     }
 
     /**
-     * This method encodes a given `key` to the given 
+     * This method encodes a given `key` to the given
      * `enc` codec or returns the Buffer itself if no
      * encoding was specified.
      *
-     * @param   \NEM\Core\Buffer|string|array   Returns either Buffer, string hexadecimal representation, or UInt8 or Int32 array.
+     * @param   \NEM\Core\Buffer    $key        The Key object (Buffer) that needs to be encoded. 
+     * @param   string|integer      $enc        Which encoding to use (One of: "hex", "uint8", "int32")
+     * @return  \NEM\Core\Buffer|string|array   Returns either of Buffer, string hexadecimal representation, or UInt8 or Int32 array.
      */
     protected function encodeKey(Buffer $key, $enc = null)
     {

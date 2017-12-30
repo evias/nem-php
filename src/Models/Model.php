@@ -310,6 +310,9 @@ class Model
      */
     public function getAttribute($alias, $doCast = true)
     {
+        if (property_exists($this, $alias))
+            return $this->$alias;
+
         if (array_key_exists($alias, $this->attributes))
             // value available
             return $this->castValue($alias, $this->attributes[$alias], $doCast);
