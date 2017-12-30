@@ -216,7 +216,7 @@ class Amount
      * @param   integer                       $quantity
      * @return  integer
      */
-    static public function mosaicQuantityToXEM($divisibility, $supply, $quantity = 0, $multiplier = Amount::XEM)
+    static public function mosaicQuantityToXEM($divisibility, $supply, $quantity, $multiplier = Amount::XEM)
     {
         if ((int) $supply <= 0) return 0;
         if ((int) $divisibility <= 0) $divisibility = 0;

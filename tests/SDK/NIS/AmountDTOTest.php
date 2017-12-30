@@ -169,7 +169,7 @@ class AmountDTOTest
     /**
      * Data provider for `testMosaicAmountXEMRepresentation` Unit Test.
      *
-     * Each row should contain 2 fields in following *strict* order:
+     * Each row should contain 5 fields in following *strict* order:
      *
      * - multiplier:           Micro XEM attachment multiplier.
      * - quantity:        Fractional mosaic amount (smallest unit of the mosaic)
@@ -188,6 +188,9 @@ class AmountDTOTest
             [1000000, 1, 9000000000, 0, 0.9999999998888889],
             [1000000, 1000, 9000000000, 0, 999.999999888889],
             [1000000, 1000000, 9000000000, 0, 999999.9998888889],
+            [1000000, 100, 10, 0, 89999999990],
+            [1000000, 5, 10, 0, 4499999999.5],
+            [10000000, 5, 10, 0, 44999999995],
         ];
     }
 

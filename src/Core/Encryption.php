@@ -20,6 +20,9 @@ namespace NEM\Core;
 
 use NEM\Core\KeyPair;
 use NEM\Core\Buffer;
+use kornrunner\Keccak;
+
+use RuntimeException;
 
 class Encryption
 {
@@ -77,6 +80,34 @@ class Encryption
     public static function hmac($algo, Buffer $data, Buffer $salt)
     {
         return new Buffer(hash_hmac($algo, $data->getBinary(), $salt->getBinary(), true));
+    }
+
+    /**
+     * Generate a checksum of data buffer `data` and of length
+     * `checksumLen`. Default length is 4 bytes.
+     *
+     * @param   string              $algo
+     * @param   \NEM\Core\Buffer    $data
+     * @param   integer             $checksumLen
+     * @return  \NEM\Core\Buffer 
+     */
+    public static function checksum($algo, Buffer $data, $checksumLen = 4)
+    {
+        if (in_array($algo, hash_algos())) {
+            $hash = hash($algo, $data->getBinary(), true);
+        }
+        if (strpos(strtolower($algo), "keccak") !== false) {
+            $bits = (int) substr($algo, -3); // keccak-256, keccak-512, etc.
+
+            // use Keccak instead of PHP hash()
+            $hash = Keccak::hash($data->getBinary(), $bits, true);
+        }
+        else {
+            throw new RuntimeException("Unsupported hash algorithm '" . $algo . "'.");
+        }
+
+        $out = new Buffer(substr($hash, 0, $checksumLen), $checksumLen);
+        return $out;
     }
 
     /**
