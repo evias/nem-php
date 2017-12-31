@@ -161,8 +161,9 @@ class KeyPair
     public function getAddress($networkId = 104, $prettyFormat = false)
     {
         $address = \NEM\Models\Address::fromPublicKey($this->getPublicKey());
-        if ($prettyFormat)
+        if ($prettyFormat) {
             return $address->toPretty();
+        }
 
         return $address->toClean();
     }
@@ -246,7 +247,7 @@ class KeyPair
             if ($keySize !== 64) {
                 throw new NISInvalidPublicKeySize("Public keys must be strictly 64 hexadecimal characters.");
             }
-            elseif (! ctype_xdigit($privateKey)) {
+            elseif (! ctype_xdigit($publicKey)) {
                 throw new NISInvalidPublicKeyContent("Argument 'publicKey' in KeyPair::create must contain only Hexadecimal data.");
             }
 
