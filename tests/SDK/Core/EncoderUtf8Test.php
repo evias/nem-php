@@ -33,7 +33,7 @@ class EncoderUtf8Test
     public function testCreateEmptyUtf8String()
     {
         $enc  = new Encoder();
-        $utf8 = $enc->hex2chr("");
+        $utf8 = $enc->hex2bin("");
 
         $this->assertTrue(is_string($utf8));
         $this->assertEmpty($utf8);
@@ -45,10 +45,10 @@ class EncoderUtf8Test
     public function utf8FromHexVectorsProvider()
     {
         return [
-            ["1", hex2bin("01"), "01"], // invalid "1" missing 1 character in hexit
+            ["1", hex2bin("10"), "10"], // invalid "1" missing 1 character in hexit (auto right pad)
             ["41", "A", "41"],
-            ["415", hex2bin("4105"), "4105"], // hexit automaticall left-zero-padded
-            ["416", hex2bin("4106"), "4106"], // hexit automaticall left-zero-padded
+            ["415", hex2bin("4150"), "4150"], // hexit automatically right zero-padded
+            ["416", hex2bin("4160"), "4160"], // hexit automatically right zero-padded
             ["4141", "AA", "4141"],
             ["42", "B", "42"],
         ];
@@ -68,11 +68,13 @@ class EncoderUtf8Test
     public function testCreateUtf8FromHex($hex, $expectedUtf8, $expectedHex)
     {
         $enc   = new Encoder();
-        $utf8  = $enc->hex2chr($hex);
+        $utf8  = $enc->hex2bin($hex);
+        $fromBin = $enc->bin2hex($utf8);
         $toHex = bin2hex($utf8);
 
         $this->assertTrue(is_string($utf8));
         $this->assertEquals($expectedUtf8, $utf8);
         $this->assertEquals($expectedHex, $toHex);
+        $this->assertEquals($fromBin, $expectedHex);
     }
 }

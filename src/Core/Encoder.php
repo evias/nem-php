@@ -25,51 +25,32 @@ use RuntimeException;
 class Encoder
 {
     /**
-     * Base32 encoding charset.
-     *
-     * @internal
-     * @var array
-     */
-   private static $base32_charset = array(
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', //  7
-        'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', // 15
-        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', // 23
-        'Y', 'Z', '2', '3', '4', '5', '6', '7', // 31
-        '='  // padding char
-    );
-
-    /**
-     * Base32 encoding charset flipped.
-     *
-     * @internal
-     * @var array
-     */
-    private static $base32_charset_flipped = array(
-        'A'=>'0', 'B'=>'1', 'C'=>'2', 'D'=>'3', 'E'=>'4', 'F'=>'5', 'G'=>'6', 'H'=>'7',
-        'I'=>'8', 'J'=>'9', 'K'=>'10', 'L'=>'11', 'M'=>'12', 'N'=>'13', 'O'=>'14', 'P'=>'15',
-        'Q'=>'16', 'R'=>'17', 'S'=>'18', 'T'=>'19', 'U'=>'20', 'V'=>'21', 'W'=>'22', 'X'=>'23',
-        'Y'=>'24', 'Z'=>'25', '2'=>'26', '3'=>'27', '4'=>'28', '5'=>'29', '6'=>'30', '7'=>'31'
-    );
-
-    /**
-     * Encode a Hexadecimal string to corresponding string characters.
+     * Encode a Hexadecimal string to corresponding string characters
+     * using the Buffer class as a backbone.
      *
      * @param   string  $hex
      * @return  string
      */
-    public function hex2chr($hex)
+    public function hex2bin($hex)
     {
-        $dec2utf8 = function($intval) {
-            return mb_convert_encoding(pack('n', $intval), 'UTF-8', 'UTF-16BE');
-        };
+        $binLen = ceil(mb_strlen($hex) / 2);
 
-        $chr = "";
-        for ($i = 0, $c = strlen($hex); $i < $c; $i = $i + 2) :
-            $hexit = hexdec(substr($hex, $i, 2));
-            $chr .= $dec2utf8($hexit);
-        endfor;
+        // size validation while creating
+        $buffer = Buffer::fromHex($hex, $binLen);
+        return $buffer->getBinary();
+    }
 
-        return $chr;
+    /**
+     * Encode a Binary string to corresponding Hexadecimal representation
+     * using the Buffer class as a backbone.
+     *
+     * @param   string  $hex
+     * @return  string
+     */
+    public function bin2hex($bin)
+    {
+        $buf = new Buffer($bin);
+        return $buf->getHex(); // automatically zero padded
     }
 
     /**
@@ -201,90 +182,5 @@ class Encoder
         }
 
         return implode("", $hex);
-    }
-
-    /**
-     * Convert binary data to Base32 encoding.
-     *
-     * @author Bryan Ruiz       Base32::encode()
-     * @author Grégory Saive    base32_encode()
-     *
-     * @param   string  $binary
-     * @param   boolean $padding
-     * @return  string
-     */
-    public function base32_encode($binary, $padding = true)
-    {
-        if (empty($binary)) return "";
-
-        $input = str_split($binary);
-        $binaryString = "";
-        for ($i = 0, $c = count($input); $i < $c; $i++) {
-            $binaryString .= str_pad(base_convert(ord($input[$i]), 10, 2), 8, '0', STR_PAD_LEFT);
-        }
-
-        $fiveBitBinaryArray = str_split($binaryString, 5);
-        $base32 = "";
-        for ($i = 0, $c = count($fiveBitBinaryArray); $i < $c; $i++) {
-            $base32 .= self::$base32_charset[base_convert(str_pad($fiveBitBinaryArray[$i], 5,'0'), 2, 10)];
-            $i++;
-        }
-
-        if ($padding && ($x = strlen($binaryString) % 40) != 0) {
-            if($x == 8) $base32 .= str_repeat(self::$base32_charset[32], 6);
-            else if($x == 16) $base32 .= str_repeat(self::$base32_charset[32], 4);
-            else if($x == 24) $base32 .= str_repeat(self::$base32_charset[32], 3);
-            else if($x == 32) $base32 .= self::$base32_charset[32];
-        }
-
-        return $base32;
-    }
-
-    /**
-     * Convert Base32 data to binary data.
-     *
-     * @author Bryan Ruiz       Base32::decode()
-     * @author Grégory Saive    base32_decode()
-     *
-     * @param   string  $input
-     * @return  string
-     */
-    public function base32_decode($input) {
-        if (empty($input)) return;
-
-        // validate '='-padding
-        $paddingCharCount = substr_count($input, self::$base32_charset[32]);
-        $allowedValues = array(6,4,3,1,0);
-        if (!in_array($paddingCharCount, $allowedValues)) return false;
-
-        // check for valid number of padding characters
-        for ($i = 0; $i < 4; $i++){ 
-            if ($paddingCharCount != $allowedValues[$i]) continue;
-
-            $that = substr($input, -($allowedValues[$i]));
-            $valid = str_repeat(self::$base32_charset[32], $allowedValues[$i]);
-            if ($that != $valid) return false; // wrong padding - cannot decode
-        }
-
-        // clean padding
-        $input = str_replace('=','', $input);
-        $input = str_split($input);
-
-        $binaryString = "";
-        for ($i = 0, $c = count($input); $i < $c; $i = $i + 8) { // move 8 bits
-            $x = "";
-            if (!in_array($input[$i], self::$base32_charset)) return false; // wrong character - cannot decode
-
-            for ($j = 0; $j < 8; $j++) { // for each bit
-                $x .= str_pad(base_convert(@self::$base32_charset_flipped[@$input[$i + $j]], 10, 2), 5, '0', STR_PAD_LEFT);
-            }
-
-            $eightBits = str_split($x, 8);
-            for ($z = 0, $m = count($eightBits); $z < $m; $z++) {
-                $binaryString .= ( ($y = chr(base_convert($eightBits[$z], 2, 10))) || ord($y) == 48 ) ? $y:"";
-            }
-        }
-
-        return $binaryString;
     }
 }

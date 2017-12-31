@@ -27,10 +27,18 @@ use NEM\Core\Buffer;
 use NEM\Core\Encoder;
 use NEM\Core\Encryption;
 use kornrunner\Keccak;
+use Base32\Base32;
 
 class Address
     extends Model
 {
+    /**
+     * The number of characters of a NEM Address.
+     *
+     * @var integer
+     */
+    const BYTES = 40;
+
     /**
      * List of fillable attributes
      *
@@ -105,23 +113,26 @@ class Address
         $pubKeyHash = Keccak::hash($pubKeyBuf->getBinary(), 256, true); // raw=true
 
         // step 2: ripemd160 hash of (1)
-        $step2Riped = new Buffer(hash("ripemd160", $pubKeyHash, true), 20);
+        $pubKeyRiped = new Buffer(hash("ripemd160", $pubKeyHash, true), 20);
 
         // step 3: add version byte in front of (2)
         $networkPrefix = Network::getPrefixFromId($networkId);
-        $versionPrefixedPubKey = Buffer::fromHex($networkPrefix . $step2Riped->getHex());
+        $versionPrefixedPubKey = Buffer::fromHex($networkPrefix . $pubKeyRiped->getHex());
 
         // step 4: get the checksum of (3)
         $checksum = Encryption::checksum("keccak-256", $versionPrefixedPubKey, 4); // checksumLen=4
-        $hexedPart4 = $versionPrefixedPubKey->getHex() . $checksum->getHex();
 
         // step 5: concatenate (3) and (4)
-        $encodedAddress = $enc->hex2chr($hexedPart4);
-        $encodedBuffer  = new Buffer($encodedAddress);
-        //dd($hexedPart4, $encodedAddress, $enc->base32_encode($encodedAddress), $enc->base32_encode($hexedPart4));
+        $addressHash = $versionPrefixedPubKey->getHex() . $checksum->getHex();
+        $hashBuf = Buffer::fromHex($addressHash);
+        $encodedAddress = hex2bin($addressHash);
+        $encodedBase32  = new Buffer(Base32::encode($encodedAddress), Address::BYTES);
 
         // step 6: base32 encode (5)
-        return new Address(["address" => $enc->base32_encode($encodedAddress)]);
+        return new Address([
+            "address" => $encodedBase32->getBinary(),
+            "publicKey" => $pubKeyBuf->getHex(),
+        ]);
     }
 
     /**
