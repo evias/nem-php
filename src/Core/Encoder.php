@@ -68,7 +68,7 @@ class Encoder
         }
 
         $buffer = new Buffer($bin);
-        return $buffer;
+        return $buffer->getBinary();
     }
 
     /**
@@ -112,19 +112,13 @@ class Encoder
      */
     public function ua2hex(array $uint8)
     {
-        $unsignedRShift = function($a, $b)
-        {
-            if($b == 0) return $a;
-            return ($a >> $b) & ~(1<<(8*PHP_INT_SIZE-1)>>($b-1));
-        };
-
         $uint8 = $uint8 ?: $this->toUInt8();
         $hex = "";
         $enc = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
         for ($i = 0, $bytes = count($uint8); $i < $bytes; $i++) {
             $code = $uint8[$i];
 
-            $hex .= $enc[$unsignedRShift($code, 4)];
+            $hex .= $enc[static::unsignedRightShift($code, 4)];
             $hex .= $enc[($code & 0x0f)];
         }
 
@@ -132,55 +126,38 @@ class Encoder
     }
 
     /**
-     * Convert a Int32 array (WordArray) to a UInt8 array.
-     *
-     * The returned array contains entries of type UInt8.
+     * Perform unsigned right shift operation. This method
+     * mocks the `>>>` operator of Javacript and Java.
      * 
-     * @param   array   $words      Int32 array (WordArray) to convert to UInt8 array.
-     * @return  array               Array of UInt8 representations.
+     * @param   integer     $a
+     * @param   integer     $b
+     * @return  integer
      */
-    public function words2ua(array $words)
+    static public function unsignedRightShift($a, $b)
     {
-        $unsignedRShift = function($a, $b)
-        {
-            if($b == 0) return $a;
-            return ($a >> $b) & ~(1<<(8*PHP_INT_SIZE-1)>>($b-1));
-        };
-
-        $int32 = $words;
-        $uint8 = [];
-        for ($i = 0, $words = count($int32); $i < $words; $i += 4) {
-            $v = $int32[$i / 4];
-            if ($v < 0) $v += 0x100000000; // 4294967296
-
-            $uint8[$i] = $unsignedRShift($v, 24);
-            $uint8[$i + 1] = ($unsignedRShift($v, 16)) & 0xff; // ff=255
-            $uint8[$i + 2] = ($unsignedRShift($v, 8)) & 0xff;
-            $uint8[$i + 3] = $v & 0xff;
+        if ($b >= 32 || $b < -32) {
+            $m = (int)($b/32);
+            $b = $b-($m*32);
         }
 
-        return $uint8;
-    }
-
-    /**
-     * Encode a Int32 array (WordArray) to its hexadecimal representation.
-     *
-     * @param   array   $words      Int32 array (WordArray) to convert to UInt8 array.
-     * @return  string              Hexadecimal representation of the WordArray
-     */
-    public function words2hex(array $words)
-    {
-        $int32 = $words ?: $this->ua2words();
-        $sigBytes = count($int32) * 4;
-        $hex = [];
-
-        for ($i = 0; $i < $sigBytes; $i++) {
-            $byte = ($int32[$i >> 2] >> (24 - ($i % 4) * 8)) & 0xff; // ff=255
-
-            array_push($hex, gmp_strval(($byte >> 4), 16));
-            array_push($hex, gmp_strval(($byte & 0x0f), 16)); // 0f=15
+        if ($b < 0) {
+            $b = 32 + $b;
         }
 
-        return implode("", $hex);
+        if ($b == 0) {
+            return (($a>>1)&0x7fffffff)*2+(($a>>$b)&1);
+        }
+
+        if ($a < 0) {
+            $a = ($a >> 1);
+            $a &= 2147483647;
+            $a |= 0x40000000;
+            $a = ($a >> ($b - 1));
+        }
+        else {
+            $a = ($a >> $b);
+        }
+
+        return $a; 
     }
 }
