@@ -193,7 +193,7 @@ If you are using Laravel or Lumen, you will need to register the Service Provide
     // Example 5: Use the SDK to create NEM *NIS compliant* Objects
     // ------------------------------------------------------------
     // You can create an instance and pass the *connection configuration*
-    $sdk = new SDK([
+    $sdk = new NEM\SDK([
         "protocol" => "http",
         "use_ssl" => false,
         "host" 	  => "go.nem.ninja",
@@ -202,7 +202,7 @@ If you are using Laravel or Lumen, you will need to register the Service Provide
     ]);
 
     // Or you can use an already initialized API client
-    $sdk = new SDK([], new API());
+    $sdk = new NEM\SDK([], new NEM\API());
     $account = $sdk->models()->account(["address" => "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ"]);
 
     // The \NEM\Contracts\DataTransferObject interface tells us that Models
@@ -218,7 +218,7 @@ If you are using Laravel or Lumen, you will need to register the Service Provide
 ```php
     // Example 6: Use the SDK NIS Web Service implementations
     // ------------------------------------------------------------
-    $sdk = new SDK();
+    $sdk = new NEM\SDK();
     $service = $sdk->account();
 
     // Generate a new account
@@ -236,7 +236,7 @@ If you are using Laravel or Lumen, you will need to register the Service Provide
 ```php
     // Example 7: Use the SDK to read an account's transactions
     // ------------------------------------------------------------
-    $sdk = new SDK();
+    $sdk = new NEM\SDK();
     $service = $sdk->account();
 
     // Get incoming transaction for an account by its address
@@ -248,6 +248,31 @@ If you are using Laravel or Lumen, you will need to register the Service Provide
 
     // Get unconfirmed transaction for an account by its address
     $unconfirmed = $service->unconfirmedTransactions("TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ");
+```
+
+### Example 8: Derive a Public Key with a hexadecimal or binary Private Key
+
+```php
+    // Example 8: Derive a Public Key with a hexadecimal or binary Private Key
+    // --------------------------------------------------------------------------
+    $privateKey = "e77c84331edbfa3d209c4e68809c98a634ad6e8891e4174455c33be9dd25fce5";
+    $publicKey  = "d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04";
+    $keypair = new NEM\Core\KeyPair($privateKey);
+    var_dump($keypair->getPublicKey("hex")); // will output: 
+
+    // Create with *provided public key* (no derivation - faster)
+    $keypair = new NEM\Core\KeyPair($privateKey, $publicKey);
+```
+
+### Example 9: Create New KeyPair and Address (randomly)
+
+```php
+    // Example 9: Create New KeyPair and Address (randomly)
+    // --------------------------------------------------------------------------
+    $keypair = new NEM\Core\KeyPair();
+    $address = NEM\Models\Address::fromPublicKey($keypair->getPublicKey());
+
+    var_dump($keypair->getPrivateKey("hex"), $address->toClean());
 ```
 
 ## Changelog

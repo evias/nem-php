@@ -124,7 +124,7 @@ class KeyPairBaseTest
     /**
      * Unit test for *Invalid Private Key SIZE error*.
      *
-     * @expectedException \NEM\Errors\NISInvalidPrivateKeySizeException
+     * @expectedException \NEM\Errors\NISInvalidPrivateKeySize
      * @return void
      */
     public function testInvalidPrivateKeySizeError()
@@ -135,7 +135,7 @@ class KeyPairBaseTest
     /**
      * Unit test for *Invalid Private Key CONTENT error*.
      *
-     * @expectedException \NEM\Errors\NISInvalidPrivateKeyContentException
+     * @expectedException \NEM\Errors\NISInvalidPrivateKeyContent
      * @return void
      */
     public function testInvalidPrivateKeyContentError()

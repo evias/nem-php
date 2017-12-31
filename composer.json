@@ -1,7 +1,7 @@
 {
     "name": "evias/nem-php",
-    "description": "Composer Package for PHP (Laravel), Wrapper to use the NEM blockchain REST API",
-    "keywords": ["laravel", "framework", "nem", "cryptocurrency", "api", "restful", "laravel-nem", "evias", "Gregory Saive"],
+    "description": "Composer Package for PHP (Laravel or Pure PHP), Wrapper to use the NEM blockchain REST API and SDK with NIS compatibility.",
+    "keywords": ["laravel", "framework", "nem", "cryptocurrency", "api", "sdk", "restful", "laravel-nem", "evias", "Gregory Saive", "nem-php", "php-nem"],
     "license": "MIT",
     "authors": [
         {

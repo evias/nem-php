@@ -20,7 +20,8 @@
 namespace NEM\Models;
 
 use NEM\Errors\NISInvalidNetworkName;
-use NEM\Errors\NISInvalidVersionByte;
+use NEM\Errors\NISInvalidNetworkId;
+use NEM\Errors\NISInvalidPublicKeyFormat;
 use NEM\Infrastructure\Network;
 use NEM\Contracts\KeyPair;
 use NEM\Core\Buffer;
@@ -51,63 +52,52 @@ class Address
     ];
 
     /**
-     * The Base32/Hex encoder.
-     *
-     * @var \NEM\Core\Encoder 
-     */
-    protected $encoder;
-
-    /**
      * Generate an address corresponding to a `publicKey`
      * public key.
      *
-     * The `publicKey` parameter can be either of a hexadecimal
+     * The `publicKey` parameter can be either a hexadecimal
      * public key representation, a byte level representation
      * of the public key, a Buffer object or a KeyPair object.
      *
      * @param   mixed           $publicKey
-     * @param   string|integer  $networkId        A network ID OR a network name.  
+     * @param   string|integer  $networkId        A network ID OR a network name. (default mainnet)
      * @return  \NEM\Models\Address
      * @throws  \NEM\Errors\NISInvalidPublicKeyFormat   On unidentifiable public key format.
      * @throws  \NEM\Errors\NISInvalidNetworkName       On invalid network name provided in `version` (when string).
      * @throws  \NEM\Errors\NISInvalidVersionByte       On invalid network byte provided in `version` (when integer).
      */
-    static public function fromPublicKey($publicKey, $networkId = 0x68)
+    static public function fromPublicKey($publicKey, $networkId = 104) // 104=mainnet
     {
         // discover public key content
         if ($publicKey instanceof Buffer) {
-            $pubKeyBuf = $publicKey;
+            $pubKeyBuf = $publicKey; // Buffer to public key
         }
         elseif ($publicKey instanceof KeyPair) {
-            $pubKeyBuf = $publicKey->getPublicKey(null);
+            $pubKeyBuf = $publicKey->getPublicKey(null); // Keypair to public key
         }
         elseif (is_string($publicKey) && ctype_xdigit($publicKey)) {
-            $pubKeyBuf = Buffer::fromHex($publicKey, 32);
+            $pubKeyBuf = Buffer::fromHex($publicKey, 32); // Hexadecimal to public key
         }
-        elseif (is_string($publicKey)) {
-            $pubKeyBuf = new Buffer($publicKey, 32);
+        elseif (is_string($publicKey) && mb_strlen($publicKey) === 32) {
+            $pubKeyBuf = new Buffer($publicKey, 32); // Binary to public key
         }
         else {
-            throw new NISInvalidPublicKeyFormat("Could not identify public key format: " . var_export($publicKey));
+            throw new NISInvalidPublicKeyFormat("Could not identify public key format: " . var_export($publicKey, true));
         }
 
         // discover network name / version byte
         if (is_string($networkId) && !is_numeric($networkId) 
             && in_array(strtolower($networkId), ["mainnet", "testnet", "mijin"])) {
             // network name provided, read version byte from SDK
-            $networkId = Network::$networkInfos[strtolower($networkId)]["byte"];
+            $networkId = Network::$networkInfos[strtolower($networkId)]["id"];
         }
         // network name / version byte is important for address creation
         elseif (is_string($networkId)) {
             throw new NISInvalidNetworkName("Invalid network name '" . $networkId . "'");
         }
-        elseif (is_integer($networkId) && !in_array($networkId, [0x68, 0x98, 0x60])) {
-            throw new NISInvalidnetworkIdByte("Invalid version byte '" . $networkId . "'");
+        elseif (is_integer($networkId) && !in_array($networkId, [104, -104, 96])) {
+            throw new NISInvalidNetworkId("Invalid netword ID '" . $networkId . "'");
         }
-
-        // instantiate address encoder
-        $obj = new static;
-        $enc = $obj->getEncoder();
 
         // step 1: keccak-256 hash of the public key
         $pubKeyHash = Keccak::hash($pubKeyBuf->getBinary(), 256, true); // raw=true
@@ -126,9 +116,10 @@ class Address
         $addressHash = $versionPrefixedPubKey->getHex() . $checksum->getHex();
         $hashBuf = Buffer::fromHex($addressHash);
         $encodedAddress = hex2bin($addressHash);
-        $encodedBase32  = new Buffer(Base32::encode($encodedAddress), Address::BYTES);
 
         // step 6: base32 encode (5)
+        $encodedBase32  = new Buffer(Base32::encode($encodedAddress), Address::BYTES);
+
         return new Address([
             "address" => $encodedBase32->getBinary(),
             "publicKey" => $pubKeyBuf->getHex(),
@@ -200,31 +191,5 @@ class Address
     {
         $clean = $this->toClean();
         return trim(chunk_split($clean, 6, '-'), " -");
-    }
-
-    /**
-     * Getter for the `encoder` property.
-     *
-     * @return  \NEM\Core\Encoder
-     */
-    public function getEncoder()
-    {
-        if (!isset($this->encoder)) {
-            $this->encoder = new Encoder();
-        }
-
-        return $this->encoder;
-    }
-
-    /**
-     * Setter for the `encoder` property.
-     *
-     * @param   \NEM\Core\Encoder    $encoder
-     * @return  \NEM\Models\Address
-     */
-    public function setEncoder(Encoder $encoder)
-    {
-        $this->encoder = $encoder;
-        return $this;
     }
 }

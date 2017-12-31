@@ -20,7 +20,7 @@ namespace NEM\Errors;
 
 use RuntimeException;
 
-class NISInvalidPrivateKeySizeException
+class NISInvalidPublicKeyFormat
     extends RuntimeException
 {
 }
