@@ -28,33 +28,35 @@ class Transaction
      * @var array
      */
     protected $fillable = [
-        "timeStamp", // NIS is fault for the "S" not me. :P
-        "amount",
-        "fee",
-        "recipient",
-        "type",
-        "deadline",
-        "message",
-        "version",
-        "signer",
-        "id",
-        "height",
-        "hash",
+        "timeStamp" => "transaction.timeStamp",
+        "amount"  => "transaction.amount",
+        "fee"  => "transaction.fee",
+        "recipient"  => "transaction.recipient",
+        "type"  => "transaction.type",
+        "deadline" => "transaction.deadline",
+        "messagePayload" => "transaction.message.payload",
+        "messageType" => "transaction.message.type",
+        "version" => "transaction.version",
+        "signer" => "transaction.signer",
+        "id" => "meta.id", 
+        "height" => "meta.height", 
+        "hash" => "meta.hash",
+        "message" => "transaction.message"
     ];
 
-    /**
-     * The model instance's relations configuration
-     *
-     * @var array
-     */
-    protected $relations = [
-        "timeStamp",
-        "amount",
-        "fee",
-        "recipient",
-        "message",
-        "signatures"
-    ];
+    // /**
+    //  * The model instance's relations configuration
+    //  *
+    //  * @var array
+    //  */
+    // protected $relations = [
+    //     "timeStamp",
+    //     "amount",
+    //     "fee",
+    //     "recipient",
+    //     "message",
+    //     "signatures"
+    // ];
 
     /**
      * The extend() method must be overloaded by any Transaction Type
