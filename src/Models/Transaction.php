@@ -28,39 +28,35 @@ class Transaction
      * @var array
      */
     protected $fillable = [
-        // NIS "meta" sub DTO (TransactionMetaData)
-        "id"     => "meta.id",
-        "height" => "meta.height",
-        "hash"   => "meta.hash",
-        // NIS "meta.hash" and "meta.innerHash" sub DTOs
-        "outerHash" => "meta.hash.data",
-        "innerHash" => "meta.innerHash.data",
-        // NIS "transaction" sub DTO (Transaction)
         "timeStamp" => "transaction.timeStamp",
-        "amount"    => "transaction.amount",
-        "fee"       => "transaction.fee",
-        "recipient" => "transaction.recipient",
-        "type"      => "transaction.type",
-        "deadline"  => "transaction.deadline",
-        "message"   => "transaction.message",
-        "version"   => "transaction.version",
-        "signer"    => "transaction.signer",
-        "mosaics"   => "transaction.mosaics",
+        "amount"  => "transaction.amount",
+        "fee"  => "transaction.fee",
+        "recipient"  => "transaction.recipient",
+        "type"  => "transaction.type",
+        "deadline" => "transaction.deadline",
+        "messagePayload" => "transaction.message.payload",
+        "messageType" => "transaction.message.type",
+        "version" => "transaction.version",
+        "signer" => "transaction.signer",
+        "id" => "meta.id", 
+        "height" => "meta.height", 
+        "hash" => "meta.hash",
+        "message" => "transaction.message"
     ];
 
-    /**
-     * The model instance's relations configuration
-     *
-     * @var array
-     */
-    protected $relations = [
-        "timeStamp",
-        "amount",
-        "fee",
-        "recipient",
-        "message",
-        "signatures",
-    ];
+    // /**
+    //  * The model instance's relations configuration
+    //  *
+    //  * @var array
+    //  */
+    // protected $relations = [
+    //     "timeStamp",
+    //     "amount",
+    //     "fee",
+    //     "recipient",
+    //     "message",
+    //     "signatures"
+    // ];
 
     /**
      * The extend() method must be overloaded by any Transaction Type
@@ -187,6 +183,7 @@ class Transaction
      */
     public function message($payload = null)
     {
-        return new Message(["payload" => $payload ?: $this->getAttribute("message")]);
+        $messagePayload = $payload ?: $this->getAttribute("message") ?: [];
+        return (new ModelMutator())->mutate("message", $messagePayload);
     }
 }

@@ -135,7 +135,7 @@ class Message
         $plain = "";
         $payload = $hex ?: $this->payload;
         for ($c = 0, $cnt = strlen($payload); $c < $cnt; $c += 2) {
-            $hex = substr($hex, $c, 2);
+            $hex = substr($payload, $c, 2);
             $decimal = hexdec($hex);
             $plain  .= chr($decimal);
         }

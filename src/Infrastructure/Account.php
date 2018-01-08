@@ -58,7 +58,7 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $object = json_decode($response);
+        $object = json_decode($response, true);
         return $this->createAccountModel($object);
     }
 
@@ -75,7 +75,7 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $object = json_decode($response);
+        $object = json_decode($response, true);
         return $this->createAccountModel($object);
     }
 
@@ -93,7 +93,7 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $object = json_decode($response);
+        $object = json_decode($response, true);
         return $this->createAccountModel($object);
     }
 
@@ -109,7 +109,7 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $object = json_decode($response);
+        $object = json_decode($response, true);
         return $this->createAccountModel($object);
     }
 
@@ -125,7 +125,7 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $object = json_decode($response);
+        $object = json_decode($response, true);
         return $this->createBaseModel($object);
     }
 
@@ -154,8 +154,8 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $object = json_decode($response);
-        return $this->createTransactionCollection($object->data); //XXX brr => error/content validation first
+        $object = json_decode($response, true);
+        return $this->createTransactionCollection($object['data']); //XXX brr => error/content validation first
     }
 
     /**
@@ -182,8 +182,8 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $object = json_decode($response);
-        return $this->createTransactionCollection($object->data); //XXX brr => error/content validation first
+        $object = json_decode($response, true);
+        return $this->createTransactionCollection($object['data']); //XXX brr => error/content validation first
     }
 
     /**
@@ -210,8 +210,8 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $object = json_decode($response);
-        return $this->createTransactionCollection($object->data); //XXX brr => error/content validation first
+        $object = json_decode($response, true);
+        return $this->createTransactionCollection($object['data']); //XXX brr => error/content validation first
     }
 
     /**
@@ -233,8 +233,8 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $data = json_decode($response);
-        return $this->createTransactionCollection($object->data); //XXX brr => error/content validation first
+        $data = json_decode($response, true);
+        return $this->createTransactionCollection($object['data']); //XXX brr => error/content validation first
     }
 
     /**
@@ -255,7 +255,7 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $data = json_decode($response);
+        $data = json_decode($response, true);
         return $this->createBaseModel($object); //XXX brr => error/content validation first
     }
 
@@ -272,8 +272,8 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $object = json_decode($response);
-        return $this->createBaseCollection($object->data); //XXX brr => error/content validation first
+        $object = json_decode($response, true);
+        return $this->createBaseCollection($object['data']); //XXX brr => error/content validation first
     }
 
     /**
@@ -303,8 +303,8 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $object = json_decode($response);
-        return $this->createNamespaceCollection($object->data); //XXX brr => error/content validation first
+        $object = json_decode($response, true);
+        return $this->createNamespaceCollection($object['data']); //XXX brr => error/content validation first
     }
 
     /**
@@ -331,8 +331,8 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $object = json_decode($response);
-        return $this->createMosaicCollection($object->data); //XXX brr => error/content validation first
+        $object = json_decode($response, true);
+        return $this->createMosaicCollection($object['data']); //XXX brr => error/content validation first
     }
 
     /**
@@ -349,8 +349,8 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $object = json_decode($response);
-        return $this->createMosaicCollection($object->data); //XXX brr => error/content validation first
+        $object = json_decode($response, true);
+        return $this->createMosaicCollection($object['data']); //XXX brr => error/content validation first
     }
 
     /**
@@ -382,7 +382,7 @@ class Account
 
         //XXX include Error checks
         $object = json_decode($response);
-        return $this->createBaseCollection($object->data); //XXX brr => error/content validation first
+        return $this->createBaseCollection($object['data']); //XXX brr => error/content validation first
     }
 
     /**
