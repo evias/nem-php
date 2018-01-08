@@ -274,14 +274,14 @@ class Model
             // read full path to attribute (get dot notation if available).
             $attribFullPath = isset($this->fillable[$field]) ? $this->fillable[$field] : $field;
 
-            $hasByPath  = array_has($attributes, $attribFullPath);
-            $hasByAlias = array_has($attributes, $field);
+            $hasByPath  = array_has($flattened, $attribFullPath);
+            $hasByAlias = array_has($attributes, $attribFullPath);
             if (! $hasByPath && ! $hasByAlias) {
                 continue;
             }
 
-            $attribValue = $hasByPath ? array_get($attributes, $attribFullPath)
-                                      : array_get($attributes, $field);
+            $attribValue = $hasByPath ? array_get($flattened, $attribFullPath)
+                                      : array_get($attributes, $attribFullPath);
 
             $this->setAttribute($field, $attribValue);
         endforeach ;
@@ -310,6 +310,9 @@ class Model
      */
     public function getAttribute($alias, $doCast = true)
     {
+        if (property_exists($this, $alias))
+            return $this->$alias;
+
         if (array_key_exists($alias, $this->attributes))
             // value available
             return $this->castValue($alias, $this->attributes[$alias], $doCast);

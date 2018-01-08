@@ -89,7 +89,7 @@ class Service
 
         // build HTTP query for GET request
         $query = http_build_query($params);
-        return sprintf("/%s/%s?%s", $cleanUrl, $cleanUri);
+        return sprintf("/%s/%s?%s", $cleanUrl, $cleanUri, $query);
     }
 
     /**

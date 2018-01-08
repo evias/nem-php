@@ -54,6 +54,16 @@ class CollectionMutator
 
         $mutator = new ModelMutator();
         $collection = new ModelCollection;
+        $reflection = new $modelClass;
+
+        if ($reflection instanceof ModelCollection) {
+            // mutating Collection object, the model class is the singular
+            // representation of the passed `$name`.
+
+            $collection = $reflection; // specialize collection
+            $name = Str::singular($name); // attachments=attachment, properties=property, etc..
+        }
+
         for ($i = 0, $m = count($items); $i < $m; $i++) {
             if (!isset($items[$i]))
                 $data = $items;

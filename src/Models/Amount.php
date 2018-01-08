@@ -203,4 +203,24 @@ class Amount
     {
         return (int) $this->divisibility;
     }
+
+    /**
+     * Helper to get the XEM equivalent for a given mosaic definition
+     * `definition` and attachment quantity `quantity`.
+     *
+     * This method is used internally to calculate the equivalent XEM
+     * amounts of a given mosaic quantity for *fees calculation*.
+     *
+     * @internal
+     * @param   \NEM\Models\MosaicDefinition  $definition
+     * @param   integer                       $quantity
+     * @return  integer
+     */
+    static public function mosaicQuantityToXEM($divisibility, $supply, $quantity, $multiplier = Amount::XEM)
+    {
+        if ((int) $supply <= 0) return 0;
+        if ((int) $divisibility <= 0) $divisibility = 0;
+
+        return 8999999999 * $quantity * $multiplier / $supply / pow(10, $divisibility + 6);
+    }
 }

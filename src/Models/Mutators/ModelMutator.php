@@ -35,7 +35,7 @@ class ModelMutator
      * @param  array    $attributes     The model's attribute values.
      * @return \NEM\Models\ModelInterface
      */
-    public function mutate($name, array $attributes)
+    public function mutate($name, $attributes)
     {
         // snake_case to camelCase
         $modelClass = "\\NEM\\Models\\" . Str::studly($name);

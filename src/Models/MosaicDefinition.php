@@ -70,7 +70,7 @@ class MosaicDefinition
      * @param   array   $mosaidId       Array should contain offsets `namespaceId` and `name`.
      * @return  \NEM\Models\Mosaic
      */
-    public function mosaic(array $mosaicId = null)
+    public function id(array $mosaicId = null)
     {
         return new Mosaic($mosaicId ?: $this->getAttribute("mosaicId"));
     }
@@ -99,5 +99,30 @@ class MosaicDefinition
     public function properties(array $properties = null)
     {
         return MosaicProperties($properties ?: $this->getAttribute("properties"));
+    }
+
+    /**
+     * Helper to read a given `name` mosaic property name.
+     * 
+     * @param   string  $name       Mosaic property name.
+     * @return  integer|boolean
+     */
+    public function getProperty($name)
+    {
+        $propertiesNames = [
+            "divisibility"  => 0,
+            "initialSupply" => 1,
+            "supplyMutable" => 2,
+            "transferable"  => 3,
+        ];
+
+        if (! array_key_exists($name, $propertiesNames)) {
+            throw new InvalidArgumentException("Mosaic property name '" . $name ."' is invalid. Must be one of 'divisibility', "
+                                             . "'initialSupply', 'supplyMutable' or 'transferable'");
+        }
+
+        $index = $propertiesNames[$name];
+        $value = $this->properties()->get($index)->value;
+        return $value;
     }
 }

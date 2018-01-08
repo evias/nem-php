@@ -95,10 +95,15 @@ class Multisig
         return $this;
     }
 
-    public function otherTrans()
+    /**
+     * Mutator for the `otherTrans` sub DTO.
+     *
+     * @param   array                   $transaction
+     * @return  \NEM\Models\Transaction
+     */
+    public function otherTrans(array $transaction = null)
     {
-        // identify type by content
-        $typeId = (int) ($this->attributes["otherTrans"]->type);
+        return $this->getAttribute("otherTrans") ?: new Transaction($transaction);
     }
 
     /**

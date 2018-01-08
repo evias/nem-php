@@ -12,15 +12,15 @@
  * @package    evias/nem-php
  * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
+ * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Errors;
+namespace NEM\Models;
 
-use RuntimeException;
-
-class NISInvalidPrivateKeySizeException
-    extends RuntimeException
+class MosaicAttachments
+    extends ModelCollection
 {
+    /** Nothing needed here. **/
 }

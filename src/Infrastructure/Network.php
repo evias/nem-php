@@ -1,78 +1,98 @@
 <?php
-
-
+/**
+ * Part of the evias/nem-php package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under MIT License.
+ *
+ * This source file is subject to the MIT License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    evias/nem-php
+ * @version    1.0.0
+ * @author     Grégory Saive <greg@evias.be>
+ * @author     Robin Pedersen (https://github.com/RobertoSnap)
+ * @license    MIT License
+ * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @link       http://github.com/evias/nem-php
+ */
 namespace NEM\Infrastructure;
 
-use NEM\NemSDK;
+use NEM\Models\Address;
+use NEM\Errors\NISInvalidAddressFormat;
+use NEM\Errors\NISInvalidNetworkId;
 
-class Network {
+class Network
+    extends Service
+{
+    /**
+     * Array of available networks by name.
+     *
+     * @var array 
+     */
+    static public $networkInfos = [
+        "mainnet" => [
+            "id"   => 104,
+            "hex"  => "68", // N
+            "char" => 'N',
+        ],
+        "testnet" =>  [
+            "id"   => -104,
+            "hex"  => "98", // T
+            "char" => 'T',
+        ],
+        "mijin"   =>  [
+            "id"   => 96,
+            "hex"  => "60", // M
+            "char" => 'N',
+        ],
+    ];
 
-	public $nemSDK;
-	public $version;
-	public $networkType;
+    /**
+     * Load a NetworkInfo object from an `address`.
+     *
+     * @param   string|\NEM\Models\Address  $address
+     * @return  \NEM\Models\Model
+     * @throws  \NEM\Errors\NISInvalidAddressFormat     On invalid address format or unrecognized address first character.
+     */
+    static public function fromAddress($address)
+    {
+        if ($address instanceof Address) {
+            $addr = $address->toClean();
+            $prefix = substr($addr, 0, 1);
+        }
+        elseif (is_string($address)) {
+            $prefix = substr($address, 0, 1);
+        }
+        else {
+            throw new NISInvalidAddressFormat("Could not identify address format: " . var_export($address, true));
+        }
 
-	public function __construct( NemSDK $nemSDK ) {
-		$this->nemSDK = $nemSDK;
-	}
+        foreach (self::$networkInfos as $name => $spec) {
+            $netChar = $spec['char'];
 
-	public function getVersion( $identifier = null, $version = 1 ) {
-		if ( ! empty( $this->version[ $version ] ) ) {
-			return $this->version[ $version ];
-		}
-		$this->checkNetwork( $identifier );
+            if ($prefix == $netChar)
+                return $this->createBaseModel($spec);
+        }
 
-		return $this->version[ $version ];
-	}
+        throw new NISInvalidAddressFormat("Could not identify network from provided address: " . var_export($address, true));
+    }
 
-	public function getNetworkType( $identifier = null ) {
-		if ( ! empty( $this->networkType ) ) {
-			return $this->networkType;
-		}
-		$this->checkNetwork( $identifier );
+    /**
+     * Helper to get a network address prefix hexadecimal representation
+     * from a network id.
+     *
+     * @param   integer     $networkId
+     * @return  string 
+     */
+    static public function getPrefixFromId($networkId)
+    {
+        foreach (self::$networkInfos as $name => $spec) {
+            if ($networkId === $spec['id'])
+                return $spec['hex'];
+        }
 
-		return $this->networkType;
-	}
-
-	private function checkNetwork( $identifier = null ) {
-		if ( preg_match( '/^([A-Z]{1})[A-Z0-9-]{39,45}$/', strtoupper( $identifier ), $matches ) ) {
-			if ( $matches[1] === "N" ) {
-				$this->setNetworkType( "MAINNET" );
-			} elseif ( $matches[1] === "T" ) {
-				$this->setNetworkType( "TESTNET" );
-			} else {
-				throw new \Exception( "Could not indentify Nem Network type from identifier. Assumed string and address." );
-			}
-		} else {
-			$networkId = ( $this->nemSDK->node()->info() )->metaData->networkId;
-			if ( $networkId === 104 ) {
-				$this->setNetworkType( "main" );
-			} elseif ( $networkId === - 104 ) {
-				$this->setNetworkType( "test" );
-			} else {
-				throw new \Exception( "Could not indentify Nem Network type from calling the node. Assumed nothing as identfier" );
-			}
-		}
-	}
-
-	private function setNetworkType( $type ) {
-		switch ( true ) {
-			case stripos( $type, "main" ) !== false:
-				$this->version     = [
-					1 => 1744830465,
-					2 => 1744830466,
-				];
-				$this->networkType = "MAINNET";
-				break;
-			case stripos( $type, "test" ) !== false:
-				$this->version     = [
-					'1' => - 1744830463,
-					'2' => - 1744830462,
-				];
-				$this->networkType = "TESTNET";
-				break;
-			default:
-				throw new \Exception( "Could not setNetworkType in NemSDK " );
-		}
-	}
-
+        throw new NISInvalidNetworkId("Network Id '" . $networkId . "' is invalid.");
+    }
 }
