@@ -183,6 +183,7 @@ class Transaction
      */
     public function message($payload = null)
     {
-        return new Message(["payload" => $payload ?: $this->getAttribute("message")]);
+        $messagePayload = $payload ?: $this->getAttribute("message") ?: [];
+        return (new ModelMutator())->mutate("message", $messagePayload);
     }
 }
