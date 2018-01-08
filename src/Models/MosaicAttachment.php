@@ -42,6 +42,15 @@ class MosaicAttachment
     ];
 
     /**
+     * List of automatic *value casts*.
+     *
+     * @var array
+     */
+    protected $casts = [
+        "quantity" => "int",
+    ];
+
+    /**
      * Address DTO automatically cleans address representation.
      *
      * @return  array       Associative array with key `address` containing a NIS *compliable* address representation.

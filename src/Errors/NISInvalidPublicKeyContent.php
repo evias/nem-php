@@ -20,7 +20,7 @@ namespace NEM\Errors;
 
 use RuntimeException;
 
-class NISInvalidPrivateKeyContentException
+class NISInvalidPublicKeyContent
     extends RuntimeException
 {
 }

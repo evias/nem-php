@@ -116,7 +116,18 @@ class Fee
      */
     static public function calculateForTransaction(Transaction $transaction)
     {
-        return 0.00;
+        // generate each content fee accordingly
+        $msgFee = self::calculateForMessage($transaction->message());
+
+        // default content fee is XEM amount transfer fee
+        $contentFee = Fee::FEE_FACTOR * self::calculateForXEM($transaction->amount()->toMicro() / Amount::XEM);
+
+        // version 2 transaction fees prevail over version 1 (no mosaics)
+        if ($transaction instanceof \NEM\Models\Transaction\MosaicTransfer) {
+            $contentFee = self::calculateForMosaics($transaction->mosaics(), $transaction->amount()->toMicro());
+        }
+
+        return floor(($msgFee + $contentFee) * Amount::XEM);
     }
 
     /**
@@ -152,12 +163,46 @@ class Fee
      * transaction's needed fees.
      *
      * @internal
-     * @param   string     $message
+     * @param   \NEM\Models\MosaicAttachments   $attachments    Collection of MosaicAttachment objects.
+     * @param   integer                         $multiplier
      * @return  \NEM\Models\Fee
      */
-    static public function calculateForMosaics(array $mosaics, $multiplier = Amount::XEM)
+    static public function calculateForMosaics(MosaicAttachments $attachments, $multiplier = Amount::XEM)
     {
-        return 0.00;
+        if ($attachments->isEmpty())
+            return 0;
+
+        $totalFee = 0;
+        foreach ($attachments as $attachment) {
+            $fqn = $attachment->getFQN();
+            $def = MosaicRegistry::getDefinition($fqn);
+
+            // read properties for calculations
+            $divisibility = $def->getProperty("divisibility") ?: 0;
+            $supply   = $def->getProperty("initialSupply") ?: 0;
+            $quantity = $attachment->quantity;
+            $supplyAdjust = 0;
+
+            // small business mosaic fee
+            if ($supply <= 10000 && $divisibility === 0) {
+                $fee = Fee::FEE_FACTOR;
+            }
+            // all other mosaics are first converted to XEM amounts
+            else {
+                $maxQuantity   = 9000000000000000;
+                $totalQuantity = $supply * pow(10, $divisibility);
+                $supplyAdjust  = floor(0.8 * log($maxQuantity / $totalQuantity));
+                $xemAmount     = Amount::mosaicToXEM($attachment->mosaicId(), $quantity);
+
+                // mosaic fee is calculate the same a XEM amounts after being converted.
+                $fee = self::calculateForXEM(ceil($xemAmount));
+            }
+
+            // add current mosaic attachment's fee
+            $totalFee += Fee::FEE_FACTOR * max([1, $fee - $supplyAdjust]);
+        }
+
+        return $totalFee;
     }
 
     /**
@@ -170,7 +215,7 @@ class Fee
      * @param   string     $message
      * @return  \NEM\Models\Fee
      */
-    static public function calculateMinimum($amountXEM = Amount::XEM)
+    static public function calculateForXEM($amountXEM = Amount::XEM)
     {
         $fee = floor(max([1, $amountXEM / 10000]));
         return $fee > 25 ? 25 : $fee;

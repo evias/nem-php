@@ -11,7 +11,13 @@ This project follows [Semantic Versioning](CONTRIBUTING.md).
 - implement necessary infrastructure service abstraction layer (NIS Web Services)
 - implement NIS API requests
 - implement unit test suite for NEM\API and NEM\SDK
-- include examples into README.md as a first (will include examples/ folder later)s
+- include examples into README.md as a first (will include examples/ folder later)
+- implement Keccak+ed25519-ref10(donna) KeyPair generation for NEM KeyPair
+- implement some pre-configured MosaicDefinition from the NEM Mainnet Network
+- implement Fee Structure into SDK (minimum, messages, mosaics and transaction fees)
+
+- implement AES encryption for NEM blockchain encrypted messages
+- implement laravel abstraction (Facades and Events)
 
 ### v0.0.3
 

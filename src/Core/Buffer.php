@@ -250,7 +250,7 @@ class Buffer
      */
     public function getInternalSize()
     {
-        return strlen($this->buffer);
+        return mb_strlen($this->buffer, "UTF-8");
     }
 
     /**
@@ -271,12 +271,12 @@ class Buffer
     {
         // if a size is specified we'll make sure the value returned is *strictly* of that size
         if ($this->size !== null) {
-            if (strlen($this->buffer) < $this->size) {
+            if (mb_strlen($this->buffer) < $this->size) {
                 // internal size of buffer is *too small*
                 // will now pad the string (zeropadding).
                 return str_pad($this->buffer, $this->size, chr(0), STR_PAD_LEFT);
             }
-            elseif (strlen($this->buffer) > $this->size) {
+            elseif (mb_strlen($this->buffer) > $this->size) {
                 // buffer size overflow - truncate the buffer
                 return substr($this->buffer, 0, $this->size);
             }

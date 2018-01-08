@@ -45,4 +45,14 @@ class Mosaic
             "name" => $this->name,
         ];
     }
+
+    /**
+     * Getter for the *fully qualified name* of the Mosaic.
+     *
+     * @return string
+     */
+    public function getFQN()
+    {
+        return sprintf("%s:%s", $this->namespaceId, $this->name);
+    }
 }

@@ -165,4 +165,52 @@ class AmountDTOTest
         $this->assertEquals($expectedAmount, $amountA->toMicro());
         $this->assertEquals($expectedUnit, $amountA->toUnit());
     }
+
+    /**
+     * Data provider for `testMosaicAmountXEMRepresentation` Unit Test.
+     *
+     * Each row should contain 5 fields in following *strict* order:
+     *
+     * - multiplier:           Micro XEM attachment multiplier.
+     * - quantity:        Fractional mosaic amount (smallest unit of the mosaic)
+     * - supply:               Total Supply of the Mosaic.
+     * - divisibility:         The mosaic divisibility.
+     * - expectedAmount:       Expected amount returned by the Amount model in MICRO XEM.
+     *
+     * @return array
+     */
+    public function mosaicAmountVectorsProvider()
+    {
+        return [
+            [1000000, 1, 9000000000, 6, 9.99999999888889e-7],
+            [1000000, 1000, 9000000000, 6, 0.000999999999888889],
+            [1000000, 1000000, 9000000000, 6, 0.9999999998888889],
+            [1000000, 1, 9000000000, 0, 0.9999999998888889],
+            [1000000, 1000, 9000000000, 0, 999.999999888889],
+            [1000000, 1000000, 9000000000, 0, 999999.9998888889],
+            [1000000, 100, 10, 0, 89999999990],
+            [1000000, 5, 10, 0, 4499999999.5],
+            [10000000, 5, 10, 0, 44999999995],
+        ];
+    }
+
+    /**
+     * Test mosaic amount XEM equivalency.
+     *
+     * @depends testNISAmountDTOStructure
+     * @dataProvider mosaicAmountVectorsProvider
+     *
+     * @param       integer         $multiplier
+     * @param       integer         $quantity
+     * @param       integer         $supply
+     * @param       integer         $divisibility
+     * @param       integer         $expectedAmount
+     * @return void
+     */
+    public function testMosaicAmountXEMRepresentation($multiplier, $quantity, $supply, $divisibility, $expectedAmount)
+    {
+        $toXEM = Amount::mosaicQuantityToXEM($divisibility, $supply, $quantity, $multiplier);
+
+        $this->assertEquals($expectedAmount, $toXEM);
+    }
 }

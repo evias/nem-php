@@ -22,6 +22,9 @@ namespace NEM\Models;
 class MosaicLevy
     extends Model
 {
+    const TYPE_ABSOLUTE = 1;
+    const TYPE_PERCENTILE = 2;
+
     /**
      * List of fillable attributes
      *

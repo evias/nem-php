@@ -84,7 +84,7 @@ class KeyGenerator
 
         // build Buffer object from UInt8 and return byte-level representation
         $encoder = new Encoder;
-        $safeSecret = $encoder->ua2bin($clampSecret)->getBinary();
+        $safeSecret = $encoder->ua2bin($clampSecret);
         return $safeSecret;
     }
 }

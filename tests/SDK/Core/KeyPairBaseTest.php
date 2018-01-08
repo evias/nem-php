@@ -124,7 +124,7 @@ class KeyPairBaseTest
     /**
      * Unit test for *Invalid Private Key SIZE error*.
      *
-     * @expectedException \NEM\Errors\NISInvalidPrivateKeySizeException
+     * @expectedException \NEM\Errors\NISInvalidPrivateKeySize
      * @return void
      */
     public function testInvalidPrivateKeySizeError()
@@ -135,12 +135,34 @@ class KeyPairBaseTest
     /**
      * Unit test for *Invalid Private Key CONTENT error*.
      *
-     * @expectedException \NEM\Errors\NISInvalidPrivateKeyContentException
+     * @expectedException \NEM\Errors\NISInvalidPrivateKeyContent
      * @return void
      */
     public function testInvalidPrivateKeyContentError()
     {
         // first character 'z' is not a valid hexadecimal character.
         $kp = KeyPair::create("z0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde");
+    }
+
+    /**
+     * Unit test for *Invalid Public Key SIZE error*.
+     *
+     * @expectedException \NEM\Errors\NISInvalidPublicKeySize
+     * @return void
+     */
+    public function testInvalidPublicKeySizeError()
+    {
+        $kp = KeyPair::create("e77c84331edbfa3d209c4e68809c98a634ad6e8891e4174455c33be9dd25fce5", "1234");
+    }
+
+    /**
+     * Unit test for *Invalid Public Key CONTENT error*.
+     *
+     * @expectedException \NEM\Errors\NISInvalidPublicKeyContent
+     * @return void
+     */
+    public function testInvalidPublicKeyContentError()
+    {
+        $kp = KeyPair::create("e77c84331edbfa3d209c4e68809c98a634ad6e8891e4174455c33be9dd25fce5", "z0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde");
     }
 }

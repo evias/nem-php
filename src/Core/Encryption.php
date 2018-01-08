@@ -20,6 +20,9 @@ namespace NEM\Core;
 
 use NEM\Core\KeyPair;
 use NEM\Core\Buffer;
+use kornrunner\Keccak;
+
+use RuntimeException;
 
 class Encryption
 {
@@ -65,6 +68,34 @@ class Encryption
     }
 
     /**
+     * Helper to hash the provided buffer `data`'s content
+     * with algorithm `algo`.
+     * 
+     * The hash algorithm can contain `keccak-256` for example.
+     * 
+     * @param   string              $algo
+     * @param   \NEM\Core\Buffer    $data
+     * @return  \NEM\Core\Buffer
+     */
+    public static function hash($algo, Buffer $data)
+    {
+        if (in_array($algo, hash_algos())) {
+            $hash = hash($algo, $data->getBinary(), true);
+        }
+        if (strpos(strtolower($algo), "keccak") !== false) {
+            $bits = (int) substr($algo, -3); // keccak-256, keccak-512, etc.
+
+            // use Keccak instead of PHP hash()
+            $hash = Keccak::hash($data->getBinary(), $bits, true);
+        }
+        else {
+            throw new RuntimeException("Unsupported hash algorithm '" . $algo . "'.");
+        }
+
+        return new Buffer($hash);
+    }
+
+    /**
      * HMAC : Hash based Message Authentication Code
      *
      * A MAC authenticates a message. It is a signature based on a secret key (salt).
@@ -77,6 +108,22 @@ class Encryption
     public static function hmac($algo, Buffer $data, Buffer $salt)
     {
         return new Buffer(hash_hmac($algo, $data->getBinary(), $salt->getBinary(), true));
+    }
+
+    /**
+     * Generate a checksum of data buffer `data` and of length
+     * `checksumLen`. Default length is 4 bytes.
+     *
+     * @param   string              $algo
+     * @param   \NEM\Core\Buffer    $data
+     * @param   integer             $checksumLen
+     * @return  \NEM\Core\Buffer 
+     */
+    public static function checksum($algo, Buffer $data, $checksumLen = 4)
+    {
+        $hash = static::hash($algo, $data)->getBinary();
+        $out = new Buffer(substr($hash, 0, $checksumLen), $checksumLen);
+        return $out;
     }
 
     /**
