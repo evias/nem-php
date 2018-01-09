@@ -73,6 +73,9 @@ class Message
         $helper = new CryptoHelper();
         $plain  = $this->toPlain();
 
+        if (empty($plain))
+            $this->type = Message::TYPE_SIMPLE;
+
         if ($this->type == Message::TYPE_HEX) {
 
             if (! ctype_xdigit($plain)) {

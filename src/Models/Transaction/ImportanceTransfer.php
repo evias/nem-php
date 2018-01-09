@@ -20,6 +20,7 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\Account;
 
 class ImportanceTransfer
     extends Transaction

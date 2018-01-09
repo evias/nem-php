@@ -33,8 +33,8 @@ class Account
         // NIS "meta" sub DTO (AccountMetaData)
         "status"        => "meta.status",
         "remoteStatus"  => "meta.remoteStatus",
-        "cosignatoryOf" => "meta.cosignatoryOf",
-        "cosignatories" => "meta.cosignatories",
+//        "cosignatoryOf" => "meta.cosignatoryOf",
+//        "cosignatories" => "meta.cosignatories",
         // NIS "account" sub DTO (AccountInfo)
         "address"       => "account.address",
         "publicKey"     => "account.publicKey",

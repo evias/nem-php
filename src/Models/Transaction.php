@@ -19,6 +19,8 @@
  */
 namespace NEM\Models;
 
+use NEM\Models\Mutators\ModelMutator;
+
 class Transaction
     extends Model
 {
@@ -169,9 +171,9 @@ class Transaction
      */
     public function fee($fee = null)
     {
-        $amount = $fee ?: $this->attributes["fee"];
+        $amount = $fee ?: $this->getAttribute("fee");
         if (!$amount)
-            $amount = Fee::calculateForTransaction($this)->toMicro();
+            $amount = Fee::calculateForTransaction($this);
 
         return new Fee(["amount" => $amount]);
     }

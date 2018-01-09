@@ -173,8 +173,14 @@ class Model
      */
     public function __construct($attributes = [])
     {
-        if (is_array($attributes))
+        if (is_array($attributes)) {
+            // assign attributes
             $this->setAttributes($attributes);
+        }
+        elseif ($attributes instanceof DataTransferObject) {
+            // copy attributes
+            $this->setAttribute($attributes->getAttributes());
+        }
     }
 
     /**
@@ -261,6 +267,7 @@ class Model
     public function setAttributes(array $attributes)
     {
         $flattened = array_dot($attributes);
+
         $fields = $this->getFields();
         if (empty($fields))
             $fields = array_keys($attributes);
@@ -275,13 +282,27 @@ class Model
             $attribFullPath = isset($this->fillable[$field]) ? $this->fillable[$field] : $field;
 
             $hasByPath  = array_has($flattened, $attribFullPath);
-            $hasByAlias = array_has($attributes, $attribFullPath);
+            $hasByAlias = array_has($attributes, $field);
+
             if (! $hasByPath && ! $hasByAlias) {
+                // try deep find and continue
+
+                // browse attributes array in depth.
+                $attrib = $attributes;
+                foreach (explode(".", $attribFullPath) as $key) {
+                    if (! isset($attrib[$key]))
+                        $attrib[$key] = null;
+
+                    $attrib = $attrib[$key];
+                }
+
+                $this->setAttribute($field, $attrib);
                 continue;
             }
 
+            // use attribute path or alias
             $attribValue = $hasByPath ? array_get($flattened, $attribFullPath)
-                                      : array_get($attributes, $attribFullPath);
+                                      : array_get($attributes, $field);
 
             $this->setAttribute($field, $attribValue);
         endforeach ;
@@ -332,9 +353,13 @@ class Model
             // no value available + no relation
             return isset($this->dotAttributes[$alias]) ? $this->castValue($alias, $this->dotAttributes[$alias], $doCast) : null;
 
-        if ($this->related[$alias] instanceof Model)
-            // forward getAttribute on subordinate DTO (on the related object)
-            return $this->related[$alias]->getAttribute($alias);
+        if ($this->related[$alias] instanceof Model) {
+            // getAttribute should return DTO data.
+            return $this->attributes[$alias];
+        }
+        elseif ($this->related[$alias] instanceof ModelCollection) {
+            return $this->related[$alias]->toDTO();
+        }
 
         return $this->related[$alias];
     }
