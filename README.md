@@ -275,6 +275,69 @@ If you are using Laravel or Lumen, you will need to register the Service Provide
     var_dump($keypair->getPrivateKey("hex"), $address->toClean());
 ```
 
+## Troubleshoot / Issues Resolution
+
+### Installing dependencies with MacOS MAMP or MAMP Pro
+
+It may happen that your PHP server is not installed in the correct version or does not load the right extensions so here is a little snippet that will provide you with the exact PHP version needed (you also need to compile httpd).
+
+First you will need to rebuilt the httpd service :
+
+```bash
+mkdir ~/httpd-2.2.34/
+
+# Download httpd source code
+cd ~/Downloads
+wgets http://apache.belnet.be//httpd/httpd-2.2.34.tar.bz2
+tar xvzf httpd-2.2.34.tar.bz2
+
+# We now have the HTTPD source code unarchived
+cd httpd-2.2.34
+./configure
+make
+make install
+```
+
+The above step is only because MAMP does not include the Apache build/ folder (which you can now find under `~/httpd-2.2.34/`). Ok, next step is to recompile PHP *as an Apache Module* as required by MAMP. Following snippet will let you download and compile the PHP package with MacOS and MAMP, enabling GMP, GD, MySQL, XML, CURL, GETTEXT and BCMATH modules.
+
+```bash
+# This is where the *built* PHP will be installed.
+mkdir ~/php-7.1.8/
+
+# Download php source code
+cd ~/Downloads
+wgets http://de2.php.net/get/php-7.1.8.tar.bz2/from/this/mirror
+tar xvzf php-7.1.8.tar.bz2
+
+# We now have the PHP source code unarchived
+cd php-7.1.8
+
+# MacOS
+brew install intltool icu4c gettext
+brew link icu4c gettext
+./configure --with-apxs2=/Applications/MAMP/Library/bin/apxs --prefix=/Users/greg/php-7.1.8 --enable-intl --with-gmp --with-xmlrpc --enable-bcmath --with-curl=/usr --with-gettext=/usr/local/Cellar/gettext/ --with-gd --with-pdo-mysql --with-openssl=/usr/local/Cellar/openssl/1.0.2n/
+make
+make install
+# End-MacOS
+
+# Linux
+./configure --prefix=/home/greg/php-7.1.8 --enable-intl --with-gmp --with-xmlrpc --enable-bcmath --with-curl=/usr --with-gettext --with-gd --with-pdo-mysql --with-openssl
+make
+make install
+# End-Linux
+```
+
+After building the PHP source code you will also need to link to that file in your system. Following is an easy workaround, but *please*, make sure to backup any file before you overwrite executables.
+
+The compilation of PHP will have installed a file: `~/httpd-2.2.34/modules/libphp7.so`, you must link your system to that file in order to use the correct PHP modules. Use following snippet to link both, the PHP apache module and the PHP executable in your MAMP installation.
+
+```bash
+mkdir /Applications/MAMP/Library/build
+cp -R /Users/greg/httpd-2.2.34/build/* /Applications/MAMP/Library/build/
+sudo ln -s /Users/greg/httpd-2.2.34/modules/libphp7.so /Applications/MAMP/bin/php/php7.1.8/modules/
+sudo ln -s /Users/greg/php-7.1.8/bin/php /usr/local/bin/php
+```
+
 ## Changelog
 
 Important versions listed below. Refer to the [Changelog](CHANGELOG.md) for a full history of the project.

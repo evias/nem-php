@@ -173,13 +173,13 @@ class Model
      */
     public function __construct($attributes = [])
     {
-        if (is_array($attributes)) {
+        if (is_array($attributes) && !empty($attributes)) {
             // assign attributes
             $this->setAttributes($attributes);
         }
         elseif ($attributes instanceof DataTransferObject) {
             // copy attributes
-            $this->setAttribute($attributes->getAttributes());
+            $this->setAttributes($attributes->getAttributes());
         }
     }
 
@@ -250,6 +250,7 @@ class Model
     {
         $fields = array_keys($this->fillable);
         if (!empty($fields) && is_integer($fields[0]))
+            // only alias provided
             $fields = array_values($this->fillable);
 
         return array_merge($fields, $this->appends, array_keys($this->attributes));
