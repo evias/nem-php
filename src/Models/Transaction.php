@@ -117,12 +117,12 @@ class Transaction
     {
         $baseMeta = $this->meta();
         $baseEntity = [
-            "timeStamp" => $this->timeStamp()->toNEMTime(),
+            "timeStamp" => $this->timeStamp()->toDTO(),
             "amount"    => $this->amount()->toMicro(),
             "fee"       => $this->fee()->toMicro(),
             "recipient" => $this->recipient()->address()->toClean(),
             "type"      => (int) $this->attributes["type"],
-            "deadline"  => $this->timeStamp()->deadline()->toNEMTime(),
+            "deadline"  => $this->deadline()->toDTO(),
             "message"   => $this->message()->toDTO(),
             "version"   => (int) $this->attributes["version"],
             "signer"    => $this->attributes["signer"],
@@ -140,6 +140,24 @@ class Transaction
             return $toDTO[$filterByKey];
 
         return $toDTO;
+    }
+
+    /**
+     * Returns timestamp of the transaction.
+     *
+     * @return int
+     */
+     public function timestamp($timestamp = null) {
+        return new TimeWindow(["timeStamp" => $timestamp ?: $this->getAttribute("timeStamp")]);
+    }
+
+    /**
+     * Returns deadline associated with the transaction
+     *
+     * @return int
+     */
+    public function deadline($deadline = null) {
+        return new TimeWindow(["timeStamp" => $deadline ?: $this->getAttribute("deadline")]);
     }
 
     /**
