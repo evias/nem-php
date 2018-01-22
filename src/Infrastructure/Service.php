@@ -84,7 +84,7 @@ class Service
         $cleanUrl = trim($this->getBaseUrl(), "/ ");
         $cleanUri = trim($uri, "/ ");
 
-        if ($buildQuery === false || empty($params))
+        if ($withQuery === false || empty($params))
             return sprintf("%s/%s", $this->getBaseUrl(), $cleanUri);
 
         // build HTTP query for GET request

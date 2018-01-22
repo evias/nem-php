@@ -41,7 +41,7 @@ class Account
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks
-        $object = json_decode($response);
+        $object = json_decode($response, true);
         return $this->createAccountModel($object); //XXX brr => error/content validation first
     }
 
