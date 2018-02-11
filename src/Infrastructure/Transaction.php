@@ -1,77 +1,88 @@
 <?php
-
-
+/**
+ * Part of the evias/nem-php package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under MIT License.
+ *
+ * This source file is subject to the MIT License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    evias/nem-php
+ * @version    1.0.0
+ * @author     Grégory Saive <greg@evias.be>
+ * @author     Robin Pedersen (https://github.com/RobertoSnap)
+ * @license    MIT License
+ * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @link       http://github.com/evias/nem-php
+ */
 namespace NEM\Infrastructure;
 
+use NEM\Models\Transaction as TxModel;
+use NEM\Core\KeyPair;
+use NEM\Core\Serializer;
 
-use NEM\Models\Transaction\Multisig;
-use NEM\Models\Transaction\Transfer;
-use NEM\Models\Transaction\Mosaic;
-use NEM\NemSDK;
+class Transaction 
+    extends Service
+{
+    /**
+     * The Base URL for this endpoint.
+     *
+     * @var string
+     */
+    protected $baseUrl = "/transaction";
 
-class Transaction {
-	public $nemSDK;
-	private $multisig = false;
-	private $transaction;
+    /**
+     * Announce a transaction. The transaction will be serialized before
+     * it is sent to the server. 
+     * 
+     * Additionally, a KeyPair object can be passed to this method *if you wish 
+     * to have the transaction **signed locally** by the SDK instead of letting
+     * the remote NIS sign for you*. The local signing method **is recommended**.
+     * 
+     * @param   \NEM\Models\Transaction     $transaction
+     * @return  \NEM\Models\Transaction
+     */
+    public function announce(TxModel $transaction, KeyPair $kp = null)
+    {
+        $serializer = new Serializer();
+        $serialized = $serializer->serialize($transaction);
+        $signature  = null !== $kp ? $kp->sign($serialized) : null;
+        $broadcast  = [];
 
-	public function __construct( NemSDK $nemSDK ) {
-		$this->nemSDK = $nemSDK;
-	}
+        if ($signature) {
+            $endpoint  = "transaction/announce";
+            $broadcast = [
+                "data" => $serialized,
+                "signature" => $signature,
+            ];
+        }
+        else {
+            $endpoint  = "transaction/prepare-announce";
+            $broadcast = $transaction->toDTO();
+        }
 
-	/*Multisig*/
-	public function multisig( $multisigPublicKey, $multisigPrivateKey ) {
-		$this->transaction = new Multisig( $this->nemSDK, $multisigPublicKey, $multisigPrivateKey );
-		$this->multisig    = true;
+        $apiUrl = $this->getPath($endpoint, []);
+        $response = $this->api->post($apiUrl, $params);
 
-		return $this;
-	}
+        //XXX include Error checks
+        $object = json_decode($response);
+        return $this->createBaseModel($object); //XXX brr => error/content validation first
+    }
 
+    /**
+     * Gets a transaction meta data pair where the transaction hash corresponds
+     * to the said `hash` parameter.
+     */
+    public function byHash($hash)
+    {
+        $params = ["hash" => $hash];
+        $apiUrl = $this->getPath('transfers/incoming', $params);
+        $response = $this->api->getJSON($apiUrl);
 
-	public function transfer( $recipient, $amount, $message, $senderPublicKey, $senderPrivateKey = null, $mosaics = array(), $fee = "auto", $encrypted = false ) {
-		if ( $this->multisig ) {
-			$this->transaction->setOtherTrans( ( new Transfer( $this->nemSDK, $recipient, $amount, $message, $senderPublicKey, $this->transaction->multisigPrivateKey, $fee, $encrypted, $mosaics ) )->toDTO() );
-		} else {
-			$this->transaction = new Transfer( $this->nemSDK, $recipient, $amount, $message, $senderPublicKey, $senderPrivateKey, $fee, $encrypted, $mosaics );
-		}
-
-		return $this->sendTransaction();
-	}
-
-	/**
-	 * @param       $mosaicName
-	 * @param       $mosaicDescription
-	 * @param       $namespaceId
-	 * @param       $signerPublicKey
-	 * @param       $signerPrivateKey
-	 * @param array $properties = [
-	 *                          'divisibility' => 2, //default 0
-	 *                          'initialSupply' => 5000, //default 1000
-	 *                          'supplyMutable' => true, //default  true
-	 *                          'transferable' => false, //default true
-	 *                          ]
-	 *
-	 * @param array $levy       = [
-	 *                          'type' => 1, // 1 is fixed fee, 2 is % fee. Default 1
-	 *                          'recipient' => "TCRE2YAZ7DWF4WL5BU3VPZ2ZWFHD6WGIKRG26IZO", //No default
-	 *                          'fee' => 10, //No default
-	 *                          "namespace" => 'snap', //default nem
-	 *                          'mosaic' => 'coin' //default xem
-	 *                          ]
-	 *
-	 * @return Mosaic
-	 */
-	public function mosaic( $mosaicName, $mosaicDescription, $namespaceId, $signerPublicKey, $signerPrivateKey = null, $properties = array(), $levy = array() ) {
-		if ( $this->multisig ) {
-			$this->transaction->setOtherTrans( ( new Mosaic( $this->nemSDK, $mosaicName, $mosaicDescription, $namespaceId, $signerPublicKey, $this->transaction->multisigPrivateKey, $properties, $levy ) )->toDTO() );
-		} else {
-			$this->transaction = new Mosaic( $this->nemSDK, $mosaicName, $mosaicDescription, $namespaceId, $signerPublicKey, $signerPrivateKey, $properties, $levy );
-		}
-
-		return $this->sendTransaction();
-	}
-
-	private function sendTransaction() {
-		return json_decode( $this->nemSDK->api->post( '/transaction/prepare-announce', $this->transaction->toDTO() ) );
-	}
-
+        //XXX include Error checks
+        $object = json_decode($response, true);
+        return $this->createTransactionModel($object['data']); //XXX brr => error/content validation first
+    }
 }

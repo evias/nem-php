@@ -21,10 +21,13 @@ namespace NEM\Core;
 
 use NEM\Contracts\KeyPair as KeyPairContract;
 use NEM\Core\Buffer;
-use NEM\Errors\NISInvalidPrivateKeySize;
+use NEM\Core\Encryption;
+use NEM\Errors\NISInvalidPrivateKeySize;    
 use NEM\Errors\NISInvalidPrivateKeyContent;
 use NEM\Errors\NISInvalidPublicKeySize;
 use NEM\Errors\NISInvalidPublicKeyContent;
+use NEM\Errors\NISInvalidSignatureContent;
+use \ParagonIE_Sodium_Core_Ed25519;
 
 class KeyPair
     implements KeyPairContract
@@ -166,6 +169,33 @@ class KeyPair
         }
 
         return $address->toClean();
+    }
+
+    /**
+     * This method returns a 64 bytes signature of the *data signed with the
+     * current `secretKey`*.
+     * 
+     * You can also specify the `enc` parameter to be "hex", "uint8" or "int32".
+     * 
+     * @param   null|string|\NEM\Core\Buffer   $data      The data that needs to be signed.
+     * @param   string|integer                 $enc       Which encoding to use (One of: "hex", "uint8", "int32")
+     * @return  \NEM\Core\Buffer|string|array   Returns either of Buffer, string hexadecimal representation, or UInt8 or Int32 array.
+     */
+    public function sign($data, $enc = null)
+    {
+        if ($data instanceof Buffer) {
+            $data = $data->getBinary();
+        }
+        elseif (is_string($data) && ctype_xdigit($data)) {
+            $data = Buffer::fromHex($data)->getBinary();
+        }
+        elseif (!is_string($data)) {
+            throw new NISInvalidSignatureContent("Invalid data argument passed in \\NEM\\Core\\KeyPair::sign().");
+        }
+
+        $buf = new Buffer($data);
+        $key = ParagonIE_Sodium_Core_Ed25519::sign_detached($buf->getHex(), $this->getSecretKey()->getBinary());
+        return $this->encodeKey(new Buffer($key), $enc);
     }
 
     /**
