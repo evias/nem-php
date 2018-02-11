@@ -21,6 +21,7 @@ namespace NEM\Core;
 
 use NEM\Contracts\KeyPair as KeyPairContract;
 use NEM\Core\Buffer;
+use NEM\Core\Signature;
 use NEM\Core\Encryption;
 use NEM\Errors\NISInvalidPrivateKeySize;    
 use NEM\Errors\NISInvalidPrivateKeyContent;
@@ -194,8 +195,8 @@ class KeyPair
         }
 
         $buf = new Buffer($data);
-        $key = ParagonIE_Sodium_Core_Ed25519::sign_detached($buf->getHex(), $this->getSecretKey()->getBinary());
-        return $this->encodeKey(new Buffer($key), $enc);
+        $sig = new Signature($this, $buf);
+        return $this->encodeKey($sig->getSignature(), $enc);
     }
 
     /**

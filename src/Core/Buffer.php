@@ -82,13 +82,13 @@ class Buffer
     {
         $this->math = EccFactory::getAdapter();
         if ($byteSize !== null) {
-            // Check the integer doesn't overflow its supposed size
+            // Check that the buffer content doesn't overflow its supposed size
             if (strlen($byteString) > $byteSize) {
                 throw new InvalidArgumentException('Byte string exceeds maximum size');
             }
         }
         else {
-            $byteSize = strlen($byteString);
+            $byteSize = mb_strlen($byteString);
         }
 
         $this->size   = $byteSize;
@@ -531,10 +531,10 @@ class Buffer
      */
     public function concat(Buffer $buffer, $size = null)
     {
-        if (null === $size || $size < $this->getSize() + $buffer->getSize())
-            $size = $this->getSize() + $buffer->getSize();
-
-        return new Buffer($this->getBinary() . $buffer->getBinary(), $size);
+        // size-protected through Buffer class
+        $this->buffer = $this->buffer . $buffer->getBinary();
+        $this->size  += $buffer->getSize();
+        return $this;
     }
 
     /**
