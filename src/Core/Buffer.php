@@ -608,4 +608,36 @@ class Buffer
         //$hashed = Buffer::fromHex(hash($algorithm, $this->getHex()));
         return $hashed->getHex();
     }
+
+    /**
+     * Convert 64 Bytes Keccak SHA3-512 Hashes into a Secret Key.
+     * 
+     * @param   string  $unsafeSecret   A 64 bytes (512 bits) Keccak hash produced from a KeyPair's Secret Key.
+     * @return  string                  Byte-level representation of the Secret Key.
+     */
+    static public function clampBits($unsafeSecret)
+    {
+        if ($unsafeSecret instanceof Buffer) {
+            // copy-construct to avoid malformed and wrong size
+            $toBuffer = new Buffer($unsafeSecret->getBinary(), 64);
+        }
+        elseif (! ctype_xdigit($unsafeSecret)) {
+            // build from binary
+            $toBuffer = new Buffer($unsafeSecret, 64);
+        }
+        else {
+            $toBuffer = Buffer::fromHex($unsafeSecret, 64);
+        }
+
+        // clamping bits
+        $clampSecret  = $toBuffer->toUInt8();
+        $clampSecret[0] &= 0xf8; // 248
+        $clampSecret[31] &= 0x7f; // 127
+        $clampSecret[31] |= 0x40; // 64
+
+        // build Buffer object from UInt8 and return byte-level representation
+        $encoder = new Encoder;
+        $safeSecret = $encoder->ua2bin($clampSecret);
+        return $safeSecret;
+    }
 }
