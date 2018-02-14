@@ -398,8 +398,8 @@ class Buffer
             throw new RuntimeException('Failed to slice string of with requested start/end');
         }
 
-        $length = strlen($string);
-        return new self($string, $length, $this->math);
+        $length = mb_strlen($string);
+        return new self($string, $length);
     }
 
     /**
@@ -615,18 +615,18 @@ class Buffer
      * @param   string  $unsafeSecret   A 64 bytes (512 bits) Keccak hash produced from a KeyPair's Secret Key.
      * @return  string                  Byte-level representation of the Secret Key.
      */
-    static public function clampBits($unsafeSecret)
+    static public function clampBits($unsafeSecret, $bytes = 64)
     {
         if ($unsafeSecret instanceof Buffer) {
             // copy-construct to avoid malformed and wrong size
-            $toBuffer = new Buffer($unsafeSecret->getBinary(), 64);
+            $toBuffer = new Buffer($unsafeSecret->getBinary(), $bytes);
         }
         elseif (! ctype_xdigit($unsafeSecret)) {
             // build from binary
-            $toBuffer = new Buffer($unsafeSecret, 64);
+            $toBuffer = new Buffer($unsafeSecret, $bytes);
         }
         else {
-            $toBuffer = Buffer::fromHex($unsafeSecret, 64);
+            $toBuffer = Buffer::fromHex($unsafeSecret, $bytes);
         }
 
         // clamping bits

@@ -23,9 +23,29 @@ use NEM\Core\KeyPair;
 use NEM\Contracts\KeyPair as KeyPairContract;
 use NEM\Core\Buffer;
 
+use kornrunner\Keccak;
+use \desktopd\SHA3\Sponge as Keccak_SHA3;
+use \ParagonIE_Sodium_Compat;
+use \ParagonIE_Sodium_Core_Ed25519 as Ed25519;
+use \ParagonIE_Sodium_Core_X25519 as Ed25519ref10;
+
 class KeyPairSignTest
     extends TestCase
 {
+    public function testKeccakDependency()
+    {
+        $expectHex = "9558a7ba9ac74b33b347703ffe33f8d561d86d9fcad1cfd63225fb55dfea50a0953a0efafd6072377f4c396e806d5bda0294cba28762740d8446fee45a276e4a";
+
+        $this->assertEquals($expectHex, Keccak::hash("testing", 512, false));
+
+        // $sponge = Keccak_SHA3::init(Keccak_SHA3::SHA3_512);
+        // $sponge->absorb("testing");
+        // $hash   = $sponge->squeeze();
+
+        // $expectHex = "9558a7ba9ac74b33b347703ffe33f8d561d86d9fcad1cfd63225fb55dfea50a0953a0efafd6072377f4c396e806d5bda0294cba28762740d8446fee45a276e4a";
+        // $this->assertEquals($expectHex, bin2hex($hash));
+    }
+
     /**
      * Unit test for *Basic KeyPair Signing*.
      *
@@ -47,7 +67,7 @@ class KeyPairSignTest
 
         // check hexadecimal representation
         $expectHex = "968aedd687bf541a2a7d65cbd316f68de47b608cffa31904f3714b44852214f447b20df2ee36b8fa2f11f491aa3de13e27def969badfac6d6f7a0201b90fad0d";
-        $this->assertEquals(64, strlen($signed->getHex()));
+        $this->assertEquals(128, strlen($signed->getHex()));
         $this->assertEquals($expectHex, $signed->getHex());
     }
 }

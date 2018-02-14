@@ -21,9 +21,10 @@ namespace NEM\Core;
 use NEM\Core\KeyPair;
 use NEM\Core\Buffer;
 use kornrunner\Keccak;
-use \SHA3 as Keccak_SHA3;
+use \desktopd\SHA3\Sponge as Keccak_SHA3;
 use \ParagonIE_Sodium_Compat;
-use \ParagonIE_Sodium_Core_Ed25519 as Ed25519ref10;
+use \ParagonIE_Sodium_Core_Ed25519 as Ed25519;
+use \ParagonIE_Sodium_Core_X25519 as Ed25519ref10;
 use \SodiumException;
 use RuntimeException;
 
@@ -174,7 +175,7 @@ class Encryption
      * Beware that the `secretKey` is not your privateKey but the 
      * `KeyPair->getSecretKey()`.
      * 
-     * @param   \NEM\Core\Buffer    $secretKey      The KeyPair calculated *secretKey* (byte-level reversed private key)
+     * @param   \NEM\Core\KeyPair    $keyPair       The KeyPair used for encryption.
      * @param   \NEM\Core\Buffer    $data           The data that you want to sign.
      * @param   string              $algorithm      The hash algorithm used for signature creation.
      * @return  \NEM\Core\Buffer
@@ -184,13 +185,8 @@ class Encryption
         // prepare sodium overload
         self::$algorithm = $algorithm ?: "keccak-512";
 
-        // shortcuts
-        $message = $data->getBinary();
-        $secret  = $keyPair->getSecretKey()->getBinary();
-        $public  = $keyPair->getPublicKey()->getBinary();
-
-        // use sodium overload
-        return self::signDetached($message, $secret, $public);
+        // use detached signature implementation
+        return self::signDetached($keyPair, $data);
     }
 
     /**
@@ -202,50 +198,69 @@ class Encryption
      *
      * @see ParagonIE_Sodium_Core_Ed25519::sign_detached()
      * @param   string  $message    The message we need to sign
-     * @param   string  $sk         The secret key used for Signing.
-     * @param   string  $pk         The public key used for Reading.
+     * @param   \NEM\Core\KeyPair    $keyPair       The KeyPair used for encryption.
+     * @param   \NEM\Core\Buffer     $data          The data that you want to sign. 
      * @return  \NEM\Core\Buffer
      */
-    public static function signDetached($message, $sk, $pk)
+    public static function signDetached(KeyPair $keyPair, Buffer $data)
     {
         $algorithm = self::$algorithm ?: "keccak-512";
         $sha3Size  = Keccak_SHA3::SHA3_512; // XXX multi-algo
 
-        // crypto_hash_sha512(az, sk, 32);
-        $hs = Keccak_SHA3::init(Keccak_SHA3::SHA3_512); // XXX multi-algo
-        $hs->absorb(Ed25519ref10::substr($sk, 0, 32));
-        $privHash = $hs->squeeze(64);
+        // shortcuts
+        $secretKey = $keyPair->getSecretKey()->getBinary();
+        $publicKey = $keyPair->getPublicKey()->getBinary();
+        $message   = $data->getBinary();
 
-        // clamp bits for secret key
-        $safePriv = Buffer::clampBits($privHash);
+        // crypto_hash_sha512(az, sk, 32);
+        $privHash = Keccak::hash($keyPair->getSecretKey()->getBinary(), 512, true);
+
+        // clamp bits for secret key + size secure
+        $safePriv = Buffer::clampBits($privHash, 64);
+        $bufferPriv = new Buffer($safePriv, 64);
 
         // generate `r` for scalar multiplication
-        $hs = Keccak_SHA3::init(Keccak_SHA3::SHA3_512); // XXX multi-algo
-        $hs->absorb(substr($safePriv, 32, 32));
-        $hs->absorb($message);
-        $r = $hs->squeeze(64); // 64=fixedOutputLength
+        // $contentR = $bufferPriv->slice(32)->getHex()
+        //           . $data->getBinary();
+        // $bufferR = new Buffer($contentR);
+        // $r = Keccak::hash($bufferR->getBinary(), 512, true);
+
+        $sigR = Keccak_SHA3::init(Keccak_SHA3::SHA3_512); // XXX multi-algo
+        $sigR->absorb(unpack("V*", $bufferPriv->slice(32)->getBinary())[0]);
+        $sigR->absorb(unpack("V*", $data->getBinary())[0]);
+        $r = $sigR->squeeze();
+
+        //dd(json_encode((new Buffer($r))->toUInt8()));
 
         // generate encoded version of `r` for `s` creation
-        $r = Ed25519ref10::sc_reduce($r);
-        $encodedR = Ed25519ref10::ge_p3_tobytes(
-            Ed25519ref10::ge_scalarmult_base($r)
+        $r = Ed25519::sc_reduce($r);
+        $encodedR = Ed25519::ge_p3_tobytes(
+            Ed25519::ge_scalarmult_base($r)
         );
+        
+        // size secure encodedR
+        $bufferR = new Buffer($encodedR, 32);
 
         // create `s` with: encodedR || public key || data
         $sigH = Keccak_SHA3::init(Keccak_SHA3::SHA3_512); // XXX multi-algo
-        $sigH->absorb($encodedR);
-        $sigH->absorb($pk);
-        $sigH->absorb($message);
-        $sig = $sigH->squeeze(64);
+        $sigH->absorb(Ed25519::substr($encodedR, 0, 32));
+        $sigH->absorb(Ed25519::substr($publicKey, 0, 32));
+        $sigH->absorb($data->getBinary());
+        $sig = $sigH->squeeze();
 
         // safe secret generation for `encodedS` which is the HIGH part of
         // the signature in scalar form.
-        $sig = Ed25519ref10::sc_reduce($sig);
-        $encodedS = Ed25519ref10::sc_muladd($sig, $safePriv, $r);
+        $sig = Ed25519::sc_reduce($sig);
+        $encodedS = Ed25519::sc_muladd($sig, $safePriv, $r);
+
+        // size secure encodedS
+        $bufferS = new Buffer($encodedS, 32);
 
         // signature[0:63] = r[0:31] || s[0:31]
-        $sig = Ed25519ref10::substr($encodedR, 0, 32) 
-             . Ed25519ref10::substr($encodedS, 0, 32);
+        $sig = $bufferR->getBinary() . $bufferS->getBinary();
+
+        // size secure signature
+        $bufferSig = new Buffer($sig, 64);
 
         // check that signature is canonical
         // - s != 0
@@ -255,13 +270,19 @@ class Encryption
         $sigZero = new Buffer(null, 32);
         if ($encodedS === $sigZero->getBinary()) {
             // re-issue signature because `s = 0`
-            return self::signDetached($message, $sk, $pk);
+            return false;
         }
 
-        // check 2 reduce and check again
-//        $canonical = new Buffer($encodedS, 32);
-//        $canonical = Ed25519ref10::sc_reduce($canonical->getBinary());
-//        assert($canonical === $encodedS);
+        // check 2: ed25519 reduce and check `encodedS` again
+        // $isSigZero = 0;
+        // $uint8R = $bufferSig->toUInt8();
+        // $uint8S = $bufferS->toUInt8();
+        // for ($i = 0; $i < 32; $i++) {
+        //     $isSigZero |= $uint8R[32+$i] ^ $uint8S[$i];
+        // }
+
+        // // should not be 0!
+        // assert($isSigZero === 0);
 
         // create 64-bytes size-secured Buffer.
         $bufSignature = new Buffer($sig, 64);
