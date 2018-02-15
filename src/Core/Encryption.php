@@ -20,8 +20,8 @@ namespace NEM\Core;
 
 use NEM\Core\KeyPair;
 use NEM\Core\Buffer;
-use kornrunner\Keccak;
-use \desktopd\SHA3\Sponge as Keccak_SHA3;
+use NEM\Core\KeccakHasher;
+use NEM\Core\KeccakSponge;
 use \ParagonIE_Sodium_Compat;
 use \ParagonIE_Sodium_Core_Ed25519 as Ed25519;
 use \ParagonIE_Sodium_Core_X25519 as Ed25519ref10;
@@ -128,11 +128,9 @@ class Encryption
             // use PHP hash()
             $hash = hash($algo, $data->getBinary(), true);
         }
-        elseif (strpos(strtolower($algo), "keccak") !== false) {
-            $bits = (int) substr($algo, -3); // keccak-256, keccak-512, etc.
-
+        elseif (strpos(strtolower($algo), "keccak-") !== false) {
             // use Keccak instead of PHP hash()
-            $hash = Keccak::hash($data->getBinary(), $bits, true);
+            $hash = KeccakHasher::hash($algo, $data->getBinary(), true);
         }
         else {
             throw new RuntimeException("Unsupported hash algorithm '" . $algo . "'.");
@@ -153,7 +151,7 @@ class Encryption
      * hash_update() method.
      * 
      * @param   string              $algorithm
-     * @return  resource
+     * @return  resource|\NEM\Core\KeccakSponge
      */
     public static function hash_init($algorithm)
     {
@@ -162,17 +160,8 @@ class Encryption
             $res = hash_init($algorithm);
         }
         elseif (strpos(strtolower($algorithm), "keccak") !== false) {
-            $bits = (int) substr($algorithm, -3); // keccak-256, keccak-512, etc.
-            $sizePerBits = [
-                "256" => Keccak_SHA3::SHA3_256,
-                "512" => Keccak_SHA3::SHA3_512,
-            ];
-
-            if (! in_array($bits, array_keys($sizePerBits)))
-                $bits = "512";
-
             // use Keccak instead of PHP hash()
-            $res = Keccak_SHA3::init($sizePerBits[$bits]);
+            $res = KeccakHasher::hash_init($algorithm);
         }
         else {
             throw new RuntimeException("Unsupported hash algorithm '" . $algo . "'.");
@@ -187,17 +176,17 @@ class Encryption
      * 
      * This method will edit the Resource directly.
      * 
-     * @param   resource|Keccak_SHA3        $hasher
+     * @param   resource|KeccakSponge        $hasher
      * @param   string|\NEM\Core\Buffer     $data
-     * @return  \NEM\Core\Buffer
+     * @return  resource|\NEM\Core\KeccakSponge
      */
     public static function hash_update($hasher, $data)
     {
         // use Buffer always
         $data = self::prepareInputBuffer($data);
 
-        if ($hasher instanceof Keccak_SHA3) {
-            return $hasher->absorb($data->getBinary());
+        if ($hasher instanceof KeccakSponge) {
+            return KeccakHasher::hash_update($hasher, $data->getBinary(), $data->getSize() * 8);
         }
 
         //XXX should use Hasher class to keep track of key size
@@ -210,15 +199,15 @@ class Encryption
      * This will close the Input Phase of the incremental
      * hashing mechanism.
      * 
-     * @param   resource|Keccak_SHA3    $hasher
+     * @param   resource|KeccakSponge    $hasher
      * @param   bool                    $returnRaw
      * @return  \NEM\Core\Buffer|string
      */
     public static function hash_final($hasher, $returnRaw = false)
     {
-        if ($hasher instanceof Keccak_SHA3) {
+        if ($hasher instanceof KeccakSponge) {
             // use Keccak internal hasher
-            $hash = $hasher->squeeze();
+            $hash = KeccakHasher::hash_final($hasher, true);
         }
         else {
             // use PHP hasher
@@ -265,8 +254,7 @@ class Encryption
     {
         // shortcuts + use Buffer always
         $data = self::prepareInputBuffer($data);
-
-        $hash = static::hash($algo, $data)->getBinary();
+        $hash = self::hash($algo, $data, false)->getBinary();
         $out = new Buffer(substr($hash, 0, $checksumLen), $checksumLen);
         return $out;
     }
@@ -310,7 +298,7 @@ class Encryption
     public static function signDetached(KeyPair $keyPair, $data)
     {
         $algorithm = self::$algorithm ?: "keccak-512";
-        $sha3Size  = Keccak_SHA3::SHA3_512; // XXX multi-algo
+        $sha3Size  = KeccakSponge::SHA3_512; // XXX multi-algo
 
         // shortcuts
         $secretKey = $keyPair->getSecretKey()->getBinary();
@@ -328,7 +316,7 @@ class Encryption
         $bufferPriv = new Buffer($safePriv, 64);
 
         // generate `r` for scalar multiplication
-        // $sigR = Keccak_SHA3::init(Keccak_SHA3::SHA3_512); // XXX multi-algo
+        // $sigR = KeccakSponge::init(KeccakSponge::SHA3_512); // XXX multi-algo
         // $sigR->absorb($bufferPriv->slice(32)->getBinary());
         // $sigR->absorb($data->getBinary());
         // $r = $sigR->squeeze();
