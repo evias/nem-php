@@ -35,24 +35,22 @@ class KeyPairSignTest
     /**
      * Unit test for *Basic KeyPair Signing*.
      *
+     * @link https://github.com/trezor/trezor-crypto/blob/master/test_check.c#L3256
      * @return void
      */
     public function testBasicKeyPairSign()
     {
-        $kp1 = KeyPair::create("e77c84331edbfa3d209c4e68809c98a634ad6e8891e4174455c33be9dd25fce5");
-        $signed = $kp1->sign("Hello, World!");
+        // @link https://github.com/trezor/trezor-crypto/blob/master/test_check.c#L3256
+        $binary = hex2bin("8ce03cd60514233b86789729102ea09e867fc6d964dea8c2018ef7d0a2e0e24bf7e348e917116690b9");
+        $kp1 = KeyPair::create("abf4cf55a2b3f742d7543d9cc17f50447b969e6e06f5ea9195d428ab12b7318d");
+        $signed = $kp1->sign($binary);
         $uint8s = $signed->toUInt8();
-
-        // check uint8 content
-        $expectUInt8 = "[150, 138, 237, 214, 135, 191, 84, 26, 42, 125, 101, 203, 211, 22, 246, 141, 228, 123, 96, 140, 255, 163, 25, 4, 243, 113, 75, 68, 133, 34, 20, 244, 71, 178, 13, 242, 238, 54, 184, 250, 47, 17, 244, 145, 170, 61, 225, 62, 39, 222, 249, 105, 186, 223, 172, 109, 111, 122, 2, 1, 185, 15, 173, 13]";
-        $this->assertEquals(64, count($uint8s));
-        $this->assertEquals($expectUInt8, json_encode($uint8s));
 
         // check binary representation
         $this->assertEquals(64, strlen($signed->getBinary()));
 
         // check hexadecimal representation
-        $expectHex = "968aedd687bf541a2a7d65cbd316f68de47b608cffa31904f3714b44852214f447b20df2ee36b8fa2f11f491aa3de13e27def969badfac6d6f7a0201b90fad0d";
+        $expectHex = "d9cec0cc0e3465fab229f8e1d6db68ab9cc99a18cb0435f70deb6100948576cd5c0aa1feb550bdd8693ef81eb10a556a622db1f9301986827b96716a7134230c";
         $this->assertEquals(128, strlen($signed->getHex()));
         $this->assertEquals($expectHex, $signed->getHex());
     }
