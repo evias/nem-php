@@ -272,14 +272,11 @@ class Encryption
      */
     public static function sign(KeyPair $keyPair, $data, $algorithm = "keccak-512")
     {
-        // prepare sodium overload
-        self::$algorithm = $algorithm ?: "keccak-512";
-
         // shortcuts + use Buffer always
         $data = self::prepareInputBuffer($data);
 
         // use detached signature implementation
-        return self::signDetached($keyPair, $data);
+        return self::signDetached($keyPair, $data, $algorithm);
     }
 
     /**
@@ -293,13 +290,11 @@ class Encryption
      * @param   string  $message    The message we need to sign
      * @param   \NEM\Core\KeyPair           $keyPair       The KeyPair used for encryption.
      * @param   string|\NEM\Core\Buffer     $data          The data that you want to sign. 
+     * @param   string                      $algorithm      The hash algorithm used for signature creation.
      * @return  \NEM\Core\Buffer
      */
-    public static function signDetached(KeyPair $keyPair, $data)
+    public static function signDetached(KeyPair $keyPair, $data, $algorithm = "keccak-512")
     {
-        $algorithm = self::$algorithm ?: "keccak-512";
-        $sha3Size  = KeccakSponge::SHA3_512; // XXX multi-algo
-
         // shortcuts
         $secretKey = $keyPair->getSecretKey()->getBinary();
         $publicKey = $keyPair->getPublicKey()->getBinary();
@@ -309,23 +304,17 @@ class Encryption
         $message   = $data->getBinary();
 
         // crypto_hash_sha512(az, sk, 32);
-        $privHash = self::hash("keccak-512", $keyPair->getSecretKey()->getBinary(), true);
+        $privHash = self::hash($algorithm, $keyPair->getSecretKey()->getBinary(), true);
 
         // clamp bits for secret key + size secure
         $safePriv = Buffer::clampBits($privHash, 64);
         $bufferPriv = new Buffer($safePriv, 64);
 
         // generate `r` for scalar multiplication
-        // $sigR = KeccakSponge::init(KeccakSponge::SHA3_512); // XXX multi-algo
-        // $sigR->absorb($bufferPriv->slice(32)->getBinary());
-        // $sigR->absorb($data->getBinary());
-        // $r = $sigR->squeeze();
-        $sigR = self::hash_init("keccak-512");
+        $sigR = self::hash_init($algorithm);
         self::hash_update($sigR, $bufferPriv->slice(32)->getBinary());
         self::hash_update($sigR, $data->getBinary());
         $r = self::hash_final($sigR, true);
-
-        //dd(json_encode((new Buffer($r))->toUInt8()));
 
         // generate encoded version of `r` for `s` creation
         $r = Ed25519::sc_reduce($r);
@@ -337,7 +326,7 @@ class Encryption
         $bufferR = new Buffer($encodedR, 32);
 
         // create `s` with: encodedR || public key || data
-        $sigH = self::hash_init("keccak-512");
+        $sigH = self::hash_init($algorithm);
         self::hash_update($sigH, Ed25519::substr($encodedR, 0, 32));
         self::hash_update($sigH, Ed25519::substr($publicKey, 0, 32));
         self::hash_update($sigH, $data->getBinary());

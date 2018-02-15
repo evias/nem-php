@@ -86,7 +86,7 @@ class Signature
         $this->prepareData($data);
 
         $this->algorithm = $algorithm ?: "keccak-512";
-        $this->signature = Encryption::sign($kp, $this->data, "keccak-512");
+        $this->signature = Encryption::sign($kp, $this->data, $algorithm);
         $this->signer = $kp->getPublicKey();
     }
 
