@@ -32,20 +32,6 @@ use \ParagonIE_Sodium_Core_X25519 as Ed25519ref10;
 class KeyPairSignTest
     extends TestCase
 {
-    public function testKeccakDependency()
-    {
-        $expectHex = "9558a7ba9ac74b33b347703ffe33f8d561d86d9fcad1cfd63225fb55dfea50a0953a0efafd6072377f4c396e806d5bda0294cba28762740d8446fee45a276e4a";
-
-        $this->assertEquals($expectHex, Keccak::hash("testing", 512, false));
-
-        // $sponge = Keccak_SHA3::init(Keccak_SHA3::SHA3_512);
-        // $sponge->absorb("testing");
-        // $hash   = $sponge->squeeze();
-
-        // $expectHex = "9558a7ba9ac74b33b347703ffe33f8d561d86d9fcad1cfd63225fb55dfea50a0953a0efafd6072377f4c396e806d5bda0294cba28762740d8446fee45a276e4a";
-        // $this->assertEquals($expectHex, bin2hex($hash));
-    }
-
     /**
      * Unit test for *Basic KeyPair Signing*.
      *

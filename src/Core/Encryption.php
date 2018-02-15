@@ -42,6 +42,28 @@ class Encryption
     static public $algorithm = "keccak-512";
 
     /**
+     * Helper to prepare a `data` attribute into a \NEM\Core\Buffer
+     * object for easier internal data representations.
+     * 
+     * @param   null|string|\NEM\Core\Buffer    $data   The data that needs to be added to the returned Buffer.
+     * @return  \NEM\Core\Buffer
+     */
+    protected static function prepareInputBuffer($data)
+    {
+        if ($data instanceof Buffer) {
+            return $data;
+        }
+        elseif (is_string($data) && ctype_xdigit($data)) {
+            return Buffer::fromHex($data);
+        }
+        elseif (is_string($data)) {
+            return new Buffer($data);
+        }
+
+        return new Buffer((string) $data);
+    }
+
+    /**
      * PBKDF2 : Password Based Key Derivation Function
      *
      * For the name of selected hashing algorithms (i.e. md5,
@@ -52,8 +74,8 @@ class Encryption
      * NEM this is used to derive a Private key off a Password.
      * 
      * @param   string                  $algorithm  Which hash algorithm to use for key derivation.
-     * @param   NEM\Core\Buffer         $password   Password for key derivation as *Buffer*.
-     * @param   NEM\Core\Buffer         $salt       Salt for key derivation as *Buffer*.
+     * @param   string|NEM\Core\Buffer  $password   Password for key derivation as *Buffer*.
+     * @param   string|NEM\Core\Buffer  $salt       Salt for key derivation as *Buffer*.
      * @param   integer                 $count      Count of Derivation iterations.
      * @param   integer                 $keyLength  Length of produced Key (count of Bytes).
      * @return  NEM\Core\Buffer
@@ -62,8 +84,12 @@ class Encryption
      * @throws  InvalidArgumentException    On negative *$keyLength* argument.
      * @throws  InvalidArgumentException    On invalid derivation iterations *$count* or invalid *$keyLength* arguments.
      */
-    public static function derive($algorithm, Buffer $password, Buffer $salt, $count = 6000, $keyLength = 64) // 6000=NanoWallet, 64=512bits
+    public static function derive($algorithm, $password, $salt, $count = 6000, $keyLength = 64) // 6000=NanoWallet, 64=512bits
     {
+        // shortcuts + use Buffer always
+        $password = self::prepareInputBuffer($password);
+        $salt = self::prepareInputBuffer($salt);
+
         if ($keyLength < 0) {
             throw new InvalidArgumentException('Cannot have a negative key-length for PBKDF2');
         }
@@ -88,13 +114,17 @@ class Encryption
      * 
      * The hash algorithm can contain `keccak-256` for example.
      * 
-     * @param   string              $algo
-     * @param   \NEM\Core\Buffer    $data
+     * @param   string                     $algo
+     * @param   string|\NEM\Core\Buffer    $data
      * @return  \NEM\Core\Buffer
      */
-    public static function hash($algo, Buffer $data)
+    public static function hash($algo, $data)
     {
+        // shortcuts + use Buffer always
+        $data = self::prepareInputBuffer($data);
+
         if (in_array($algo, hash_algos())) {
+            // use PHP hash()
             $hash = hash($algo, $data->getBinary(), true);
         }
         if (strpos(strtolower($algo), "keccak") !== false) {
@@ -115,13 +145,17 @@ class Encryption
      *
      * A MAC authenticates a message. It is a signature based on a secret key (salt).
      *
-     * @param   string              $algorithm  Which hash algorithm to use.
-     * @param   NEM\Core\Buffer     $data
-     * @param   NEM\Core\Buffer     $salt
+     * @param   string                  $algorithm  Which hash algorithm to use.
+     * @param   string|NEM\Core\Buffer  $data
+     * @param   string|NEM\Core\Buffer  $salt
      * @return  NEM\Core\Buffer
      */
-    public static function hmac($algo, Buffer $data, Buffer $salt)
+    public static function hmac($algo, $data, $salt)
     {
+        // shortcuts + use Buffer always
+        $data = self::prepareInputBuffer($data);
+        $salt = self::prepareInputBuffer($salt);
+
         return new Buffer(hash_hmac($algo, $data->getBinary(), $salt->getBinary(), true));
     }
 
@@ -129,44 +163,19 @@ class Encryption
      * Generate a checksum of data buffer `data` and of length
      * `checksumLen`. Default length is 4 bytes.
      *
-     * @param   string              $algo
-     * @param   \NEM\Core\Buffer    $data
-     * @param   integer             $checksumLen
+     * @param   string                     $algo
+     * @param   string|\NEM\Core\Buffer    $data
+     * @param   integer                    $checksumLen
      * @return  \NEM\Core\Buffer 
      */
-    public static function checksum($algo, Buffer $data, $checksumLen = 4)
+    public static function checksum($algo, $data, $checksumLen = 4)
     {
+        // shortcuts + use Buffer always
+        $data = self::prepareInputBuffer($data);
+
         $hash = static::hash($algo, $data)->getBinary();
         $out = new Buffer(substr($hash, 0, $checksumLen), $checksumLen);
         return $out;
-    }
-
-    /**
-     * Helper for encryption using a *sender private key* and *recipient public
-     * key*.
-     *
-     * @param   string              $data               Plain text content of the Message to encrypt.
-     * @param   \NEM\Core\KeyPair   $senderPrivateKey   Private Key of the Sender.
-     * @param   \NEM\Core\KeyPair   $recipientPubKey    Public Key of the Recipient.
-     * @return  string
-     */
-    public function encrypt($data, KeyPair $recipientPrivateKey, KeyPair $senderPublicKey)
-    {
-        return "";
-    }
-
-    /**
-     * Helper for decryption using a *recipient private key* and *sender public
-     * key*.
-     *
-     * @param   \NEM\Core\Buffer    $payload                An encrypted message payload.
-     * @param   \NEM\Core\KeyPair   $recipientPrivateKey    Private Key of the Sender.
-     * @param   \NEM\Core\KeyPair   $senderPubKey           Public Key of the Recipient.
-     * @return  string
-     */
-    public function decrypt(Buffer $payload, KeyPair $recipientPrivateKey, KeyPair $senderPublicKey)
-    {
-        return "";
     }
 
     /**
@@ -175,15 +184,18 @@ class Encryption
      * Beware that the `secretKey` is not your privateKey but the 
      * `KeyPair->getSecretKey()`.
      * 
-     * @param   \NEM\Core\KeyPair    $keyPair       The KeyPair used for encryption.
-     * @param   \NEM\Core\Buffer    $data           The data that you want to sign.
-     * @param   string              $algorithm      The hash algorithm used for signature creation.
+     * @param   \NEM\Core\KeyPair           $keyPair       The KeyPair used for encryption.
+     * @param   string|\NEM\Core\Buffer     $data           The data that you want to sign.
+     * @param   string                      $algorithm      The hash algorithm used for signature creation.
      * @return  \NEM\Core\Buffer
      */
-    public static function sign(KeyPair $keyPair, Buffer $data, $algorithm = "keccak-512")
+    public static function sign(KeyPair $keyPair, $data, $algorithm = "keccak-512")
     {
         // prepare sodium overload
         self::$algorithm = $algorithm ?: "keccak-512";
+
+        // shortcuts + use Buffer always
+        $data = self::prepareInputBuffer($data);
 
         // use detached signature implementation
         return self::signDetached($keyPair, $data);
@@ -198,11 +210,11 @@ class Encryption
      *
      * @see ParagonIE_Sodium_Core_Ed25519::sign_detached()
      * @param   string  $message    The message we need to sign
-     * @param   \NEM\Core\KeyPair    $keyPair       The KeyPair used for encryption.
-     * @param   \NEM\Core\Buffer     $data          The data that you want to sign. 
+     * @param   \NEM\Core\KeyPair           $keyPair       The KeyPair used for encryption.
+     * @param   string|\NEM\Core\Buffer     $data          The data that you want to sign. 
      * @return  \NEM\Core\Buffer
      */
-    public static function signDetached(KeyPair $keyPair, Buffer $data)
+    public static function signDetached(KeyPair $keyPair, $data)
     {
         $algorithm = self::$algorithm ?: "keccak-512";
         $sha3Size  = Keccak_SHA3::SHA3_512; // XXX multi-algo
@@ -210,6 +222,9 @@ class Encryption
         // shortcuts
         $secretKey = $keyPair->getSecretKey()->getBinary();
         $publicKey = $keyPair->getPublicKey()->getBinary();
+
+        // use Buffer always
+        $data = self::prepareInputBuffer($data);
         $message   = $data->getBinary();
 
         // crypto_hash_sha512(az, sk, 32);
@@ -220,15 +235,14 @@ class Encryption
         $bufferPriv = new Buffer($safePriv, 64);
 
         // generate `r` for scalar multiplication
-        // $contentR = $bufferPriv->slice(32)->getHex()
-        //           . $data->getBinary();
-        // $bufferR = new Buffer($contentR);
-        // $r = Keccak::hash($bufferR->getBinary(), 512, true);
-
-        $sigR = Keccak_SHA3::init(Keccak_SHA3::SHA3_512); // XXX multi-algo
-        $sigR->absorb(unpack("V*", $bufferPriv->slice(32)->getBinary())[0]);
-        $sigR->absorb(unpack("V*", $data->getBinary())[0]);
-        $r = $sigR->squeeze();
+        // $sigR = Keccak_SHA3::init(Keccak_SHA3::SHA3_512); // XXX multi-algo
+        // $sigR->absorb($bufferPriv->slice(32)->getBinary());
+        // $sigR->absorb($data->getBinary());
+        // $r = $sigR->squeeze();
+        $sigR = hash_init("sha3-512");
+        hash_update($sigR, $bufferPriv->slice(32)->getBinary());
+        hash_update($sigR, $data->getBinary());
+        $r = hash_final($sigR, true);
 
         //dd(json_encode((new Buffer($r))->toUInt8()));
 
