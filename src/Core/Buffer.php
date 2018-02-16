@@ -82,7 +82,7 @@ class Buffer
     {
         $this->math = EccFactory::getAdapter();
         if ($byteSize !== null) {
-            // Check the integer doesn't overflow its supposed size
+            // Check that the buffer content doesn't overflow its supposed size
             if (strlen($byteString) > $byteSize) {
                 throw new InvalidArgumentException('Byte string exceeds maximum size');
             }
@@ -250,7 +250,7 @@ class Buffer
      */
     public function getInternalSize()
     {
-        return mb_strlen($this->buffer, "UTF-8");
+        return strlen($this->buffer);
     }
 
     /**
@@ -271,12 +271,12 @@ class Buffer
     {
         // if a size is specified we'll make sure the value returned is *strictly* of that size
         if ($this->size !== null) {
-            if (mb_strlen($this->buffer) < $this->size) {
+            if (strlen($this->buffer) < $this->size) {
                 // internal size of buffer is *too small*
                 // will now pad the string (zeropadding).
                 return str_pad($this->buffer, $this->size, chr(0), STR_PAD_LEFT);
             }
-            elseif (mb_strlen($this->buffer) > $this->size) {
+            elseif (strlen($this->buffer) > $this->size) {
                 // buffer size overflow - truncate the buffer
                 return substr($this->buffer, 0, $this->size);
             }
@@ -399,7 +399,7 @@ class Buffer
         }
 
         $length = strlen($string);
-        return new self($string, $length, $this->math);
+        return new self($string, $length);
     }
 
     /**
@@ -531,10 +531,10 @@ class Buffer
      */
     public function concat(Buffer $buffer, $size = null)
     {
-        if (null === $size || $size < $this->getSize() + $buffer->getSize())
-            $size = $this->getSize() + $buffer->getSize();
-
-        return new Buffer($this->getBinary() . $buffer->getBinary(), $size);
+        // size-protected through Buffer class
+        $this->buffer = $this->buffer . $buffer->getBinary();
+        $this->size  += $buffer->getSize();
+        return $this;
     }
 
     /**
@@ -607,5 +607,37 @@ class Buffer
         $hashed = new Buffer(hash($algorithm, $this->getBinary(), true), $byteSize);
         //$hashed = Buffer::fromHex(hash($algorithm, $this->getHex()));
         return $hashed->getHex();
+    }
+
+    /**
+     * Convert 64 Bytes Keccak SHA3-512 Hashes into a Secret Key.
+     * 
+     * @param   string  $unsafeSecret   A 64 bytes (512 bits) Keccak hash produced from a KeyPair's Secret Key.
+     * @return  string                  Byte-level representation of the Secret Key.
+     */
+    static public function clampBits($unsafeSecret, $bytes = 64)
+    {
+        if ($unsafeSecret instanceof Buffer) {
+            // copy-construct to avoid malformed and wrong size
+            $toBuffer = new Buffer($unsafeSecret->getBinary(), $bytes);
+        }
+        elseif (! ctype_xdigit($unsafeSecret)) {
+            // build from binary
+            $toBuffer = new Buffer($unsafeSecret, $bytes);
+        }
+        else {
+            $toBuffer = Buffer::fromHex($unsafeSecret, $bytes);
+        }
+
+        // clamping bits
+        $clampSecret  = $toBuffer->toUInt8();
+        $clampSecret[0] &= 0xf8; // 248
+        $clampSecret[31] &= 0x7f; // 127
+        $clampSecret[31] |= 0x40; // 64
+
+        // build Buffer object from UInt8 and return byte-level representation
+        $encoder = new Encoder;
+        $safeSecret = $encoder->ua2bin($clampSecret);
+        return $safeSecret;
     }
 }
