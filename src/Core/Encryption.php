@@ -186,7 +186,7 @@ class Encryption
         $data = self::prepareInputBuffer($data);
 
         if ($hasher instanceof KeccakSponge) {
-            return KeccakHasher::hash_update($hasher, $data->getBinary(), $data->getSize() * 8);
+            return KeccakHasher::hash_update($hasher, $data->getBinary(), $data->getInternalSize() * 8);
         }
 
         //XXX should use Hasher class to keep track of key size
@@ -304,40 +304,45 @@ class Encryption
         $message   = $data->getBinary();
 
         // crypto_hash_sha512(az, sk, 32);
-        $privHash = self::hash($algorithm, $keyPair->getSecretKey()->getBinary(), true);
+        //XXX $privHash = self::hash($algorithm, $keyPair->getSecretKey()->getBinary(), true);
+        $privHash = self::hash("keccak-512", $keyPair->getSecretKey()->getBinary(), true);
 
         // clamp bits for secret key + size secure
         $safePriv = Buffer::clampBits($privHash, 64);
         $bufferPriv = new Buffer($safePriv, 64);
 
         // generate `r` for scalar multiplication
+        // `r = H(priv[32..64], data)`
         $sigR = self::hash_init($algorithm);
         self::hash_update($sigR, $bufferPriv->slice(32)->getBinary());
         self::hash_update($sigR, $data->getBinary());
         $r = self::hash_final($sigR, true);
 
         // generate encoded version of `r` for `s` creation
-        $r = Ed25519::sc_reduce($r);
+        // `R = rB`
+        $r = Ed25519::sc_reduce($r) . Ed25519::substr($r, 32);
         $encodedR = Ed25519::ge_p3_tobytes(
             Ed25519::ge_scalarmult_base($r)
         );
 
-        // size secure encodedR
-        $bufferR = new Buffer($encodedR, 32);
-
         // create `s` with: encodedR || public key || data
+        // `S = H(R,A,m)`
         $sigH = self::hash_init($algorithm);
         self::hash_update($sigH, Ed25519::substr($encodedR, 0, 32));
         self::hash_update($sigH, Ed25519::substr($publicKey, 0, 32));
         self::hash_update($sigH, $data->getBinary());
-        $sig = self::hash_final($sigH, true);
+        $hramHash = self::hash_final($sigH, true);
 
         // safe secret generation for `encodedS` which is the HIGH part of
         // the signature in scalar form.
-        $sig = Ed25519::sc_reduce($sig);
-        $encodedS = Ed25519::sc_muladd($sig, $safePriv, $r);
+        // `S = H(R,A,m)a`
+        // `S = (r + H(R,A,m)a)`
+        $hram = Ed25519::sc_reduce($hramHash);
+        $az   = Ed25519::substr($safePriv, 0, 32);
+        $encodedS = Ed25519::sc_muladd($hram, $az, $r);
 
-        // size secure encodedS
+        // size secure encodedR and encodedS
+        $bufferR = new Buffer($encodedR, 32);
         $bufferS = new Buffer($encodedS, 32);
 
         // signature[0:63] = r[0:31] || s[0:31]
@@ -349,6 +354,7 @@ class Encryption
         // check that signature is canonical
         // - s != 0
         // - ed25519 reduced `s` should be identical to `s`.
+        // `S = (r + H(R,A,m)a) mod L`
 
         // check 1: make sure `s` != 0
         $sigZero = new Buffer(null, 32);
