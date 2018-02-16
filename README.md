@@ -275,6 +275,18 @@ If you are using Laravel or Lumen, you will need to register the Service Provide
     var_dump($keypair->getPrivateKey("hex"), $address->toClean());
 ```
 
+### Example 10: Sign Data with a NEM KeyPair
+
+```php
+    // Example 10: Sign Data with a NEM KeyPair
+    // --------------------------------------------------------------------------
+    $keypair = new NEM\Core\KeyPair("abf4cf55a2b3f742d7543d9cc17f50447b969e6e06f5ea9195d428ab12b7318d");
+
+    var_dump($keypair->sign("nem-php by eVias!")->getHex());
+    // this will show you the following hexadecimal signature:
+    // 177908f0cb5e56a0da11bfc3b38f6d749c4c870c9b356313db6460925e4584a9304e6aa1a5ba50ec2f773bbdfbfc03285a35d986d056df27b7d05a74f6c9b501
+```
+
 ## Troubleshoot / Issues Resolution
 
 ### Installing dependencies with MacOS MAMP or MAMP Pro

@@ -21,7 +21,6 @@ namespace NEM\Core;
 use NEM\Core\KeyPair;
 use NEM\Core\Buffer;
 use NEM\Core\KeccakHasher;
-use NEM\Core\KeccakSponge;
 use \ParagonIE_Sodium_Compat;
 use \ParagonIE_Sodium_Core_Ed25519 as Ed25519;
 use \ParagonIE_Sodium_Core_X25519 as Ed25519ref10;

@@ -19,7 +19,6 @@
 namespace NEM\Core;
 
 use kornrunner\Keccak;
-use NEM\Core\KeccakSponge;
 use NEM\Core\Buffer;
 
 class KeccakHasher
@@ -67,6 +66,38 @@ class KeccakHasher
     }
 
     /**
+     * Helper function used to determine each hash's Bits length
+     * by a given `algorithm`.
+     * 
+     * The `algorithm` parameter can be a integer directly and should
+     * then represent a Bits Length for generated Hashes.
+     * 
+     * @param   null|string|integer     $algorithm      The hashing algorithm or Hashes' Bits Length.
+     * @return  integer
+     */
+    static public function getHashBitLength($algorithm = null)
+    {
+        if (!$algorithm) {
+            return self::HASH_BIT_LENGTH;
+        }
+
+        if (is_integer($algorithm)) {
+            // direct hash-bit-length provided
+            return (int) $algorithm;
+        }
+        elseif (strpos(strtolower($algorithm), "keccak-") !== false) {
+            $bits = (int) substr($algorithm, -3); // keccak-256, keccak-512, etc.
+
+            if (! in_array($bits, [256, 228, 384, 512]))
+                $bits = 512;
+
+            return $bits;
+        }
+
+        return self::HASH_BIT_LENGTH;
+    }
+
+/**
      * Initialize a *Incremental* Keccak Hash.
      * 
      * This will construct a Keccak Sponge. The `algorithm`
@@ -75,7 +106,7 @@ class KeccakHasher
      * 
      * @param   integer|string  $algorithm
      * @return  \NEM\Core\KeccakSponge
-     */
+
     static public function hash_init($algorithm)
     {
         $hashBits = self::getHashBitLength($algorithm);
@@ -101,7 +132,7 @@ class KeccakHasher
      * @param   string                  $data
      * @param   integer                 $dataBitLen
      * @return  \NEM\Core\KeccakSponge
-     */
+
     static public function hash_update(KeccakSponge $sponge, $data, $dataBitLen = null)
     {
         if (! $dataBitLen) {
@@ -139,7 +170,7 @@ class KeccakHasher
      * 
      * @param   boolean                 $raw_output
      * @return  string|\NEM\Core\Buffer
-     */
+
     public function hash_final(KeccakSponge $sponge, bool $raw_output = false)
     {
         $output = $sponge->squeeze(null, $raw_output);
@@ -151,36 +182,5 @@ class KeccakHasher
         $outputLength = $sponge->getLength();
         return new Buffer($output, $outputLength);
     }
-
-    /**
-     * Helper function used to determine each hash's Bits length
-     * by a given `algorithm`.
-     * 
-     * The `algorithm` parameter can be a integer directly and should
-     * then represent a Bits Length for generated Hashes.
-     * 
-     * @param   null|string|integer     $algorithm      The hashing algorithm or Hashes' Bits Length.
-     * @return  integer
-     */
-    static public function getHashBitLength($algorithm = null)
-    {
-        if (!$algorithm) {
-            return self::HASH_BIT_LENGTH;
-        }
-
-        if (is_integer($algorithm)) {
-            // direct hash-bit-length provided
-            return (int) $algorithm;
-        }
-        elseif (strpos(strtolower($algorithm), "keccak-") !== false) {
-            $bits = (int) substr($algorithm, -3); // keccak-256, keccak-512, etc.
-
-            if (! in_array($bits, [256, 228, 384, 512]))
-                $bits = 512;
-
-            return $bits;
-        }
-
-        return self::HASH_BIT_LENGTH;
-    }
+**/
 }
