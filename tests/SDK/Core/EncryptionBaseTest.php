@@ -28,6 +28,32 @@ class EncryptionBaseTest
     extends TestCase
 {
     /**
+     * Unit test for lower level PHP Hasher implementations.
+     * 
+     * This test will make sure that the Encryption class delegates
+     * to the PHP hasher correctly in both non-incremental and 
+     * incremental hashing mode.
+     * 
+     * @return void
+     */
+    public function testPHPHasher()
+    {
+        // test simple hash
+        $hash256 = Encryption::hash("sha3-256", "testing");
+        $expectHex = "7f5979fb78f082e8b1c676635db8795c4ac6faba03525fb708cb5fd68fd40c5e";
+
+        $this->assertEquals(64, strlen($hash256->getHex()));
+        $this->assertEquals($expectHex, $hash256->getHex());
+
+        // test incremental hash
+        $incremental = Encryption::hash_init("sha3-256");
+        Encryption::hash_update($incremental, "testing");
+        $hashInc256  = Encryption::hash_final($incremental);
+
+        $this->assertEquals($expectHex, $hashInc256->getHex());
+    }
+
+    /**
      * Unit test for *non-incremental Keccak Hash creation*.
      *
      * @return void

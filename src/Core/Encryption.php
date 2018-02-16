@@ -338,7 +338,7 @@ class Encryption
         // `S = H(R,A,m)a`
         // `S = (r + H(R,A,m)a)`
         $hram = Ed25519::sc_reduce($hramHash);
-        $az   = Ed25519::substr($safePriv, 0, 32);
+        $az   = $safePriv;
         $encodedS = Ed25519::sc_muladd($hram, $az, $r);
 
         // size secure encodedR and encodedS

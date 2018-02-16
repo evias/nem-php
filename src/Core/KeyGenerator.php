@@ -22,9 +22,9 @@ namespace NEM\Core;
 use NEM\Contracts\KeyPair as KeyPairContract;
 use NEM\Core\Buffer;
 use NEM\Core\Encoder;
+use NEM\Core\Encryption;
 use \ParagonIE_Sodium_Core_Ed25519;
 
-use kornrunner\Keccak;
 
 class KeyGenerator
 {
@@ -42,7 +42,7 @@ class KeyGenerator
         $buffer = new Buffer;
 
         // hash the secret key with Keccak SHA3 variation with 512-bit output (64 bytes)
-        $hashedSecret = Keccak::hash($keyPair->getSecretKey()->getBinary(), 512, true); // raw=true
+        $hashedSecret = Encryption::hash("keccak-512", $keyPair->getSecretKey()->getBinary(), true); // raw=true
 
         // clamp bits of the scalar *before* scalar multiplication
         $safeSecret = Buffer::clampBits($hashedSecret);
