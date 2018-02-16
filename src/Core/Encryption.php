@@ -159,10 +159,6 @@ class Encryption
             // use PHP hash()
             $res = hash_init($algorithm);
         }
-        elseif (strpos(strtolower($algorithm), "keccak") !== false) {
-            // use Keccak instead of PHP hash()
-            $res = KeccakHasher::hash_init($algorithm);
-        }
         else {
             throw new RuntimeException("Unsupported hash algorithm '" . $algo . "'.");
         }
@@ -185,10 +181,6 @@ class Encryption
         // use Buffer always
         $data = self::prepareInputBuffer($data);
 
-        if ($hasher instanceof KeccakSponge) {
-            return KeccakHasher::hash_update($hasher, $data->getBinary(), $data->getInternalSize() * 8);
-        }
-
         //XXX should use Hasher class to keep track of key size
         return hash_update($hasher, $data->getBinary());
     }
@@ -205,15 +197,8 @@ class Encryption
      */
     public static function hash_final($hasher, $returnRaw = false)
     {
-        if ($hasher instanceof KeccakSponge) {
-            // use Keccak internal hasher
-            $hash = KeccakHasher::hash_final($hasher, true);
-        }
-        else {
-            // use PHP hasher
-            $hash = hash_final($hasher, true);
-        }
-        
+        $hash = hash_final($hasher, true);
+
         if ((bool) $returnRaw) {
             return $hash;
         }
