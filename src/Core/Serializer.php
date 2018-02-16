@@ -60,28 +60,108 @@ class Serializer
     }
 
     /**
+     * Serialize any input for the NEM network.
+     * 
+     * @param   string          $data
+     * @return  array
+     */
+    public function serialize(/*mixed*/ $data) 
+    {
+        if (is_array($data)) {
+            return $this->serializeUInt8($data);
+        }
+        elseif (is_integer($data)) {
+            return $this->serializeLong($data);
+        }
+        elseif (is_string($data)) {
+            return $this->serializeString($data);
+        }
+        //XXX serializeTransaction
+    }
+
+    /**
      * Serialize string data. The serialized string will be prefixed
      * with a 4-bytes long Size field followed by the UInt8 representation
      * of the given `str`.
      * 
-     * Returns an array of Unsigned Integers on 8-bits.
+     * Takes in a string and returns an array of Unsigned Integers 
+     * on 8-bits.
      * 
      * @internal This method is used internally
      * @param   string  $str
      * @return  array
      */
-    public function serializeString($str)
+    public function serializeString(string $str = null)
     {
         if (null === $str) {
             $binary = Buffer::fromInt(0xffffffff, 4)->getBinary();
         }
         else {
-            $binary = Buffer::fromInt(strlen($str), 4, null, Buffer::PAD_RIGHT)->getBinary();
+            $count = strlen($str);
+            $binary = Buffer::fromInt($count, 4, null, Buffer::PAD_RIGHT)->getBinary();
 
-            for ($i = 0; $i < strlen($str); $i++) {
-                $char = Ed25519::intToChr(Ed25519::chrToInt((substr($str, $i, 1))));
+            for ($i = 0; $i < $count; $i++) {
+                $char = Ed25519::intToChr(
+                            Ed25519::chrToInt((substr($str, $i, 1))));
                 $binary .= $char;
             }
+        }
+
+        $buffer = new Buffer($binary, strlen($binary));
+        return $buffer->toUInt8();
+    }
+
+    /**
+     * Serialize unsigned char data. The serialized string will be prefixed
+     * with a 4-bytes long Size field followed by the given `str`.
+     * 
+     * Takes in a 8bit-string and returns an array of Unsigned Integers 
+     * on 8-bits.
+     * 
+     * @internal This method is used internally
+     * @param   string  $str
+     * @return  array
+     */
+    public function serializeUInt8(array $uint8Str = null)
+    {
+        if (null === $uint8Str) {
+            $binary = Buffer::fromInt(0xffffffff, 4)->getBinary();
+        }
+        else {
+            $count = count($uint8Str);
+            $binary = Buffer::fromInt(count($uint8Str), 4, null, Buffer::PAD_RIGHT)->getBinary();
+
+            for ($i = 0; $i < count($uint8Str); $i++) {
+                $char = Ed25519::intToChr($uint8Str[$i]);
+                $binary .= $char;
+            }
+        }
+
+        $buffer = new Buffer($binary, strlen($binary));
+        return $buffer->toUInt8();
+    }
+
+    /**
+     * Serialize UInt64 numbers. This corresponds to the `long` variable type
+     * in C.
+     * 
+     * @param   integer     $long
+     * @return  array
+     */
+    public function serializeLong(int $long = null)
+    {
+        if (null === $long) {
+            $binary = Buffer::fromInt(0, 8)->getBinary();
+        }
+        else {
+            // low part
+            $binary = Buffer::fromInt($long, null, null, Buffer::PAD_RIGHT)->getBinary();
+            if (($len = strlen($binary)) < 4)
+                $binary = $binary . str_repeat("\0", 4 - $len);
+
+            // high part
+            $oflow = floor($long / 0x100000000);
+            $binary .= Buffer::fromInt($oflow, 4, null, Buffer::PAD_RIGHT)->getBinary();
         }
 
         $buffer = new Buffer($binary, strlen($binary));

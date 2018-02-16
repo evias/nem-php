@@ -447,7 +447,7 @@ class Buffer
      * @param   int     $decimal
      * @return  string          Binary Data
      */
-    public function decimalToBinary($decimal)
+    public function decimalToBinary($decimal, $size = null, $padding = false, $direction = self::PAD_LEFT)
     {
         if ($decimal < 0xfd) {
             // Uint8 (unsigned char)
@@ -471,6 +471,12 @@ class Buffer
             $a32 = ($decimal & $biggerThan) >>32;
             $b32 = $decimal & $smallerThan;
             $bin = pack("NN", $a32, $b32);
+        }
+
+        // add padding when needed
+        if ($padding = true && $size) {
+            $buf = new Buffer($bin, $size, $direction);
+            $bin = $buf->getBinary();
         }
 
         return $bin;
