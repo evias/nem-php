@@ -244,41 +244,28 @@ class Encryption
     }
 
     /**
-     * This method lets you sign `data` with a given `secretKey`.
+     * This method lets you sign `data` with a given `keyPair`.
      * 
-     * Beware that the `secretKey` is not your privateKey but the 
-     * `KeyPair->getSecretKey()`.
+     * The signature scheme of NEM can be divided in following steps:
+     * 
+     * - step 1: hash the keypair secret key (byte-level reversed private key) with keccak-512
+     * - step 2: generate `r` with `r = H(priv[32..64], data)`
+     * - step 3: generate encodedR with ED25519 scalar multiplication
+     * - step 4: generate hram with `encodedR || public key || data`
+     * - step 5: generate encodedS with ED25519 scalar mult addition
+     * - step 6: concatenate encodedR and encodedS to obtain 64 bytes signature
+     * - step 7: assert that the signature is canonical or return false
      * 
      * @param   \NEM\Core\KeyPair           $keyPair       The KeyPair used for encryption.
      * @param   string|\NEM\Core\Buffer     $data           The data that you want to sign.
      * @param   string                      $algorithm      The hash algorithm used for signature creation.
-     * @return  \NEM\Core\Buffer
+     * @return  false|\NEM\Core\Buffer
      */
     public static function sign(KeyPair $keyPair, $data, $algorithm = "keccak-512")
     {
         // shortcuts + use Buffer always
         $data = self::prepareInputBuffer($data);
 
-        // use detached signature implementation
-        return self::signDetached($keyPair, $data, $algorithm);
-    }
-
-    /**
-     * Overload of the ParagonIE_Sodium_Core_Ed25519::sign_detached method
-     * to work with Keccak hashes needed for the NEM Network.
-     *
-     * More than just keccak-* hashes can be used through this change. Also
-     * PHP supported `hash_algos()` are supported here.
-     *
-     * @see ParagonIE_Sodium_Core_Ed25519::sign_detached()
-     * @param   string  $message    The message we need to sign
-     * @param   \NEM\Core\KeyPair           $keyPair       The KeyPair used for encryption.
-     * @param   string|\NEM\Core\Buffer     $data          The data that you want to sign. 
-     * @param   string                      $algorithm      The hash algorithm used for signature creation.
-     * @return  \NEM\Core\Buffer
-     */
-    public static function signDetached(KeyPair $keyPair, $data, $algorithm = "keccak-512")
-    {
         // shortcuts
         $secretKey = $keyPair->getSecretKey()->getBinary();
         $publicKey = $keyPair->getPublicKey()->getBinary();
@@ -287,32 +274,32 @@ class Encryption
         $data = self::prepareInputBuffer($data);
         $message   = $data->getBinary();
 
-        // crypto_hash_sha512(az, sk, 32);
+        // step 1: crypto_hash_sha512(az, sk, 32);
         $privHash = self::hash($algorithm, $keyPair->getSecretKey()->getBinary(), true);
 
         // clamp bits for secret key + size secure
         $safePriv = Buffer::clampBits($privHash, 64);
         $bufferPriv = new Buffer($safePriv, 64);
 
-        // generate `r` for scalar multiplication
+        // step 2: generate `r` for scalar multiplication
         // `r = H(priv[32..64], data)`
         $hashData = $bufferPriv->slice(32)->getBinary() . $data->getBinary();
         $r = self::hash($algorithm, $hashData, true);
 
-        // generate encoded version of `r` for `s` creation
+        // step 3: generate encoded version of `r` for `s` creation
         // `R = rB`
         $r = Ed25519::sc_reduce($r);
         $encodedR = Ed25519::ge_p3_tobytes(
             Ed25519::ge_scalarmult_base($r)
         );
 
-        // create `s` with: encodedR || public key || data
+        // step 4: create `s` with: encodedR || public key || data
         // `S = H(R,A,m)`
         $hramData = $encodedR . $publicKey . $data->getBinary();
         $hramHash = self::hash($algorithm, $hramData, true);
 
-        // safe secret generation for `encodedS` which is the HIGH part of
-        // the signature in scalar form.
+        // step 5: safe secret generation for `encodedS` which is the 
+        // HIGH part of the signature in scalar form.
         // `S = H(R,A,m)a`
         // `S = (r + H(R,A,m)a)`
         $hram = Ed25519::sc_reduce($hramHash);
@@ -323,13 +310,13 @@ class Encryption
         $bufferR = new Buffer($encodedR, 32);
         $bufferS = new Buffer($encodedS, 32);
 
-        // signature[0:63] = r[0:31] || s[0:31]
+        // step 6: signature[0:63] = r[0:31] || s[0:31]
         $sig = $bufferR->getBinary() . $bufferS->getBinary();
 
         // size secure signature
         $bufferSig = new Buffer($sig, 64);
 
-        // check that signature is canonical
+        // step 7: check that signature is canonical
         // - s != 0
         // - ed25519 reduced `s` should be identical to `s`.
         // `S = (r + H(R,A,m)a) mod L`
