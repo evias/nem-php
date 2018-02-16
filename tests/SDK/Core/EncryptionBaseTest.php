@@ -58,7 +58,7 @@ class EncryptionBaseTest
      *
      * @return void
      */
-    public function testSimpleKeccak()
+    public function testKeccakHasher()
     {
         // keccak-512
         $hash512 = Encryption::hash("keccak-512", "testing");

@@ -304,8 +304,7 @@ class Encryption
         $message   = $data->getBinary();
 
         // crypto_hash_sha512(az, sk, 32);
-        //XXX $privHash = self::hash($algorithm, $keyPair->getSecretKey()->getBinary(), true);
-        $privHash = self::hash("keccak-512", $keyPair->getSecretKey()->getBinary(), true);
+        $privHash = self::hash($algorithm, $keyPair->getSecretKey()->getBinary(), true);
 
         // clamp bits for secret key + size secure
         $safePriv = Buffer::clampBits($privHash, 64);
@@ -313,25 +312,20 @@ class Encryption
 
         // generate `r` for scalar multiplication
         // `r = H(priv[32..64], data)`
-        $sigR = self::hash_init($algorithm);
-        self::hash_update($sigR, $bufferPriv->slice(32)->getBinary());
-        self::hash_update($sigR, $data->getBinary());
-        $r = self::hash_final($sigR, true);
+        $hashData = $bufferPriv->slice(32)->getBinary() . $data->getBinary();
+        $r = self::hash($algorithm, $hashData, true);
 
         // generate encoded version of `r` for `s` creation
         // `R = rB`
-        $r = Ed25519::sc_reduce($r) . Ed25519::substr($r, 32);
+        $r = Ed25519::sc_reduce($r);
         $encodedR = Ed25519::ge_p3_tobytes(
             Ed25519::ge_scalarmult_base($r)
         );
 
         // create `s` with: encodedR || public key || data
         // `S = H(R,A,m)`
-        $sigH = self::hash_init($algorithm);
-        self::hash_update($sigH, Ed25519::substr($encodedR, 0, 32));
-        self::hash_update($sigH, Ed25519::substr($publicKey, 0, 32));
-        self::hash_update($sigH, $data->getBinary());
-        $hramHash = self::hash_final($sigH, true);
+        $hramData = $encodedR . $publicKey . $data->getBinary();
+        $hramHash = self::hash($algorithm, $hramData, true);
 
         // safe secret generation for `encodedS` which is the HIGH part of
         // the signature in scalar form.
@@ -356,23 +350,12 @@ class Encryption
         // - ed25519 reduced `s` should be identical to `s`.
         // `S = (r + H(R,A,m)a) mod L`
 
-        // check 1: make sure `s` != 0
+        // make sure `s` != 0
         $sigZero = new Buffer(null, 32);
         if ($encodedS === $sigZero->getBinary()) {
             // re-issue signature because `s = 0`
             return false;
         }
-
-        // check 2: ed25519 reduce and check `encodedS` again
-        // $isSigZero = 0;
-        // $uint8R = $bufferSig->toUInt8();
-        // $uint8S = $bufferS->toUInt8();
-        // for ($i = 0; $i < 32; $i++) {
-        //     $isSigZero |= $uint8R[32+$i] ^ $uint8S[$i];
-        // }
-
-        // // should not be 0!
-        // assert($isSigZero === 0);
 
         // create 64-bytes size-secured Buffer.
         $bufSignature = new Buffer($sig, 64);
