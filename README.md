@@ -298,7 +298,7 @@ make
 make install
 ```
 
-The above step is only because MAMP does not include the Apache build/ folder (which you can now find under `~/httpd-2.2.34/`). Ok, next step is to recompile PHP *as an Apache Module* as required by MAMP. Following snippet will let you download and compile the PHP package with MacOS and MAMP, enabling GMP, GD, MySQL, XML, CURL, GETTEXT and BCMATH modules.
+The above step is only because MAMP does not include the Apache build/ folder (which you can now find under `~/httpd-2.2.34/`). Ok, next step is to recompile PHP *as an Apache Module* as required by MAMP. Following snippet will let you download and compile the PHP package with MacOS and MAMP, enabling GMP, GD, MySQL, XML, CURL, GETTEXT, MBSTRING and BCMATH modules.
 
 ```bash
 # This is where the *built* PHP will be installed.
@@ -315,7 +315,7 @@ cd php-7.1.8
 # MacOS
 brew install intltool icu4c gettext
 brew link icu4c gettext
-./configure --with-apxs2=/Applications/MAMP/Library/bin/apxs --prefix=/Users/greg/php-7.1.8 --enable-intl --with-gmp --with-xmlrpc --enable-bcmath --with-curl=/usr --with-gettext=/usr/local/Cellar/gettext/ --with-gd --with-pdo-mysql --with-openssl=/usr/local/Cellar/openssl/1.0.2n/
+./configure --with-apxs2=/Applications/MAMP/Library/bin/apxs --prefix=/Users/greg/php-7.1.8 --enable-intl --with-gmp --with-xmlrpc --enable-bcmath --with-curl=/usr --with-gettext=/usr/local/Cellar/gettext/ --with-gd --with-pdo-mysql --with-openssl=/usr/local/Cellar/openssl/1.0.2n/ --enable-mbstring
 make
 make install
 # End-MacOS
