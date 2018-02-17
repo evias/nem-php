@@ -22,6 +22,7 @@ use NEM\Tests\TestCase;
 use NEM\Core\Serializer;
 use NEM\Core\Buffer;
 use NEM\Models\Model;
+use NEM\Models\ModelCollection;
 
 class SerializerFactoryTest
     extends TestCase
@@ -37,6 +38,7 @@ class SerializerFactoryTest
         $uint8 = [72, 114, 4, 0, 0, 0, 0, 0];
         $char  = "290888";
 
+        // test factory method serialize()
         $serializer = Serializer::getInstance();
         $serNull  = $serializer->serialize(null);
         $serInt   = $serializer->serialize($int32);
@@ -76,7 +78,7 @@ class SerializerFactoryTest
             "attribute_three" => "value_pos3",
         ]);
 
-        // test factory serialization
+        // test serialization process specialization in Model
         $serializer = Serializer::getInstance();
         $serModel   = $serializer->serialize($model);
 
@@ -100,5 +102,43 @@ class SerializerFactoryTest
 
         $this->assertEquals($expectSize, count($serModel));
         $this->assertEquals(json_encode($expectUInt8), json_encode($serModel));
+    }
+
+    /**
+     * Unit test for *base Model serialization* without specialization
+     * and using the factory method serialize().
+     * 
+     * @return void
+     */
+    public function testSerializerCollectionBase()
+    {
+        $model1 = new Model(["attribute_one" => "value_pos1_1"]);
+        $model2 = new Model(["attribute_one" => "value_pos1_2"]);
+        $collection = new ModelCollection([$model1, $model2]);
+
+        // test serialization process specialization in ModelCollection
+        $serializer = Serializer::getInstance();
+        $serCollection = $collection->serialize($collection);
+
+        // expected results
+        $expectJSON = '[{"attribute_one":"value_pos1_1"},'
+                      .'{"attribute_one":"value_pos1_2"}]';
+        $expectSize = 4 + strlen($expectJSON);
+        $expectUInt8 = [
+             67,   0,   0,   0, 
+             91, 123,  34,  97, 116, 116, 114, 105,
+             98, 117, 116, 101,  95, 111, 110, 101,
+             34,  58,  34, 118,  97, 108, 117, 101,
+             95, 112, 111, 115,  49,  95,  49,  34,
+            125,  44, 123,  34,  97, 116, 116, 114,
+            105,  98, 117, 116, 101,  95, 111, 110,
+            101,  34,  58,  34, 118,  97, 108, 117,
+            101,  95, 112, 111, 115,  49,  95,  50,
+             34, 125,  93
+        ];
+
+        // assert
+        $this->assertEquals($expectSize, count($serCollection));
+        $this->assertEquals(json_encode($expectUInt8), json_encode($serCollection));
     }
 }

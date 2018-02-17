@@ -105,6 +105,12 @@ class Model
     extends ArrayObject
     implements DataTransferObject, Serializable
 {
+    /**
+     * Inject getSerializer() and setSerializer()
+     * 
+     * @see \NEM\Traits\Serializable
+     * @see \NEM\Core\Serializer
+     */
     use \NEM\Traits\Serializable;
 
     /**

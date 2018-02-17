@@ -26,6 +26,7 @@ use NEM\Models\Model;
 // This unit test will test all serializer process Specializations
 use NEM\Models\Mosaic;
 use NEM\Models\MosaicAttachment;
+use NEM\Models\MosaicAttachments;
 
 class SerializerSpecializationTest
     extends TestCase
@@ -126,6 +127,54 @@ class SerializerSpecializationTest
             107,   7,   0,   0,   0, 110, 101, 109,
              45, 112, 104, 112,   1,   0,   0,   0, 
               0,   0,   0,   0
+        ];
+        $expectSize = count($expectUInt8);
+
+        $this->assertEquals($expectSize, count($serialized));
+        $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
+    }
+
+    /**
+     * Unit test for *serialize process Specialization: MosaicAttachments collection*.
+     * 
+     * @return void
+     */
+    public function testSerializerModelSpecialization_MosaicAttachmentsCollection()
+    {
+        $mosaic = new Mosaic([
+            "namespaceId" => "evias.sdk",
+            "name" => "nem-php"
+        ]);
+
+        $attachment1 = new MosaicAttachment([
+            "mosaicId" => $mosaic->toDTO(),
+            "quantity" => 1
+        ]);
+
+        $attachment2 = new MosaicAttachment([
+            "mosaicId" => $mosaic->toDTO(),
+            "quantity" => 2
+        ]);
+
+        // create MosaicAttachments collection instance
+        $collection = new MosaicAttachments([$attachment1, $attachment2]);
+
+        // test specialized MosaicAttachments::serialize() serialization process
+        $serialized = $collection->serialize();
+
+        // expected results
+        $expectUInt8 = [
+              2,   0,   0,   0,
+             36,   0,   0,   0,  24,   0,   0,   0,
+              9,   0,   0,   0, 101, 118, 105,  97,
+            115,  46, 115, 100, 107,   7,   0,   0,
+              0, 110, 101, 109,  45, 112, 104, 112,
+              1,   0,   0,   0,   0,   0,   0,   0,
+             36,   0,   0,   0,  24,   0,   0,   0,
+              9,   0,   0,   0, 101, 118, 105,  97,
+            115,  46, 115, 100, 107,   7,   0,   0,
+              0, 110, 101, 109,  45, 112, 104, 112,
+              2,   0,   0,   0,   0,   0,   0,   0
         ];
         $expectSize = count($expectUInt8);
 

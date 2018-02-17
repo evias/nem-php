@@ -240,7 +240,7 @@ class Serializer
      * @param   array   $uint8_X
      * @return  array
      */
-    public function aggregate()
+    public function aggregate(/* [array $uint8_1, array $uint8_2, ...] */)
     {
         // read dynamic arguments
         $count = func_num_args();
