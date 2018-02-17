@@ -41,10 +41,10 @@ class MosaicProperties
     public function toDTO() 
     {
         $props = [
-            ["name" => "divisibility", "value" => null],
-            ["name" => "initialSupply", "value" => null],
-            ["name" => "supplyMutable", "value" => null],
-            ["name" => "transferable", "value" => null],
+            0 => ["name" => "divisibility", "value" => null],
+            1 => ["name" => "initialSupply", "value" => null],
+            2 => ["name" => "supplyMutable", "value" => null],
+            3 => ["name" => "transferable", "value" => null],
         ];
 
         $propertiesNames = [
@@ -62,6 +62,47 @@ class MosaicProperties
             $props[$index]["value"] = $item->value;
         }
 
+        // remove null values
+        $props = array_filter($props, function($item)
+        {
+            return $item["value"] !== null;
+        });
+
         return $props;
+    }
+
+    /**
+     * Overload of the \NEM\Core\ModelCollection::serialize() method to provide
+     * with a specialization for *MosaicProperties Arrays* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        // shortcuts
+        $serializer = $this->getSerializer();
+
+        // sort properties lexicographically (see toDTO() overload)
+        $sorted = $this->sortBy("name");
+
+        // serialize attachments
+        // prepend size on 4 bytes
+        $prependSize = $serializer->serializeInt($sorted->count());
+
+        // serialize each attachment
+        $stateUInt8 = $prependSize;
+        foreach ($sorted->all() as $property) {
+            // use MosaicProperty::serialize() specialization
+            $serialized = $property->serialize();
+
+            // use merge here, no aggregator
+            $stateUInt8 = array_merge($stateUInt8, $serialized);
+        }
+
+        // no need to use the aggregator, we dynamically aggregated
+        // our collection data and prepended the size on 4 bytes.
+        return $stateUInt8;
     }
 }

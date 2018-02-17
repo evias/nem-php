@@ -39,9 +39,39 @@ class MosaicProperty
      */
     public function toDTO($filterByKey = null)
     {
+        $value = (string) $this->value;
+        if (in_array($this->name, ["supplyMutable", "transferable"])) {
+            $value = ((bool) $this->value) ? "true" : "false";
+        }
+
         return [
             "name" => $this->name,
-            "value" => $this->value,
+            "value" => $value,
         ];
+    }
+
+    /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *Mosaic Definition Properties* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        // shortcuts
+        $propertyName  = $this->name;
+        $propertyValue = $this->value;
+        $serializer    = $this->getSerializer();
+
+        if (in_array($this->name, ["supplyMutable", "transferable"])) {
+            $propertyValue = ((bool) $propertyValue) ? "true" : "false";
+        }
+
+        $serializedName = $serializer->serializeString($propertyName);
+        $serializedValue = $serializer->serializeString($propertyValue);
+
+        return $serializer->aggregate($serializedName, $serializedValue);
     }
 }

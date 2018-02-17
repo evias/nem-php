@@ -36,7 +36,7 @@ class MosaicAttachments
         $serializer = $this->getSerializer();
 
         // sort attachments lexicographically
-        $this->sort(function($attach1, $attach2)
+        $sorted = $this->sort(function($attach1, $attach2)
         {
             $lexic1 = $attach1->mosaicId()->getFQN() . " : " . $attach1->quantity;
             $lexic2 = $attach2->mosaicId()->getFQN() . " : " . $attach2->quantity;
@@ -46,13 +46,13 @@ class MosaicAttachments
 
         // serialize attachments
         // prepend size on 4 bytes
-        $prependSize = $serializer->serializeInt($this->count());
+        $prependSize = $serializer->serializeInt($sorted->count());
 
         // serialize each attachment
         $stateUInt8 = $prependSize;
-        for ($i = 0, $len = $this->count(); $i < $len; $i++) {
+        for ($i = 0, $len = $sorted->count(); $i < $len; $i++) {
             // use MosaicAttachment::serialize() specialization
-            $attachment = $this->get($i)->serialize();
+            $attachment = $sorted->get($i)->serialize();
 
             // use merge here, no aggregator
             $stateUInt8 = array_merge($stateUInt8, $attachment);
