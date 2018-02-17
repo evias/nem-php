@@ -64,6 +64,23 @@ class MosaicAttachment
     }
 
     /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *mosaicId and Quantity* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        // shortcuts
+        $mosaicS = $this->mosaicId()->serialize();
+        $quantity = $this->serializer->serializeLong($this->quantity);
+
+        return $this->serializer->aggregate($mosaicS, $quantity);
+    }
+
+    /**
      * Mutator for `mosaicId` relation.
      *
      * This will return a NIS compliant [MosaicId](https://bob.nem.ninja/docs/#mosaicId) object. 

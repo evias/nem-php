@@ -176,4 +176,32 @@ class SerializerScalarTest
         $this->assertEquals(json_encode($expectTenThousand), json_encode($tenThousand));
         $this->assertEquals(json_encode($expectMaxMosaic), json_encode($maxMosaic));
     }
+
+    /**
+     * Unit test for *aggregate serialized objects* action.
+     * 
+     * @return void
+     */
+    public function testSerializedDataAggregator()
+    {
+        $serializer = Serializer::getInstance();
+
+        $one = $serializer->serializeUint8([1, 0, 0, 0]);
+        $two = $serializer->serializeUint8([2, 0, 0, 0]);
+        $aggregated = $serializer->aggregate($one, $two);
+
+        $len1 = count($one); // 7
+        $len2 = count($two); // 7
+
+        // aggregate should prepend size on 4 bytes
+        $expectSize = 4 + $len1 + $len2;
+        $expectUInt8 = [
+            16, 0, 0, 0,
+            4, 0, 0, 0, 1, 0, 0, 0, 
+            4, 0, 0, 0, 2, 0, 0, 0, 
+        ];
+
+        $this->assertEquals($expectSize, count($aggregated));
+        $this->assertEquals(json_encode($expectUInt8), json_encode($aggregated));
+    }
 }

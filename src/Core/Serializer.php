@@ -22,6 +22,7 @@ namespace NEM\Core;
 use NEM\Core\KeyPair;
 use NEM\Core\Buffer;
 use NEM\Core\Encryption;
+use NEM\Contracts\Serializable;
 use NEM\Errors\NISInvalidSignatureContent;
 use \ParagonIE_Sodium_Compat;
 use \ParagonIE_Sodium_Core_Ed25519 as Ed25519;
@@ -76,12 +77,16 @@ class Serializer
     /**
      * Serialize any input for the NEM network.
      * 
-     * @param   string          $data
-     * @return  array
+     * @param   array|string|integer|\NEM\Core\Serializer   $data
+     * @return  array       Returns a byte-array with values in UInt8 representation.
+     * @throws  RuntimeException    On unrecognized `data` argument.
      */
     public function serialize(/*mixed*/ $data) 
     {
-        if (is_array($data)) {
+        if (null === $data) {
+            return $this->serializeInt(null);
+        }
+        elseif (is_array($data)) {
             return $this->serializeUInt8($data);
         }
         elseif (is_integer($data)) {
@@ -90,7 +95,40 @@ class Serializer
         elseif (is_string($data)) {
             return $this->serializeString($data);
         }
-        //XXX serializeTransaction
+        elseif ($data instanceof Serializable) {
+            return $data->serialize();
+        }
+
+        throw new RuntimeException("Invalid parameter provided to \\NEM\\Core\\Serialize::serialize().");
+    }
+
+    /**
+     * Internal method to serialize a decimal number into a
+     * Integer on 4 Bytes.
+     * 
+     * This method is used in all other serializeX methods and
+     * should not be used directly from outside the NEM SDK.
+     * 
+     * @internal This method should not be used directly
+     * 
+     * @param   integer     $number
+     * @return  array       Returns a byte-array with values in UInt8 representation.
+     */
+    public function serializeInt(int $number = null)
+    {
+        if (null === $number) {
+            return $this->serializeInt(self::NULL_SENTINEL);
+        }
+        else {
+            $uint8 = [
+                $number         & 0xff,
+                ($number >> 8)  & 0xff,
+                ($number >> 16) & 0xff,
+                ($number >> 24) & 0xff
+            ];
+        }
+
+        return $uint8;
     }
 
     /**
@@ -155,30 +193,6 @@ class Serializer
     }
 
     /**
-     * Internal method to serialize a decimal number into a
-     * Integer on 4 Bytes.
-     * 
-     * @param   integer     $number
-     * @return  array       Returns a byte-array with values in UInt8 representation.
-     */
-    public function serializeInt(int $number = null)
-    {
-        if (null === $number) {
-            return $this->serializeInt(self::NULL_SENTINEL);
-        }
-        else {
-            $uint8 = [
-                $number         & 0xff,
-                ($number >> 8)  & 0xff,
-                ($number >> 16) & 0xff,
-                ($number >> 24) & 0xff
-            ];
-        }
-
-        return $uint8;
-    }
-
-    /**
      * Serialize UInt64 numbers. This corresponds to the `long` variable type
      * in C.
      * 
@@ -201,12 +215,59 @@ class Serializer
                 // job done
                 return $uint8;
 
-            // self-padding to 8 bytes
+            // right padding to 8 bytes
             for ($i = 0, $done = 8 - $len; $i < $done; $i++) {
                 array_push($uint8, 0);
             }
         }
 
         return $uint8;
+    }
+
+    /**
+     * This method lets you aggregate multiple serialized
+     * byte arrays.
+     * 
+     * It will also prepend a size on 4 bytes representing
+     * the *size of the merged/aggregated byte arrays*.
+     * 
+     * This method accepts *any* count of array arguments.
+     * The passed array must contain UInt8 representation
+     * of bytes (see serializeX methods).
+     * 
+     * @param   array   $uint8_1
+     * @param   array   $uint8_2
+     * @param   array   $uint8_X
+     * @return  array
+     */
+    public function aggregate()
+    {
+        // read dynamic arguments
+        $count = func_num_args();
+        if (! $count) {
+            return [];
+        }
+
+        // interpret dynamic arguments and concatenate
+        // byte arrays into one aggregated byte array `concat`.
+        $concat = [];
+        $length = 0;
+        for ($i = 0; $i < $count; $i++) {
+            $argument = func_get_arg($i);
+            if (! is_array($argument)) {
+                // object is not serialized yet
+                $argument = $this->serialize($argument);
+            }
+
+            $concat = array_merge($concat, $argument);
+            $length += count($argument);
+        }
+
+        // prepend size on 4 bytes
+        $output = $this->serializeInt($length);
+
+        // append serialized parts
+        $output = array_merge($output, $concat);
+        return $output;
     }
 }

@@ -26,6 +26,7 @@ use \Illuminate\Support\Arr;
 use NEM\Infrastructure\ServiceInterface;
 use NEM\Models\Mutators\ModelMutator;
 use NEM\Contracts\DataTransferObject;
+use NEM\Contracts\Serializable;
 
 use ArrayObject;
 use BadMethodCallException;
@@ -102,8 +103,10 @@ use RuntimeException;
  */
 class Model
     extends ArrayObject
-    implements DataTransferObject
+    implements DataTransferObject, Serializable
 {
+    use \NEM\Traits\Serializable;
+
     /**
      * List of fillable attributes
      *
@@ -154,6 +157,14 @@ class Model
     protected $dotAttributes = [];
 
     /**
+     * Field names sorted with indexes.
+     * 
+     * @internal
+     * @var array
+     */
+    protected $sortedFields = [];
+
+    /**
      * The model instance's RELATED OBJECTS.
      *
      * Can't overload this property as it is used internally. 
@@ -193,7 +204,8 @@ class Model
      * grained data transfer objects.
      *
      * @see http://bob.nem.ninja/docs/  NIS API Documentation
-     * @return  array       Associative array representation of the object *compliable* with NIS definition.
+     * @param   null|string $filterByKey    non-null will return only the named sub-dtos.
+     * @return  array       Associative     array representation of the object *compliable* with NIS definition.
      */
     public function toDTO($filterByKey = null)
     {
@@ -222,6 +234,28 @@ class Model
             return $dtos[$filterByKey];
 
         return $dtos;
+    }
+
+    /**
+     * This method should return a *byte-array* with UInt8
+     * representation of bytes for the said object.
+     *
+     * Each class implementing this interface should provide
+     * with a specific *serializing process* where the data
+     * is grouped and organized correctly according to the 
+     * NIS reference.
+     * 
+     * The `parameters` argument can be used to filter sub-dtos
+     * or fields of a given model instance.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        $json = json_encode($this->toDTO($parameters));
+        return $this->serializer->serializeString($json);
     }
 
     /**
@@ -321,7 +355,13 @@ class Model
      */
     public function getAttributes()
     {
-        return $this->attributes;
+        // prevent order of fields from changing
+        $sortedAttribs = [];
+        foreach ($this->sortedFields as $ix => $attribute) {
+            $sortedAttribs[$attribute] = $this->attributes[$attribute];
+        }
+
+        return $sortedAttribs;
     }
 
     /**
@@ -374,6 +414,16 @@ class Model
      */
     public function setAttribute($name, $data)
     {
+        // new fields are detected to *prevent the order of fields*
+        // from changing during data processes.
+
+        $attributes = array_keys($this->attributes);
+        $cntAttribs = count($attributes);
+        if (! in_array($name, $attributes)) {
+            // new field detected, store index for correct order
+            $this->sortedFields[$cntAttribs-1] = $name;
+        }
+
         if (in_array($name, $this->relations) || method_exists($this, $name)) {
             // subordinate DTO data passed (one-to-one, one-to-many, etc.)
             // build the linked Model using Relationship configuration.
