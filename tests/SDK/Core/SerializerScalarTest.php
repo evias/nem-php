@@ -43,7 +43,7 @@ class SerializerScalarTest
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
 
         // test empty string
-        $expectUInt8 = [0,0,0,0];
+        $expectUInt8 = [0, 0, 0, 0];
         $serialized = $serializer->serializeString("");
         $this->assertTrue(is_array($serialized));
         $this->assertEquals(4, count($serialized));
@@ -131,7 +131,7 @@ class SerializerScalarTest
         // test null value
         $serialized = $serializer->serializeLong(null);
 
-        $expectUInt8 = [0, 0, 0, 0, 0, 0, 0, 0];
+        $expectUInt8 = [255, 255, 255, 255, 0, 0, 0, 0];
         $this->assertTrue(is_array($serialized));
         $this->assertEquals(8, count($serialized));
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
@@ -155,19 +155,25 @@ class SerializerScalarTest
         $one = $serializer->serializeLong(1);
         $two = $serializer->serializeLong(2);
         $hundred = $serializer->serializeLong(100);
+        $twoHundred = $serializer->serializeLong(256);
         $thousand = $serializer->serializeLong(1000);
+        $tenThousand = $serializer->serializeLong(10000);
         $maxMosaic = $serializer->serializeLong(9000000000);
 
         $expectOne = [1, 0, 0, 0, 0, 0, 0, 0];
         $expectTwo = [2, 0, 0, 0, 0, 0, 0, 0];
         $expectHundred = [100, 0, 0, 0, 0, 0, 0, 0];
+        $expectTwoHundred = [0, 1, 0, 0, 0, 0, 0, 0];
         $expectThousand = [232, 3, 0, 0, 0, 0, 0, 0];
+        $expectTenThousand = [16, 39, 0, 0, 0, 0, 0, 0];
         $expectMaxMosaic = [0, 26, 113, 24, 2, 0, 0, 0];
 
         $this->assertEquals(json_encode($expectOne), json_encode($one));
         $this->assertEquals(json_encode($expectTwo), json_encode($two));
         $this->assertEquals(json_encode($expectHundred), json_encode($hundred));
+        $this->assertEquals(json_encode($expectTwoHundred), json_encode($twoHundred));
         $this->assertEquals(json_encode($expectThousand), json_encode($thousand));
+        $this->assertEquals(json_encode($expectTenThousand), json_encode($tenThousand));
         $this->assertEquals(json_encode($expectMaxMosaic), json_encode($maxMosaic));
     }
 }

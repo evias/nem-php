@@ -108,7 +108,7 @@ class Buffer
         }
 
         $this->size   = $byteSize;
-        $this->buffer = $byteString;
+        $this->buffer = $byteString === null ? "" : $byteString;
         $this->paddingDirection = $paddingDirection;
     }
 
@@ -242,7 +242,11 @@ class Buffer
         }
 
         $math = $math ?: EccFactory::getAdapter();
-        $binary = pack("H*", $math->decHex($integer));
+        $binary = null;
+        if ($integer !== null) {
+            $binary = pack("H*", $math->decHex($integer));
+        }
+
         return new self($binary, $byteSize, $paddingDirection);
     }
 

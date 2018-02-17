@@ -29,6 +29,20 @@ USE \SodiumException;
 
 class Serializer
 {
+
+    /**
+     * Sentinel value used to indicate that a serialized byte array 
+     * should be deserialized as null.
+     * 
+     * @var integer
+     */
+    const NULL_SENTINEL = 0xffffffff;
+
+    /**
+     * The singleton instance
+     * 
+     * @var \NEM\Core\Serializer
+     */
     static protected $_instance = null;
 
     /**
@@ -89,26 +103,26 @@ class Serializer
      * 
      * @internal This method is used internally
      * @param   string  $str
-     * @return  array
+     * @return  array       Returns a byte-array with values in UInt8 representation.
      */
     public function serializeString(string $str = null)
     {
         if (null === $str) {
-            $binary = Buffer::fromInt(0xffffffff, 4)->getBinary();
+            $uint8 = $this->serializeInt(null);
         }
         else {
+            // prepend size on 4 bytes
             $count = strlen($str);
-            $binary = Buffer::fromInt($count, 4, null, Buffer::PAD_RIGHT)->getBinary();
+            $uint8 = $this->serializeInt($count);
 
+            // UTF-8 to binary
             for ($i = 0; $i < $count; $i++) {
-                $char = Ed25519::intToChr(
-                            Ed25519::chrToInt((substr($str, $i, 1))));
-                $binary .= $char;
+                $dec = Ed25519::chrToInt(substr($str, $i, 1));
+                array_push($uint8, $dec);
             }
         }
 
-        $buffer = new Buffer($binary, strlen($binary));
-        return $buffer->toUInt8();
+        return $uint8;
     }
 
     /**
@@ -120,25 +134,48 @@ class Serializer
      * 
      * @internal This method is used internally
      * @param   string  $str
-     * @return  array
+     * @return  array       Returns a byte-array with values in UInt8 representation.
      */
     public function serializeUInt8(array $uint8Str = null)
     {
         if (null === $uint8Str) {
-            $binary = Buffer::fromInt(0xffffffff, 4)->getBinary();
+            $uint8 = $this->serializeInt(null);
         }
         else {
+            // prepend size on 4 bytes
             $count = count($uint8Str);
-            $binary = Buffer::fromInt(count($uint8Str), 4, null, Buffer::PAD_RIGHT)->getBinary();
+            $uint8 = $this->serializeInt($count);
 
-            for ($i = 0; $i < count($uint8Str); $i++) {
-                $char = Ed25519::intToChr($uint8Str[$i]);
-                $binary .= $char;
+            for ($i = 0; $i < $count; $i++) {
+                array_push($uint8, $uint8Str[$i]);
             }
         }
 
-        $buffer = new Buffer($binary, strlen($binary));
-        return $buffer->toUInt8();
+        return $uint8;
+    }
+
+    /**
+     * Internal method to serialize a decimal number into a
+     * Integer on 4 Bytes.
+     * 
+     * @param   integer     $number
+     * @return  array       Returns a byte-array with values in UInt8 representation.
+     */
+    public function serializeInt(int $number = null)
+    {
+        if (null === $number) {
+            return $this->serializeInt(self::NULL_SENTINEL);
+        }
+        else {
+            $uint8 = [
+                $number         & 0xff,
+                ($number >> 8)  & 0xff,
+                ($number >> 16) & 0xff,
+                ($number >> 24) & 0xff
+            ];
+        }
+
+        return $uint8;
     }
 
     /**
@@ -151,20 +188,25 @@ class Serializer
     public function serializeLong(int $long = null)
     {
         if (null === $long) {
-            $binary = Buffer::fromInt(0, 8)->getBinary();
+            // long on 8 bytes always
+            $uint8 = array_merge($this->serializeInt(null), $this->serializeInt(0));
         }
         else {
-            // low part
-            $binary = Buffer::fromInt($long, null, null, Buffer::PAD_RIGHT)->getBinary();
-            if (($len = strlen($binary)) < 4)
-                $binary = $binary . str_repeat("\0", 4 - $len);
+            // prepend size on 4 bytes
+            $uint64L = $this->serializeInt($long);
+            $uint64H = $this->serializeInt($long >> 32);
 
-            // high part
-            $oflow = floor($long / 0x100000000);
-            $binary .= Buffer::fromInt($oflow, 4, null, Buffer::PAD_RIGHT)->getBinary();
+            $uint8 = array_merge($uint64L, $uint64H);
+            if (($len = count($uint8)) === 8) 
+                // job done
+                return $uint8;
+
+            // self-padding to 8 bytes
+            for ($i = 0, $done = 8 - $len; $i < $done; $i++) {
+                array_push($uint8, 0);
+            }
         }
 
-        $buffer = new Buffer($binary, strlen($binary));
-        return $buffer->toUInt8();
+        return $uint8;
     }
 }
