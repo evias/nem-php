@@ -149,4 +149,26 @@ class ModelAbstractionTest
         $this->assertNotEquals($tx->getFields(), $itx->getFields());
         $this->assertNotEmpty($itx->getAppends());
     }
+
+    /**
+     * Unit test for *prevention of fields order change*.
+     * 
+     * @return void
+     */
+    public function testSDKModelFieldsOrderChangePrevention()
+    {
+        $model = new Model([
+            "attribute_one"   => "value_pos1",
+            "attribute_two"   => "value_pos2",
+            "attribute_three" => "value_pos3"
+        ]);
+
+        $attribs = $model->toDTO();
+        $fields  = array_keys($attribs);
+
+        $this->assertEquals(3, count($fields));
+        $this->assertEquals("attribute_one", $fields[0]);
+        $this->assertEquals("attribute_two", $fields[1]);
+        $this->assertEquals("attribute_three", $fields[2]);
+    }
 }
