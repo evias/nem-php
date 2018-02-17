@@ -47,6 +47,27 @@ class Mosaic
     }
 
     /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *mosaicId* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        // shortcuts
+        $namespace = $this->namespaceId;
+        $mosaicName = $this->name;
+        $serializer = $this->getSerializer();
+
+        $serializedNS = $serializer->serializeString($namespace);
+        $serializedMos = $serializer->serializeString($mosaicName);
+
+        return $serializer->aggregate($serializedNS, $serializedMos);
+    }
+
+    /**
      * Getter for the *fully qualified name* of the Mosaic.
      *
      * @return string
