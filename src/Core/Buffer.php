@@ -44,6 +44,15 @@ use RuntimeException;
 class Buffer
 {
     /**
+     * Buffer padding directions
+     * 
+     * @internal
+     * @var integer
+     */
+    const PAD_LEFT = 1;
+    const PAD_RIGHT = 2;
+
+    /**
      * Size of the Buffer
      *
      * @var int
@@ -67,6 +76,13 @@ class Buffer
     protected $math;
 
     /**
+     * The padding direction (default LEFT)
+     *
+     * @var integer
+     */
+    protected $paddingDirection;
+
+    /**
      * Buffer::__construct()
      *
      * Construct a Buffer from a String. Both parameters are optional.
@@ -78,7 +94,7 @@ class Buffer
      * @param   null|integer         $byteSize          Size of the Content (Optional)
      * @throws  \InvalidArgumentException    On Invalid `byteSize` and `byteString` pair.
      */
-    public function __construct($byteString = '', $byteSize = null)
+    public function __construct($byteString = '', $byteSize = null, $paddingDirection = self::PAD_LEFT)
     {
         $this->math = EccFactory::getAdapter();
         if ($byteSize !== null) {
@@ -92,7 +108,8 @@ class Buffer
         }
 
         $this->size   = $byteSize;
-        $this->buffer = $byteString;
+        $this->buffer = $byteString === null ? "" : $byteString;
+        $this->paddingDirection = $paddingDirection;
     }
 
     /**
@@ -127,21 +144,21 @@ class Buffer
      * @param   integer         $byteSize
      * @return  \NEM\Core\Buffer
      */
-    static public function bufferize($data, $byteSize = null)
+    static public function bufferize($data, $byteSize = null, $paddingDirection = self::PAD_LEFT)
     {
         if (is_integer($data)) {
             // Buffer from Decimal
-            return Buffer::fromInt($data, $byteSize);
+            return Buffer::fromInt($data, $byteSize, null, $paddingDirection);
         }
 
         $charLen = strlen($data);
         if (ctype_xdigit($data) && $charLen % 32 === 0) {
             // Buffer from Hexadecimal
-            return Buffer::fromHex($data, $byteSize);
+            return Buffer::fromHex($data, $byteSize, $paddingDirection);
         }
 
         // Buffer from Normalized String
-        return Buffer::fromString($data);
+        return Buffer::fromString($data, $paddingDirection);
     }
 
     /**
@@ -153,16 +170,16 @@ class Buffer
      * @param   string  $string
      * @return  \NEM\Core\Buffer
      */
-    static public function fromString($string)
+    static public function fromString($string, $paddingDirection = self::PAD_LEFT)
     {
         if (!class_exists("Normalizer")) {
             // Data representation Normalization not supported
-            return new Buffer($string);
+            return new Buffer($string, null, $paddingDirection);
         }
 
         // Normalizer is used to avoid problems with UTF-8 serialization
         $normalized = \Normalizer::normalize($string, \Normalizer::FORM_KD);
-        return new Buffer($normalized);
+        return new Buffer($normalized, null, $paddingDirection);
     }
 
     /**
@@ -175,7 +192,7 @@ class Buffer
      * @return  \NEM\Core\Buffer
      * @throws  \InvalidArgumentException   On non-hexadecimal content in `hexString`
      */
-    static public function fromHex($hexString = '', $byteSize = null)
+    static public function fromHex($hexString = '', $byteSize = null, $paddingDirection = self::PAD_LEFT)
     {
         if (strlen($hexString) > 0 && !ctype_xdigit($hexString)) {
             throw new InvalidArgumentException('NEM\\Core\\Buffer::hex: non-hexadecimal character passed');
@@ -183,7 +200,7 @@ class Buffer
 
         // format to binary hexadecimal string
         $binary = pack("H*", $hexString);
-        return new self($binary, $byteSize);
+        return new self($binary, $byteSize, $paddingDirection);
     }
 
     /**
@@ -218,15 +235,19 @@ class Buffer
      * @return  \NEM\Core\Buffer
      * @throws  InvalidArgumentException   On negative integer value
      */
-    static public function fromInt($integer, $byteSize = null, GmpMathInterface $math = null)
+    static public function fromInt($integer, $byteSize = null, GmpMathInterface $math = null, $paddingDirection = self::PAD_LEFT)
     {
         if ($integer < 0) {
             throw new InvalidArgumentException('Buffer::int supports only unsigned integers.');
         }
 
         $math = $math ?: EccFactory::getAdapter();
-        $binary = pack("H*", $math->decHex($integer));
-        return new self($binary, $byteSize);
+        $binary = null;
+        if ($integer !== null) {
+            $binary = pack("H*", $math->decHex($integer));
+        }
+
+        return new self($binary, $byteSize, $paddingDirection);
     }
 
     /**
@@ -274,7 +295,8 @@ class Buffer
             if (strlen($this->buffer) < $this->size) {
                 // internal size of buffer is *too small*
                 // will now pad the string (zeropadding).
-                return str_pad($this->buffer, $this->size, chr(0), STR_PAD_LEFT);
+                $direction = $this->paddingDirection == self::PAD_RIGHT ? STR_PAD_RIGHT : STR_PAD_LEFT; 
+                return str_pad($this->buffer, $this->size, chr(0), $direction);
             }
             elseif (strlen($this->buffer) > $this->size) {
                 // buffer size overflow - truncate the buffer
@@ -429,7 +451,7 @@ class Buffer
      * @param   int     $decimal
      * @return  string          Binary Data
      */
-    public function decimalToBinary($decimal)
+    public function decimalToBinary($decimal, $size = null, $padding = false, $direction = self::PAD_LEFT)
     {
         if ($decimal < 0xfd) {
             // Uint8 (unsigned char)
@@ -453,6 +475,12 @@ class Buffer
             $a32 = ($decimal & $biggerThan) >>32;
             $b32 = $decimal & $smallerThan;
             $bin = pack("NN", $a32, $b32);
+        }
+
+        // add padding when needed
+        if ($padding = true && $size) {
+            $buf = new Buffer($bin, $size, $direction);
+            $bin = $buf->getBinary();
         }
 
         return $bin;
@@ -514,7 +542,7 @@ class Buffer
         // argument *by-reference*
         array_walk($split, function(&$item, $ix) {
             $buf = new Buffer($item, 1);
-            $item = $buf->getInt();
+            $item = (int) $buf->getInt();
         });
 
         return $split;
@@ -526,10 +554,9 @@ class Buffer
      * Concatenate buffers
      *
      * @param   \NEM\Core\Buffer    $buffer1
-     * @param   int                 $size
      * @return  \NEM\Core\Buffer
      */
-    public function concat(Buffer $buffer, $size = null)
+    public function concat(Buffer $buffer)
     {
         // size-protected through Buffer class
         $this->buffer = $this->buffer . $buffer->getBinary();

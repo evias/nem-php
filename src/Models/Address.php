@@ -100,7 +100,7 @@ class Address
         }
 
         // step 1: keccak-256 hash of the public key
-        $pubKeyHash = Keccak::hash($pubKeyBuf->getBinary(), 256, true); // raw=true
+        $pubKeyHash = Encryption::hash("keccak-256", $pubKeyBuf->getBinary(), true); // raw=true
 
         // step 2: ripemd160 hash of (1)
         $pubKeyRiped = new Buffer(hash("ripemd160", $pubKeyHash, true), 20);

@@ -35,8 +35,6 @@ interface KeyPair
      * This method should return a Hexadecimal representation
      * of a Public Key.
      *
-     * Binary data should and will only be used internally.
-     *
      * @internal
      * @param   string|integer                  Which encoding to use (One of: "hex", "uint8", "int32")
      * @return  \NEM\Core\Buffer|string|array
@@ -47,11 +45,20 @@ interface KeyPair
      * This method should return a Hexadecimal representation
      * of a Private Key.
      *
-     * Binary data should and will only be used internally.
-     *
      * @internal
      * @param   string|integer                  Which encoding to use (One of: "hex", "uint8", "int32")
      * @return  \NEM\Core\Buffer|string|array
      */
     public function getPrivateKey($enc = null);
+
+    /**
+     * This method should return a Hexadecimal representation
+     * of a Secret Key. The secret key is the *reversed byte-level
+     * representation of the Private Key*.^
+     *
+     * @internal
+     * @param   string|integer                  Which encoding to use (One of: "hex", "uint8", "int32")
+     * @return  \NEM\Core\Buffer|string|array
+     */
+    public function getSecretKey($enc = null);
 }

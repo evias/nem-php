@@ -23,23 +23,25 @@ namespace NEM\Contracts;
  * Interface to provide with easy Serialization.
  *
  * Serialization is best done when data can be represented
- * in binary form.
- *
- * This interface should with a simple way of getting a Buffer
- * created out of any class implementing the interface.
+ * in binary form, this will be handled internally with the
+ * provided Serializer class.
  *
  */
 interface Serializable
 {
     /**
-     * Serializable::getBuffer()
-     *
-     * This method should return an object implementing 
-     * \NEM\Core\Buffer such that the 
-     * contents of the buffer can be represented as Binary
-     * Data.
-     *
-     * @return \NEM\Core\Buffer
+     * Serializable::serialize()
+     * 
+     * This method should return a *byte-array* with UInt8
+     * representation of bytes for the said object.
+     * 
+     * Each class implementing this interface should provide
+     * with a specific *serializing process* where the data
+     * is grouped and organized correctly according to the 
+     * NIS reference.
+     * 
+     * @param   null|mixed  $parameters     Any parameters you want to pass along to the serialization process.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
      */
-    public function getBuffer();
+    public function serialize($parameters = null);
 }

@@ -180,7 +180,7 @@ class KeyPair
      * 
      * @param   null|string|\NEM\Core\Buffer   $data        The data that needs to be signed.
      * @param   string                         $algorithm   The hash algorithm used for signature creation.
-     * @param   string|integer                 $enc         Which encoding to use (One of: "hex", "uint8", "int32")
+     * @param   string|integer                 $enc         Which encoding to return (One of: "hex", "uint8", "int32")
      * @return  \NEM\Core\Buffer|string|array   Returns either of Buffer, string hexadecimal representation, or UInt8 or Int32 array.
      */
     public function sign($data, $algorithm = "keccak-512", $enc = null)
