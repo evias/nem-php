@@ -21,6 +21,7 @@ namespace NEM\Tests\SDK\Core;
 use NEM\Tests\TestCase;
 use NEM\Core\Serializer;
 use NEM\Core\Buffer;
+use NEM\Models\Model;
 
 class SerializerFactoryTest
     extends TestCase
@@ -59,5 +60,45 @@ class SerializerFactoryTest
         $this->assertEquals(json_encode($expectUInt8_Int), json_encode($serInt));
         $this->assertEquals(json_encode($expectUInt8_Char), json_encode($serChar));
         $this->assertEquals(json_encode($expectUInt8_UInt8), json_encode($serUInt8));
+    }
+
+    /**
+     * Unit test for *base Model serialization* without specialization
+     * and using the factory method serialize().
+     * 
+     * @return void
+     */
+    public function testSerializerModelBase()
+    {
+        $model = new Model([
+            "attribute_one" => "value_pos1",
+            "attribute_two" => "value_pos2",
+            "attribute_three" => "value_pos3",
+        ]);
+
+        // test factory serialization
+        $serializer = Serializer::getInstance();
+        $serModel   = $serializer->serialize($model);
+
+        $expectJSON = '{"attribute_one":"value_pos1","attribute_two":"value_pos2","attribute_three":"value_pos3"}';
+        $expectSize = 4 + strlen($expectJSON);
+        $expectUInt8 = [
+            90,    0,   0,   0,
+            123,  34,  97, 116, 116, 114, 105,  98,
+            117, 116, 101,  95, 111, 110, 101,  34,
+            58,   34, 118,  97, 108, 117, 101,  95,
+            112, 111, 115,  49,  34,  44,  34,  97,
+            116, 116, 114, 105,  98, 117, 116, 101,
+            95,  116, 119, 111,  34,  58,  34, 118,
+            97,  108, 117, 101,  95, 112, 111, 115,
+            50,   34,  44,  34,  97, 116, 116, 114,
+            105,  98, 117, 116, 101,  95, 116, 104,
+            114, 101, 101,  34,  58,  34, 118,  97,
+            108, 117, 101,  95, 112, 111, 115, 51, 
+            34,  125
+        ];
+
+        $this->assertEquals($expectSize, count($serModel));
+        $this->assertEquals(json_encode($expectUInt8), json_encode($serModel));
     }
 }

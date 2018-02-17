@@ -75,9 +75,9 @@ class MosaicAttachment
     {
         // shortcuts
         $mosaicS = $this->mosaicId()->serialize();
-        $quantity = $this->serializer->serializeLong($this->quantity);
+        $quantity = $this->getSerializer()->serializeLong($this->quantity);
 
-        return $this->serializer->aggregate($mosaicS, $quantity);
+        return $this->getSerializer()->aggregate($mosaicS, $quantity);
     }
 
     /**

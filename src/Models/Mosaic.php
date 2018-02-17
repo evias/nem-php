@@ -59,12 +59,12 @@ class Mosaic
         // shortcuts
         $namespace = $this->namespaceId;
         $mosaicName = $this->name;
+        $serializer = $this->getSerializer();
 
-        $serializedNS = $this->serializer->serializeString($namespace);
-        $serializedMos = $this->serializer->serializeString($mosaicName);
+        $serializedNS = $serializer->serializeString($namespace);
+        $serializedMos = $serializer->serializeString($mosaicName);
 
-        return $this->serializer
-                    ->aggregate($serializedNS, $serializedMos);
+        return $serializer->aggregate($serializedNS, $serializedMos);
     }
 
     /**

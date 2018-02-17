@@ -255,7 +255,7 @@ class Model
     public function serialize($parameters = null)
     {
         $json = json_encode($this->toDTO($parameters));
-        return $this->serializer->serializeString($json);
+        return $this->getSerializer()->serializeString($json);
     }
 
     /**
