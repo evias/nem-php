@@ -78,7 +78,7 @@ class SerializerFactoryTest
             "attribute_three" => "value_pos3",
         ]);
 
-        // test serialization process specialization in Model
+        // test serialization process specialization in Serializer
         $serializer = Serializer::getInstance();
         $serModel   = $serializer->serialize($model);
 
@@ -116,9 +116,9 @@ class SerializerFactoryTest
         $model2 = new Model(["attribute_one" => "value_pos1_2"]);
         $collection = new ModelCollection([$model1, $model2]);
 
-        // test serialization process specialization in ModelCollection
+        // test serialization process specialization in Serializer
         $serializer = Serializer::getInstance();
-        $serCollection = $collection->serialize($collection);
+        $serCollection = $serializer->serialize($collection);
 
         // expected results
         $expectJSON = '[{"attribute_one":"value_pos1_1"},'
