@@ -17,14 +17,15 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Models\Mosaics\Dim;
+namespace NEM\Mosaics;
 
 use NEM\Models\Mosaic;
 use NEM\Models\MosaicAttachment;
 use NEM\Models\MosaicDefinition;
 use InvalidArgumentException;
+use RuntimeException;
 
-class Registry
+final class Registry
 {
     /**
      * Array of MosaicDefinition instances containing pre-configured
@@ -59,8 +60,8 @@ class Registry
             throw new InvalidArgumentException("Unrecognized `mosaic` parameter to \\NEM\\Models\\Mosaics\\Registry::getDefinition().");
         }
 
-        $preconfigClass = $this->getClass($fqn);
-        if (class_exists($preconfigClass)) {
+        $preconfigClass = self::morphClass($fqn);
+        if (false !== $preconfigClass && class_exists($preconfigClass)) {
             // Pre-Configured mosaic definition found
             return new $preconfigClass();
         }
@@ -69,6 +70,8 @@ class Registry
         // Web service to read mosaic definition.
 
         //XXX
+        return false;
+        //throw new RuntimeException("Unsupported mosaic registry feature.");
     }
 
     /**
@@ -84,9 +87,9 @@ class Registry
      * @return  string
      * @throws  \InvalidArgumentException       On invalid mosaic fully qualified name.
      */
-    static protected function getClass($fqn)
+    static public function morphClass($fqn)
     {
-        $namespace = "\\NEM\\Models\\Mosaics";
+        $namespace = "\\NEM\\Mosaics";
         $classPath = [];
 
         // each namespace/sub-namespace has its own folder
@@ -94,13 +97,29 @@ class Registry
             $nsParts = explode(".", $classPath[1]); // $1 is namespace (before semi-colon ':')
             $className = ucfirst($classPath[2]); // $2 is mosaic name (after semi-colon ':')
 
-            $classPath = array_map(function($item) { return ucfirst($item); }, $nsParts);
+            // format class name by mosaic fully qualified name.
+            /**
+             * @example of FQN is `evias.sdk:nem-php`, this will be 
+             * represented in a PSR-4 class scheme with the following path:
+             * 
+             * \NEM\Mosaics\Evias\Sdk\NemPhp.php
+             */
+
+            $transReg = "/[^a-zA-Z0-9]*/";
+            $classPath = array_map(function($item) use ($transReg) {
+                // transformer for PSR-4 vali^ class/namespace format.
+
+                $norm = preg_replace($transReg, "_", $item);
+                $upper = ucwords(str_replace("_", " ", strtolower($item)));
+                return str_replace(" ", "", $upper);
+            }, $nsParts);
+
             array_push($classPath, $className);
 
             $preconfigured = $namespace . "\\" . implode("\\", $classPath);
             return $preconfigured;
         }
 
-        return new MosaicDefinition();
+        return false;
     }
 }

@@ -17,14 +17,29 @@
  * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Models\Mosaics\Dim;
+namespace NEM\Mosaics\Pacnem;
 
 use NEM\Models\MosaicDefinition;
+use NEM\Models\MosaicProperties;
+use NEM\Models\MosaicLevy;
+use NEM\Models\Mosaic;
 
-class Nemether
+class Cheese
     extends MosaicDefinition
 {
-    public $creator = "b089dc609b9ba65d9f5f3b5f58561ec5cc480f6e7eebf22b7ab88479f08706db";
+    public $creator = "d33a1f38cb1241f77d3786a2c8547b894ec903a864ae745bd628b81b0c35deec";
+
+    /**
+     * Overload of the getTotalSupply() method for fast
+     * tracking with preconfigured mosaics.
+     * 
+     * @return integer
+     */
+    public function getTotalSupply()
+    {
+        //XXX mutable supply
+        return 290888;
+    }
 
     /**
      * Mutator for `mosaic` relation.
@@ -36,7 +51,7 @@ class Nemether
      */
     public function id(array $mosaicId = null)
     {
-        return new Mosaic($mosaicId ?: ["namespaceId" => "nemether", "name" => "nemether"]);
+        return new Mosaic($mosaicId ?: ["namespaceId" => "pacnem", "name" => "cheese"]);
     }
 
     /**
@@ -51,9 +66,9 @@ class Nemether
     {
         $xem = new Mosaic(["namespaceId" => "nem", "name" => "xem"]);
         $data = $levy ?: [
-            "type" => self::TYPE_ABSOLUTE,
-            "fee" => 10,
-            "recipient" => "NC56RYVRUPG3WRNGMVNRKODJZJNZKZYS76UAPO7K",
+            "type" => MosaicLevy::TYPE_PERCENTILE,
+            "fee" => 100,
+            "recipient" => "NDHGYUVXKUWYFNO6THLUKAF6ZH2WIDCC6XD5UPC4",
             "mosaicId" => $xem->toDTO(),
         ];
 
@@ -71,12 +86,12 @@ class Nemether
     public function properties(array $properties = null)
     {
         $data = $properties ?: [
-            ["name" => "divisibility", "value" => 6],
-            ["name" => "initialSupply", "value" => 95100000],
-            ["name" => "supplyMutable", "value" => true],
-            ["name" => "transferable", "value" => true],
+            new MosaicProperty(["name" => "divisibility", "value" => 6]),
+            new MosaicProperty(["name" => "initialSupply", "value" => 290888]),
+            new MosaicProperty(["name" => "supplyMutable", "value" => true]),
+            new MosaicProperty(["name" => "transferable", "value" => true]),
         ];
 
-        return MosaicProperties($data);
+        return new MosaicProperties($data);
     }
 }

@@ -48,7 +48,7 @@ class MosaicProperties
             // discover
             $name  = $item->getAttribute("name");
             $value = (string) $item->value;
-        
+
             if (in_array($name, ["supplyMutable", "transferable"])) {
                 $value = ((bool) $item->value) ? "true" : "false";
             }
@@ -100,5 +100,32 @@ class MosaicProperties
         // no need to use the aggregator, we dynamically aggregated
         // our collection data and prepended the size on 4 bytes.
         return $stateUInt8;
+    }
+
+    /**
+     * Helper to read a given `name` mosaic property name.
+     * 
+     * @param   string  $name       Mosaic property name.
+     * @return  integer|boolean
+     */
+    public function getProperty($name)
+    {
+        $propertiesNames = [
+            "divisibility"  => 0,
+            "initialSupply" => 1,
+            "supplyMutable" => 2,
+            "transferable"  => 3,
+        ];
+
+        if (! array_key_exists($name, $propertiesNames)) {
+            throw new InvalidArgumentException("Mosaic property name '" . $name ."' is invalid. Must be one of 'divisibility', "
+                                             . "'initialSupply', 'supplyMutable' or 'transferable'");
+        }
+
+        // sort properties lexicographically (see toDTO() overload)
+        $sorted = $this->sortBy("name");
+        $index = $propertiesNames[$name];
+        $value = $sorted->get($index)->value;
+        return $value;
     }
 }

@@ -33,6 +33,36 @@ class Mosaic
     ];
 
     /**
+     * Class method to create a new `Mosaic` object from `namespace`
+     * name and `mosaic` mosaic name.
+     * 
+     * @param   string      $namespace
+     * @param   string      $mosaic
+     * @return  \NEM\Models\Mosaic
+     */
+    static public function create(string $namespace, string $mosaic = null)
+    {
+        if (empty($mosaic)) {
+            // `namespace` should contain `FQN`
+            $fullyQualifiedName = $namespace;
+            $splitRegexp = "/([a-zA-Z0-9\\-_\.]+):([a-zA-Z0-9\\-_\.]+)/";
+
+            // split with format: `namespace:mosaic`
+            $namespace = preg_replace($splitRegexp, "$1", $fullyQualifiedName);
+            $mosaic    = preg_replace($splitRegexp, "$2", $fullyQualifiedName);
+        }
+
+        if (empty($namespace) || empty($mosaic)) {
+            throw new RuntimeException("Missing namespace or mosaic name for \\NEM\\Models\\Mosaic instance.");
+        }
+
+        return new static([
+            "namespaceId" => $namespace,
+            "name" => $mosaic
+        ]);
+    }
+
+    /**
      * Mosaic DTO build a package with offsets `namespaceId` and
      * `name` as required by NIS for the mosaic identification.
      *

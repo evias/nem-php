@@ -20,6 +20,9 @@
 namespace NEM\Models;
 
 use NEM\Models\Transaction;
+use NEM\Models\Mosaics\Registry;
+
+use RuntimeException;
 
 class Fee
     extends Amount
@@ -39,6 +42,17 @@ class Fee
      * @var integer
      */
     public const TRANSACTION_FEE = 3;
+
+    /**
+     * NEM network maximum Fee Amount.
+     * 
+     * This amount is multiplied by `FEE_FACTOR` during
+     * result computation.
+     *
+     * @internal
+     * @var integer
+     */
+    public const MAX_AMOUNT_FEE = 25;
 
     /**
      * NEM Multisig Transaction Fee (in microXEM).
@@ -147,7 +161,7 @@ class Fee
         $dto = $message->toDTO();
 
         if (empty($dto["payload"]))
-            return 0.00;
+            return 0;
 
         // message fee is 0.05 (current fee factor) multiplied
         // by the count of *started* 31 characters chunks.
@@ -161,38 +175,56 @@ class Fee
      *
      * This method is used internally to calculate a mosaic transfer
      * transaction's needed fees.
+     * 
+     * The `definitions` argument should contain definitions of attached
+     * mosaics.
      *
      * @internal
+     * @param   \NEM\Models\MosaicDefinitions   $definitions    Collection of MosaicDefinition objects.
      * @param   \NEM\Models\MosaicAttachments   $attachments    Collection of MosaicAttachment objects.
      * @param   integer                         $multiplier
      * @return  \NEM\Models\Fee
+     * @throws  RuntimeException                                On missing MosaicDefinition in `definitions` argument.
      */
-    static public function calculateForMosaics(MosaicAttachments $attachments, $multiplier = Amount::XEM)
+    static public function calculateForMosaics(MosaicDefinitions $definitions,
+                                               MosaicAttachments $attachments,
+                                               $multiplier = Amount::XEM)
     {
         if ($attachments->isEmpty())
             return 0;
 
         $totalFee = 0;
         foreach ($attachments as $attachment) {
-            $fqn = $attachment->getFQN();
-            $def = MosaicRegistry::getDefinition($fqn);
+            $mosaicFQN = $attachment->mosaicId()->getFQN();
+
+            // in case user didnt provide the definition, try to
+            // to find it with the registry of preconfigured Mosaics classes.
+            $definition = $definitions->getDefinition($attachment->mosaicId())
+                        ?: Registry::getDefinition($mosaicFQN);
+
+            if ($definition === false) {
+                throw new RuntimeException("Missing MosaicDefinition for Mosaic: `" . $fqn . "`.");
+            }
 
             // read properties for calculations
-            $divisibility = $def->getProperty("divisibility") ?: 0;
-            $supply   = $def->getProperty("initialSupply") ?: 0;
+            $divisibility = $definition->getProperty("divisibility") ?: 0;
+            $supply   = $definition->getTotalSupply() ?: Amount::XEM_SUPPLY;
             $quantity = $attachment->quantity;
             $supplyAdjust = 0;
 
             // small business mosaic fee
             if ($supply <= 10000 && $divisibility === 0) {
-                $fee = Fee::FEE_FACTOR;
+                $fee = Fee::FEE_FACTOR; // 0.05
             }
             // all other mosaics are first converted to XEM amounts
             else {
-                $maxQuantity   = 9000000000000000;
+                $maxQuantity   = Amount::MAX_AMOUNT / pow(10, 6); // 9_000_000_000
                 $totalQuantity = $supply * pow(10, $divisibility);
                 $supplyAdjust  = floor(0.8 * log($maxQuantity / $totalQuantity));
-                $xemAmount     = Amount::mosaicToXEM($attachment->mosaicId(), $quantity);
+                $xemAmount     = Amount::mosaicQuantityToXEM($divisibility,
+                                                             $supply,
+                                                             $quantity,
+                                                             $multiplier);
 
                 // mosaic fee is calculate the same a XEM amounts after being converted.
                 $fee = self::calculateForXEM(ceil($xemAmount));
@@ -218,6 +250,6 @@ class Fee
     static public function calculateForXEM($amountXEM = Amount::XEM)
     {
         $fee = floor(max([1, $amountXEM / 10000]));
-        return $fee > 25 ? 25 : $fee;
+        return $fee > self::MAX_AMOUNT_FEE ? self::MAX_AMOUNT_FEE : $fee;
     }
 }

@@ -46,6 +46,13 @@ class Amount
     const MAX_AMOUNT = 9000000000000000;
 
     /**
+     * Define the XEM total supply.
+     *
+     * @var integer
+     */
+    const XEM_SUPPLY = 8999999999;
+
+    /**
      * List of fillable attributes
      *
      * @var array

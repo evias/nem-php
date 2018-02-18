@@ -57,7 +57,7 @@ class MosaicDefinition
     {
         return [
             "creator" => $this->creator,
-            "id" => $this->mosaic()->toDTO(),
+            "id" => $this->id()->toDTO(),
             "description" => $this->description()->getPlain(),
             "properties" => $this->properties()->toDTO(),
             "levy" => $this->levy()->toDTO(),
@@ -158,7 +158,7 @@ class MosaicDefinition
     public function description($description = null)
     {
         $msg = new Message();
-        $msg->setPlain($description);
+        $msg->setPlain($this->getAttribute("description"));
 
         return $msg;
     }
@@ -166,25 +166,30 @@ class MosaicDefinition
     /**
      * Helper to read a given `name` mosaic property name.
      * 
+     * This is just a proxy method for MosaicProperties::getProperty().
+     * 
      * @param   string  $name       Mosaic property name.
      * @return  integer|boolean
      */
     public function getProperty($name)
     {
-        $propertiesNames = [
-            "divisibility"  => 0,
-            "initialSupply" => 1,
-            "supplyMutable" => 2,
-            "transferable"  => 3,
-        ];
+        return $this->properties()->getProperty($name);
+    }
 
-        if (! array_key_exists($name, $propertiesNames)) {
-            throw new InvalidArgumentException("Mosaic property name '" . $name ."' is invalid. Must be one of 'divisibility', "
-                                             . "'initialSupply', 'supplyMutable' or 'transferable'");
-        }
-
-        $index = $propertiesNames[$name];
-        $value = $this->properties()->get($index)->value;
-        return $value;
+    /**
+     * Getter for the Mosaic's Total Supply.
+     * 
+     * Mosaics with mutable supply must provide with a specialization
+     * of this method in order to provide with the correct total supply.
+     * 
+     * In case no class is defined in the Mosaics Registry, the NIS Infrastructur
+     * class will be integrated to provide with Mosaic Supply Requests. (to be implemented)
+     * 
+     * @return integer
+     */
+    public function getTotalSupply()
+    {
+        $initial = (int) $this->getProperty("initialSupply");
+        return $initial;
     }
 }
