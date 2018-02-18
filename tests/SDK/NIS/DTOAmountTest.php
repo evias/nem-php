@@ -20,7 +20,7 @@ namespace NEM\Tests\SDK\NIS;
 
 use NEM\Models\Amount;
 
-class AmountDTOTest
+class DTOAmountTest
     extends NISComplianceTestCase
 {
     /**

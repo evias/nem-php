@@ -40,33 +40,25 @@ class MosaicProperties
      */
     public function toDTO() 
     {
-        $props = [
-            0 => ["name" => "divisibility", "value" => null],
-            1 => ["name" => "initialSupply", "value" => null],
-            2 => ["name" => "supplyMutable", "value" => null],
-            3 => ["name" => "transferable", "value" => null],
-        ];
-
-        $propertiesNames = [
-            "divisibility"  => 0,
-            "initialSupply" => 1,
-            "supplyMutable" => 2,
-            "transferable"  => 3,
-        ];
+        // sort properties lexicographically (see toDTO() overload)
+        $sorted = $this->sortBy("name");
+        $props = [];
 
         foreach ($this->all() as $ix => $item) {
             // discover
-            $index = $propertiesName[$item->name];
+            $name  = $item->getAttribute("name");
+            $value = (string) $item->value;
+        
+            if (in_array($name, ["supplyMutable", "transferable"])) {
+                $value = ((bool) $item->value) ? "true" : "false";
+            }
 
             // update mosaic property value.
-            $props[$index]["value"] = $item->value;
+            $props[$ix] = [
+                "name" => $name,
+                "value" => $value,
+            ];
         }
-
-        // remove null values
-        $props = array_filter($props, function($item)
-        {
-            return $item["value"] !== null;
-        });
 
         return $props;
     }
@@ -94,6 +86,10 @@ class MosaicProperties
         // serialize each attachment
         $stateUInt8 = $prependSize;
         foreach ($sorted->all() as $property) {
+            if (is_array($property)) {
+                $property = new MosaicProperty($property);
+            }
+
             // use MosaicProperty::serialize() specialization
             $serialized = $property->serialize();
 

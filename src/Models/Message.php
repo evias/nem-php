@@ -49,16 +49,10 @@ class Message
      * @var array
      */
     protected $fillable = [
+        "plain",
         "payload",
         "type",
     ];
-
-    /**
-     * Store the plain text representation of the message
-     *
-     * @var string
-     */
-    protected $plain;
 
     /**
      * Account DTO represents NIS API's [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair).
@@ -71,13 +65,12 @@ class Message
         // CryptoHelper will store a KeyPair when necessary
         // to allow encryption (needs private + public keys)
         $helper = new CryptoHelper();
-        $plain  = $this->toPlain();
+        $plain  = $this->getPlain();
 
-        if (empty($plain))
+        if (empty($plain) || !isset($this->type))
             $this->type = Message::TYPE_SIMPLE;
 
         if ($this->type == Message::TYPE_HEX) {
-
             if (! ctype_xdigit($plain)) {
                 throw new RuntimeException("Invalid hexadecimal representation. Use Message::TYPE_SIMPLE instead of Message::TYPE_HEX.");
             }
@@ -108,9 +101,13 @@ class Message
      *
      * @return string
      */
-    public function toHex()
+    public function toHex($prefixHexContent = false)
     {
-        $chars = $this->plain;
+        $chars = $this->getPlain();
+        if ($prefix && ctype_xdigit($chars)) {
+            return "fe" . $chars;
+        }
+
         $payload = "";
         for ($c = 0, $cnt = strlen($chars); $c < $cnt; $c++ ) {
             $decimal = ord($chars[$c]);
@@ -120,7 +117,7 @@ class Message
             $payload .= str_pad($hexCode, 2, "0", STR_PAD_LEFT);
         }
 
-        $this->payload = strtoupper($payload);
+        $this->payload = strtolower($payload);
         return $this->payload;
     }
 
@@ -144,5 +141,28 @@ class Message
         }
 
         return ($this->plain = $plain);
+    }
+
+    /**
+     * Setter for the plaintext content of a NEM Message.
+     * 
+     * @param   string  $plain
+     * @return  \NEM\Models\Message
+     */
+    public function setPlain($plain)
+    {
+        $this->plain = $plain;
+        return $this;
+    }
+
+    /**
+     * Getter for the plaintext content of a NEM Message.
+     * 
+     * @param   string  $plain
+     * @return  \NEM\Models\Message
+     */
+    public function getPlain()
+    {
+        return $this->plain;
     }
 }

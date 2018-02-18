@@ -48,6 +48,16 @@ class MosaicLevy
     ];
 
     /**
+     * List of automatic *value casts*.
+     *
+     * @var array
+     */
+    protected $casts = [
+        "type" => "int",
+        "fee"  => "int",
+    ];
+
+    /**
      * Mosaic Levy DTO builds a package with offsets `type`,
      * `recipient`, `mosaicId` and `fee`. 
      * 
@@ -60,9 +70,34 @@ class MosaicLevy
         return [
             "type" => $this->type,
             "recipient" => $this->recipient()->address()->toClean(),
-            "mosaicId" => $this->mosaic()->toDTO(),
+            "mosaicId" => $this->mosaicId()->toDTO(),
             "fee" => $this->fee,
         ];
+    }
+
+    /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *Mosaic Levy* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        // shortcuts
+        $serializer = $this->getSerializer();
+        $address    = $this->recipient()->address()->toClean();
+
+        // serialize
+        $type = $serializer->serializeInt($this->type);
+        $recipient = $serializer->serializeString($address);
+        $fee       = $serializer->serializeLong($this->fee);
+        $mosaic    = $this->mosaicId()->serialize();
+
+        // prepend size on 4 bytes + concatenate UInt8
+        return $this->getSerializer()
+                    ->aggregate($type, $recipient, $mosaic, $fee);
     }
 
     /**
@@ -73,7 +108,7 @@ class MosaicLevy
      * @param   array   $mosaidId       Array should contain offsets `namespaceId` and `name`.
      * @return  \NEM\Models\Mosaic
      */
-    public function mosaic(array $mosaicId = null)
+    public function mosaicId(array $mosaicId = null)
     {
         return new Mosaic($mosaicId ?: $this->getAttribute("mosaicId"));
     }

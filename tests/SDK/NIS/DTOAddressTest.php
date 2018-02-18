@@ -21,7 +21,7 @@ namespace NEM\Tests\SDK\NIS;
 use NEM\Models\Address;
 use NEM\Infrastructure\Network;
 
-class AddressDTOTest
+class DTOAddressTest
     extends NISComplianceTestCase
 {
     /**

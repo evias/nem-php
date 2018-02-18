@@ -27,6 +27,7 @@ use NEM\Models\Model;
 use NEM\Models\Mosaic;
 use NEM\Models\MosaicAttachment;
 use NEM\Models\MosaicAttachments;
+use NEM\Models\MosaicLevy;
 
 class SerializeMosaicDataTest
     extends TestCase
@@ -134,6 +135,59 @@ class SerializeMosaicDataTest
             115,  46, 115, 100, 107,   7,   0,   0,
               0, 110, 101, 109,  45, 112, 104, 112,
               2,   0,   0,   0,   0,   0,   0,   0
+        ];
+        $expectSize = count($expectUInt8);
+
+        $this->assertEquals($expectSize, count($serialized));
+        $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
+    }
+
+    /**
+     * Unit test for *serialize process Specialization: MosaicLevy*.
+     * 
+     * @return void
+     */
+    public function testSerializerModelSpecialization_MosaicLevy()
+    {
+        $mosaic = new Mosaic([
+            "namespaceId" => "evias.sdk",
+            "name" => "nem-php"
+        ]);
+
+        $levy = new MosaicLevy([
+            "type" => MosaicLevy::TYPE_ABSOLUTE, // 1
+            "recipient" => "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
+            "mosaicId" => $mosaic->toDTO(),
+            "fee"  => 10
+        ]);
+
+        // test specialized MosaicLevy::serialize() serialization process
+        $serialized = $levy->serialize();
+
+        // expected results
+        $expectUInt8 = [
+            84,   0,   0,   0,
+             1,   0,   0,   0,
+            40,   0,   0,   0,
+            84,  68,  87,  90,
+            53,  53,  82,  53,
+            86,  73,  72,  83,
+            72,  53,  87,  87,
+            75,  54,  67,  69,
+            71,  65,  73,  80,
+            55,  68,  51,  53,
+            88,  86,  70,  90,
+            51,  82,  85,  50,
+            83,  53,  85,  81,
+            24,   0,   0,   0,
+             9,   0,   0,   0,
+           101, 118, 105,  97,
+           115,  46, 115, 100,
+           107,   7,   0,   0,
+             0, 110, 101, 109,
+            45, 112, 104, 112,
+            10,   0,   0,   0,
+             0,   0,   0,   0
         ];
         $expectSize = count($expectUInt8);
 

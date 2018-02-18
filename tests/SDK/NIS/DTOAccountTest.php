@@ -24,7 +24,7 @@ use NEM\Models\Amount;
 use NEM\Models\MultisigInfo;
 use NEM\Models\ModelCollection;
 
-class AccountMetaDataPairTest
+class DTOAccountTest
     extends NISComplianceTestCase
 {
     /**
