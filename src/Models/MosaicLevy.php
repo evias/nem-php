@@ -67,6 +67,9 @@ class MosaicLevy
      */
     public function toDTO($filterByKey = null)
     {
+        if (! $this->getAttribute("recipient") || ! $this->getAttribute("mosaicId"))
+            return [];
+
         return [
             "type" => $this->type,
             "recipient" => $this->recipient()->address()->toClean(),
@@ -87,12 +90,17 @@ class MosaicLevy
     {
         // shortcuts
         $serializer = $this->getSerializer();
-        $address    = $this->recipient()->address()->toClean();
+        $nisData = $this->toDTO();
+
+        if (empty($nisData)) {
+            $emptyLevy = $serializer->serializeInt(null);
+            return $serializer->aggregate($emptyLevy);
+        }
 
         // serialize
-        $type = $serializer->serializeInt($this->type);
-        $recipient = $serializer->serializeString($address);
-        $fee       = $serializer->serializeLong($this->fee);
+        $type = $serializer->serializeInt($nisData["type"]);
+        $recipient = $serializer->serializeString($nisData["recipient"]);
+        $fee       = $serializer->serializeLong($nisData["fee"]);
         $mosaic    = $this->mosaicId()->serialize();
 
         // prepend size on 4 bytes + concatenate UInt8

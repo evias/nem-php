@@ -45,7 +45,7 @@ class Mosaic
         if (empty($mosaic)) {
             // `namespace` should contain `FQN`
             $fullyQualifiedName = $namespace;
-            $splitRegexp = "/([a-zA-Z0-9\\-_\.]+):([a-zA-Z0-9\\-_\.]+)/";
+            $splitRegexp = "/([^:]+):([^:]+)/";
 
             // split with format: `namespace:mosaic`
             $namespace = preg_replace($splitRegexp, "$1", $fullyQualifiedName);
@@ -104,6 +104,9 @@ class Mosaic
      */
     public function getFQN()
     {
+        if (empty($this->namespaceId) || empty($this->name))
+            return "";
+
         return sprintf("%s:%s", $this->namespaceId, $this->name);
     }
 }

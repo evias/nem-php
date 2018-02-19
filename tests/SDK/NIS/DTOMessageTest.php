@@ -81,6 +81,12 @@ class DTOMessageTest
     public function messageUtf8VectorsProvider()
     {
         return [
+            // test UTF-8 characters
+            ["Grégory",        "4772c3a9676f7279"],
+            ["éöäüèç^<>",      "c3a9c3b6c3a4c3bcc3a8c3a75e3c3e"],
+            ["ぁあぃいぼも",     "e38181e38182e38183e38184e381bce38282"],
+
+            // test generic texts
             ["test",           bin2hex("test")],
             ["",               bin2hex("")],
             ["Grégory",        bin2hex("Grégory")],

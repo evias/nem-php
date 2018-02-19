@@ -44,8 +44,12 @@ class MosaicProperties
         $sorted = $this->sortBy("name");
         $props = [];
 
-        foreach ($this->all() as $ix => $item) {
+        foreach ($sorted->all() as $ix => $item) {
             // discover
+            if (is_array($item)) {
+                $item = new MosaicProperty($item);
+            }
+
             $name  = $item->getAttribute("name");
             $value = (string) $item->value;
 

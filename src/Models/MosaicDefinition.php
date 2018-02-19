@@ -56,7 +56,7 @@ class MosaicDefinition
     public function toDTO($filterByKey = null)
     {
         return [
-            "creator" => $this->creator,
+            "creator" => $this->creator()->publicKey,
             "id" => $this->id()->toDTO(),
             "description" => $this->description()->getPlain(),
             "properties" => $this->properties()->toDTO(),
@@ -131,9 +131,7 @@ class MosaicDefinition
      */
     public function levy(array $levy = null)
     {
-        $levy = new MosaicLevy($levy ?: $this->getAttribute("levy"));
-        $attribs = $levy->getAttributes();
-        return empty($attribs) ? null : $levy;
+        return new MosaicLevy($levy ?: $this->getAttribute("levy"));
     }
 
     /**
@@ -157,10 +155,7 @@ class MosaicDefinition
      */
     public function description($description = null)
     {
-        $msg = new Message();
-        $msg->setPlain($this->getAttribute("description"));
-
-        return $msg;
+        return new Message(["plain" => $this->getAttribute("description") ?: ""]);
     }
 
     /**
