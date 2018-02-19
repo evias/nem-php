@@ -21,6 +21,7 @@ namespace NEM\Mosaics\Nemether;
 
 use NEM\Models\MosaicDefinition;
 use NEM\Models\MosaicProperties;
+use NEM\Models\MosaicProperty;
 use NEM\Models\MosaicLevy;
 use NEM\Models\Mosaic;
 
@@ -66,7 +67,7 @@ class Nemether
     {
         $xem = new Mosaic(["namespaceId" => "nem", "name" => "xem"]);
         $data = $levy ?: [
-            "type" => self::TYPE_ABSOLUTE,
+            "type" => MosaicLevy::TYPE_ABSOLUTE,
             "fee" => 10,
             "recipient" => "NC56RYVRUPG3WRNGMVNRKODJZJNZKZYS76UAPO7K",
             "mosaicId" => $xem->toDTO(),

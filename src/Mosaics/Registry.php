@@ -93,28 +93,29 @@ final class Registry
         $classPath = [];
 
         // each namespace/sub-namespace has its own folder
-        if ((bool) preg_match("/([^:]+):(.*)/", $fqn, $classPath)) {
+        if ((bool) preg_match("/([^:]+):([^:]+)$/", $fqn, $classPath)) {
+
             $nsParts = explode(".", $classPath[1]); // $1 is namespace (before semi-colon ':')
             $className = ucfirst($classPath[2]); // $2 is mosaic name (after semi-colon ':')
 
             // format class name by mosaic fully qualified name.
             /**
-             * @example of FQN is `evias.sdk:nem-php`, this will be 
+             * @example FQN is `evias.sdk:nem-php`, this will be 
              * represented in a PSR-4 class scheme with the following path:
              * 
              * \NEM\Mosaics\Evias\Sdk\NemPhp.php
              */
 
-            $transReg = "/[^a-zA-Z0-9]*/";
+            $transReg = "/[^a-zA-Z0-9]/";
+
+            // format class path
             $classPath = array_map(function($item) use ($transReg) {
                 // transformer for PSR-4 vali^ class/namespace format.
 
-                $norm = preg_replace($transReg, "_", $item);
-                $upper = ucwords(str_replace("_", " ", strtolower($item)));
+                $norm  = preg_replace($transReg, "_", $item);
+                $upper = ucwords(str_replace("_", " ", strtolower($norm)));
                 return str_replace(" ", "", $upper);
-            }, $nsParts);
-
-            array_push($classPath, $className);
+            }, array_merge($nsParts, [$className]));
 
             $preconfigured = $namespace . "\\" . implode("\\", $classPath);
             return $preconfigured;

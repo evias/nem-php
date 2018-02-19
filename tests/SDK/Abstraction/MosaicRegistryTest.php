@@ -31,17 +31,65 @@ class MosaicRegistryTest
      * @expectedException   \InvalidArgumentException
      * @return void
      */
-    public function testDynamicClassSearchError()
+    public function testMorphClassSearchTypeErrorThrowsError()
     {
         $invalidParam = Registry::getDefinition(null);
     }
 
     /**
-     * Unit test for *valid mosaic parameter* for registry searches.
-     *
+     * Unit test for *unknown mosaic* for registry searches.
+     * 
      * @return void
      */
-    public function testMorphClassXem()
+    public function testMorphClassSearchUnknownMosaicReturnsFalse()
+    {
+        $invalidFQN = "evias.sdk.preconfigured:nem-php";
+        $definition = Registry::getDefinition($invalidFQN);
+
+        $this->assertFalse($definition);
+    }
+
+    /**
+     * Unit test for *morphClass multiple inputs*.
+     *
+     * @dataProvider morphClassVectorsProvider
+     * @return void
+     */
+    public function testMorphClassVectorsClassInheritance($fqn, $expectClass)
+    {
+        $expectClass = "\\" . $expectClass;
+        $actualClass = Registry::morphClass($fqn);
+
+        // test class inheritance and instance type
+        $this->assertEquals($expectClass, $actualClass);
+    }
+
+    /**
+     * Data provider for the testMorphClassVectorsClassInheritance() unit test
+     * 
+     * @return array
+     */
+    public function morphClassVectorsProvider()
+    {
+        return [
+            ["dim:coin",                    \NEM\Mosaics\Dim\Coin::class],
+            ["dim:token",                   \NEM\Mosaics\Dim\Token::class],
+            ["dim:eur",                     \NEM\Mosaics\Dim\Eur::class],
+            ["nemether:nemether",           \NEM\Mosaics\Nemether\Nemether::class],
+            ["pacnem:cheese",               \NEM\Mosaics\Pacnem\Cheese::class],
+            ["pacnem:hall-of-famer",        \NEM\Mosaics\Pacnem\HallOfFamer::class],
+            ["pacnem:heart",                \NEM\Mosaics\Pacnem\Heart::class],
+            ["pacnem:personal-token",       \NEM\Mosaics\Pacnem\PersonalToken::class],
+        ];
+    }
+
+    /**
+     * Unit test for *valid mosaic parameter* for registry searches.
+     *
+     * @depends testMorphClassVectorsClassInheritance
+     * @return void
+     */
+    public function testGetDefinitionXemDTOStructure()
     {
         $definition = Registry::getDefinition("nem:xem");
         $definitionNIS = $definition->toDTO();
@@ -58,27 +106,36 @@ class MosaicRegistryTest
 
         $this->assertEquals(6, $actualDivisibility);
         $this->assertEquals(8999999999, $actualInitialSupply);
-        $this->assertEquals("false", $actualSupplyMutable);
-        $this->assertEquals("true", $actualTransferable);
+        $this->assertEquals(false, $actualSupplyMutable);
+        $this->assertEquals(true, $actualTransferable);
     }
 
     /**
-     * Unit test for *morphClass multiple inputs*.
+     * Unit test for *valid mosaic parameter* for registry searches.
      *
-     * @dataProvider morphClassVectorsProvider
+     * @depends testGetDefinitionXemDTOStructure
+     * @dataProvider getDefinitionVectorsProvider
      * @return void
      */
-    public function testMorphClassVectors($fqn, $expectObject)
+    public function testGetDefinitionVectorsDTOStructure($fqn, $expectClass)
     {
         $definition = Registry::getDefinition($fqn);
 
         // test class inheritance
-        $this->assertTrue($definition instanceof \NEM\Models\MosaicDefinition);
+        $this->assertTrue($definition instanceof MosaicDefinition);
 
+        // test class specialization
+        $expectClass = "\\" . $expectClass;
+        $actualClass = "\\" . get_class($definition);
+        $this->assertEquals($expectClass, $actualClass);
+
+        // assert instance content
         $definitionNIS = $definition->toDTO();
-
-        // test class inheritance and instance type
-        $this->assertEquals(get_class($expectObject), get_class($definition));
+        $this->assertArrayHasKey("id", $definitionNIS);
+        $this->assertArrayHasKey("creator", $definitionNIS);
+        $this->assertArrayHasKey("properties", $definitionNIS);
+        $this->assertArrayHasKey("levy", $definitionNIS);
+        $this->assertArrayHasKey("description", $definitionNIS);
     }
 
     /**
@@ -86,17 +143,17 @@ class MosaicRegistryTest
      * 
      * @return array
      */
-    public function morphClassVectorsProvider()
+    public function getDefinitionVectorsProvider()
     {
         return [
-            ["dim:coin",                    new \NEM\Mosaics\Dim\Coin],
-            ["dim:token",                   new \NEM\Mosaics\Dim\Token],
-            ["dim:eur",                     new \NEM\Mosaics\Dim\Eur],
-            ["nemether:nemether",           new \NEM\Mosaics\Nemether\Nemether],
-            ["pacnem:cheese",               new \NEM\Mosaics\Pacnem\Cheese],
-            ["pacnem:hall-of-famer",        new \NEM\Mosaics\Pacnem\HallOfFamer],
-            ["pacnem:heart",                new \NEM\Mosaics\Pacnem\Heart],
-            ["pacnem:personal-token",       new \NEM\Mosaics\Pacnem\PersonalToken],
+            ["dim:coin",                    \NEM\Mosaics\Dim\Coin::class],
+            ["dim:token",                   \NEM\Mosaics\Dim\Token::class],
+            ["dim:eur",                     \NEM\Mosaics\Dim\Eur::class],
+            ["nemether:nemether",           \NEM\Mosaics\Nemether\Nemether::class],
+            ["pacnem:cheese",               \NEM\Mosaics\Pacnem\Cheese::class],
+            ["pacnem:hall-of-famer",        \NEM\Mosaics\Pacnem\HallOfFamer::class],
+            ["pacnem:heart",                \NEM\Mosaics\Pacnem\Heart::class],
+            ["pacnem:personal-token",       \NEM\Mosaics\Pacnem\PersonalToken::class],
         ];
     }
 }

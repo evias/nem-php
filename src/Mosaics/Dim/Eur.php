@@ -21,6 +21,7 @@ namespace NEM\Mosaics\Dim;
 
 use NEM\Models\MosaicDefinition;
 use NEM\Models\MosaicProperties;
+use NEM\Models\MosaicProperty;
 use NEM\Models\MosaicLevy;
 use NEM\Models\Mosaic;
 

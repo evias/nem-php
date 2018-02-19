@@ -218,13 +218,17 @@ class Fee
             }
             // all other mosaics are first converted to XEM amounts
             else {
-                $maxQuantity   = Amount::MAX_AMOUNT / pow(10, 6); // 9_000_000_000
+                $maxQuantity   = Amount::MAX_AMOUNT; // 9_000_000_000_000_000
                 $totalQuantity = $supply * pow(10, $divisibility);
                 $supplyAdjust  = floor(0.8 * log($maxQuantity / $totalQuantity));
-                $xemAmount     = Amount::mosaicQuantityToXEM($divisibility,
+
+                $xemAmount = $quantity;
+                if ($mosaicFQN !== "nem:xem") {
+                    $xemAmount = Amount::mosaicQuantityToXEM($divisibility,
                                                              $supply,
                                                              $quantity,
                                                              $multiplier);
+                }
 
                 // mosaic fee is calculate the same a XEM amounts after being converted.
                 $fee = self::calculateForXEM(ceil($xemAmount));
