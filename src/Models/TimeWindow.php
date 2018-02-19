@@ -32,6 +32,7 @@ class TimeWindow
      */
     protected $fillable = [
         "timeStamp",
+        "utc"
     ];
 
     /**
@@ -41,6 +42,7 @@ class TimeWindow
      */
     protected $casts = [
         "timeStamp" => "int",
+        "utc" => "int",
     ];
 
     /**
@@ -54,14 +56,16 @@ class TimeWindow
 
     /**
      * TimeWindow DTO represents NIS API's Timestamps.
+     * 
+     * This `toDTO` overload is specific in that it doesn't return
+     * an array! That is because working with NIS you will always
+     * need integers for timestamps rather than sub-dtos.
      *
      * @return  integer         Seconds since NEM genesis block.
      */
     public function toDTO($filterByKey = null)
     {
-        return [
-            "timeStamp" => $this->toNIS()
-        ];
+        return $this->toNIS();
     }
 
     /**
@@ -75,8 +79,16 @@ class TimeWindow
      */
     public function toNIS()
     {
-        // NEM Time = Seconds between the `timeStamp` attribute and the NEM Genesis Block Time.
-        return $this->diff($this->getAttribute("timeStamp") ?: null, static::$nemesis);
+        if ($this->getAttribute("timeStamp")) {
+            // from NIS timestamp
+            $ts = $this->getAttribute("timeStamp");
+            return $this->diff($ts, static::$nemesis);
+        }
+        else {
+            // from UTC timestamp
+            $utc = $this->getAttribute("utc");
+            return $this->diff($utc, static::$nemesis);
+        }
     }
 
     /**
@@ -88,12 +100,14 @@ class TimeWindow
     {
         $ts = time();
         if ($this->getAttribute("timeStamp")) {
-            $ts = static::$nemesis;
-            if ($this->getAttribute("timeStamp") != static::$nemesis)
-                $ts += (1000 * ((int) $this->getAttribute("timeStamp")));
+            // from NIS to UTC
+            $ts = (int) $this->getAttribute("timeStamp");
+            return self::$nemesis + (1000 * $ts);
         }
-
-        return $ts;
+        else {
+            // has UTC
+            return $this->getAttribute("utc");
+        }
     }
 
     /**

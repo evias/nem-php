@@ -20,7 +20,7 @@ namespace NEM\Tests\SDK\NIS;
 
 use NEM\Models\MultisigInfo;
 
- class DTOMultisigInfoTest
+class DTOMultisigInfoTest
     extends NISComplianceTestCase
 {
     /**

@@ -21,7 +21,7 @@ namespace NEM\Tests\SDK\NIS;
 use NEM\Models\Mosaic;
 use NEM\Models\MosaicAttachment;
 
- class DTOMosaicAttachmentTest
+class DTOMosaicAttachmentTest
     extends NISComplianceTestCase
 {
     /**

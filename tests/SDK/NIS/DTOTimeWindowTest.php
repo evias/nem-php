@@ -23,7 +23,7 @@ use NEM\Models\TimeWindow;
 use DateTime;
 use DateTimeZone;
 
- class DTOTimeWindowTest
+class DTOTimeWindowTest
     extends NISComplianceTestCase
 {
     /**
@@ -36,8 +36,7 @@ use DateTimeZone;
         $nemTime = new TimeWindow([]);
         $nemTimeNIS = $nemTime->toDTO();
 
-        $this->assertArrayHasKey("timeStamp", $nemTimeNIS);
-        $this->assertInternalType("int", $nemTimeNIS["timeStamp"]);
+        $this->assertInternalType("int", $nemTimeNIS);
     }
 
     /**
@@ -53,7 +52,7 @@ use DateTimeZone;
         $nemTimeNIS = $nemTime->toDTO();
 
         // test content
-        $this->assertEquals($expectNIS, $nemTimeNIS["timeStamp"]);
+        $this->assertEquals($expectNIS, $nemTimeNIS);
         $this->assertEquals($expectNIS, $nemTime->toNIS());
         $this->assertEquals($expectUTC, $nemTime->toUTC());
     }
@@ -68,8 +67,8 @@ use DateTimeZone;
         return [
             [
                 ($t = new DateTime("2018-01-01 01:01:01")),
-                87180876, 
-                TimeWindow::$nemesis + ($t->getTimestamp() * 1000)
+                87180876, // NIS
+                1516196048585 // UTC
             ],
             [
                 ($t1 = new DateTime("2018-01-01 00:01:01")),

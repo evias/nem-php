@@ -21,7 +21,7 @@ namespace NEM\Tests\SDK\NIS;
 use NEM\Models\Mosaic;
 use NEM\Models\MosaicProperty;
 
- class DTOMosaicPropertyTest
+class DTOMosaicPropertyTest
     extends NISComplianceTestCase
 {
     /**

@@ -40,8 +40,8 @@ class DTOMosaicTest
         $actualFQN_1 = $emptyNS->getFQN();
         $actualFQN_2 = $emptyMos->getFQN();
 
-        $this->assertEmpty($assertFQN_1);
-        $this->assertEmpty($assertFQN_2);
+        $this->assertEmpty($actualFQN_1);
+        $this->assertEmpty($actualFQN_2);
     }
 
     /**

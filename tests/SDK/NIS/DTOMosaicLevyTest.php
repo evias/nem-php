@@ -21,7 +21,7 @@ namespace NEM\Tests\SDK\NIS;
 use NEM\Models\Mosaic;
 use NEM\Models\MosaicLevy;
 
- class DTOMosaicLevyTest
+class DTOMosaicLevyTest
     extends NISComplianceTestCase
 {
     /**
