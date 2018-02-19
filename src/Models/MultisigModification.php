@@ -23,6 +23,16 @@ class MultisigModification
     extends Model
 {
     /**
+     * NIS Multisig modification Types
+     * 
+     * @link https://bob.nem.ninja/docs/#multisigCosignatoryModification
+     * @internal
+     * @var integer
+     */
+    const TYPE_ADD = 1;
+    const TYPE_REMOVE = 2;
+
+    /**
      * List of fillable attributes
      *
      * @var array
@@ -42,6 +52,15 @@ class MultisigModification
     ];
 
     /**
+     * The model instance's relations configuration
+     *
+     * @var array
+     */
+    protected $relations = [
+        "cosignatoryAccount",
+    ];
+
+    /**
      * MultisigModification DTO automatically builds a *NIS compliant*
      * [MultisigCosignatoryModification](https://bob.nem.ninja/docs/#multisigCosignatoryModification)
      *
@@ -49,9 +68,22 @@ class MultisigModification
      */
     public function toDTO($filterByKey = null)
     {
+        if (! in_array($this->modificationType, [self::TYPE_ADD, self::TYPE_REMOVE]))
+            $this->modificationType = self::TYPE_ADD;
+
         return [
-            "modificationType" => $this->modificationType,
-            "cosignatoryAccount" => $this->cosignatoryAccount,
+            "modificationType" => (int) $this->modificationType,
+            "cosignatoryAccount" => $this->cosignatoryAccount()->address()->toClean(),
         ];
+    }
+
+    /**
+     * Mutator for the cosignatoryAccount Account object.
+     *
+     * @return \NEM\Models\Account
+     */
+    public function cosignatoryAccount($address = null)
+    {
+        return new Account(["address" => $address ?: $this->getAttribute("cosignatoryAccount")]);
     }
 }

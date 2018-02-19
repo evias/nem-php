@@ -35,6 +35,15 @@ class TimeWindow
     ];
 
     /**
+     * List of automatic *value casts*.
+     *
+     * @var array
+     */
+    protected $casts = [
+        "timeStamp" => "int",
+    ];
+
+    /**
      * NEM Network Genesis.
      *
      * This corresponds to the NEMesis in *UTC Timezone*.
@@ -50,7 +59,9 @@ class TimeWindow
      */
     public function toDTO($filterByKey = null)
     {
-        return $this->toNIS();
+        return [
+            "timeStamp" => $this->toNIS()
+        ];
     }
 
     /**
@@ -65,7 +76,7 @@ class TimeWindow
     public function toNIS()
     {
         // NEM Time = Seconds between the `timeStamp` attribute and the NEM Genesis Block Time.
-        return $this->diff($this->attributes["timeStamp"] ?: null, static::$nemesis);
+        return $this->diff($this->getAttribute("timeStamp") ?: null, static::$nemesis);
     }
 
     /**
@@ -76,8 +87,11 @@ class TimeWindow
     public function toUTC() 
     {
         $ts = time();
-        if ($this->attributes["timeStamp"])
-            $ts = static::$nemesis + ((int) $this->attributes["timeStamp"]);
+        if ($this->getAttribute("timeStamp")) {
+            $ts = static::$nemesis;
+            if ($this->getAttribute("timeStamp") != static::$nemesis)
+                $ts += (1000 * ((int) $this->getAttribute("timeStamp")));
+        }
 
         return $ts;
     }
