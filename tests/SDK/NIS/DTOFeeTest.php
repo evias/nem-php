@@ -169,7 +169,7 @@ class DTOFeeTest
     }
 
     /**
-     * Unit test for *empty mosaic attachments fee calculation*.
+     * Unit test for *mosaic attachments minimum fee calculation*.
      * 
      * @return void
      */
@@ -189,5 +189,33 @@ class DTOFeeTest
         $actualFee = Fee::calculateForMosaics($definitions, $attachments);
 
         $this->assertEquals($expectFee, $actualFee);
+    }
+
+    /**
+     * Unit test for *mosaic attachments fee calculation*.
+     * 
+     * @return void
+     */
+    public function testMosaicAttachmentsFeeCalculation()
+    {
+        $attachment  = new MosaicAttachment([
+            "mosaicId" => (new Mosaic([
+                "namespaceId" => "nem",
+                "name" => "xem"]))->toDTO(),
+            "quantity" => 100 * pow(10, 6)
+        ]);
+
+        $definitions = MosaicDefinitions::create();
+        $attachments = new MosaicAttachments([$attachment]);
+
+        // multiplier changes
+        $actualFee_1 = Fee::calculateForMosaics($definitions, $attachments, 1 * pow(10, 6));
+        $actualFee_2 = Fee::calculateForMosaics($definitions, $attachments, 1000 * pow(10, 6));
+
+        $expectFee_1 = 1 * Fee::FEE_FACTOR;
+        $expectFee_2 = 10 * Fee::FEE_FACTOR;
+
+        $this->assertEquals($expectFee_1, $actualFee_1);
+        $this->assertEquals($expectFee_2, $actualFee_2);
     }
 }

@@ -222,13 +222,10 @@ class Fee
                 $totalQuantity = $supply * pow(10, $divisibility);
                 $supplyAdjust  = floor(0.8 * log($maxQuantity / $totalQuantity));
 
-                $xemAmount = $quantity;
-                if ($mosaicFQN !== "nem:xem") {
-                    $xemAmount = Amount::mosaicQuantityToXEM($divisibility,
-                                                             $supply,
-                                                             $quantity,
-                                                             $multiplier);
-                }
+                $xemAmount = Amount::mosaicQuantityToXEM($divisibility,
+                                                         $supply,
+                                                         $quantity,
+                                                         $multiplier);
 
                 // mosaic fee is calculate the same a XEM amounts after being converted.
                 $fee = self::calculateForXEM(ceil($xemAmount));

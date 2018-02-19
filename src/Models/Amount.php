@@ -228,6 +228,6 @@ class Amount
         if ((int) $supply <= 0) return 0;
         if ((int) $divisibility <= 0) $divisibility = 0;
 
-        return 8999999999 * $quantity * $multiplier / $supply / pow(10, $divisibility + 6);
+        return self::XEM_SUPPLY * $quantity * $multiplier / $supply / pow(10, $divisibility + 6);
     }
 }
