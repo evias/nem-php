@@ -86,10 +86,12 @@ class Mosaic
      */
     public function serialize($parameters = null)
     {
+        $nisData = $this->toDTO();
+
         // shortcuts
-        $namespace = $this->namespaceId;
-        $mosaicName = $this->name;
         $serializer = $this->getSerializer();
+        $namespace  = $nisData["namespaceId"];
+        $mosaicName = $nisData["name"];
 
         $serializedNS = $serializer->serializeString($namespace);
         $serializedMos = $serializer->serializeString($mosaicName);

@@ -73,9 +73,11 @@ class MosaicAttachment
      */
     public function serialize($parameters = null)
     {
+        $nisData = $this->toDTO();
+
         // shortcuts
         $mosaicS = $this->mosaicId()->serialize();
-        $quantity = $this->getSerializer()->serializeLong($this->quantity);
+        $quantity = $this->getSerializer()->serializeLong($nisData["quantity"]);
 
         return $this->getSerializer()->aggregate($mosaicS, $quantity);
     }

@@ -76,9 +76,10 @@ use NEM\Models\MosaicLevy;
         $expectLevy = $levyNIS;
 
         $this->assertEquals($expectCreator, $definitionNIS["creator"]);
-        $this->assertEquals(json_encode($mosaic->toDTO()), json_encode($definitionNIS["id"]));
         $this->assertEquals($expectDesc, $definitionNIS["description"]);
+        $this->assertEquals(json_encode($mosaic->toDTO()), json_encode($definitionNIS["id"]));
         $this->assertEquals(json_encode($expectLevy), json_encode($definitionNIS["levy"]));
+        $this->assertEquals(json_encode($expectProps), json_encode($definitionNIS["properties"]));
     }
 
     /**
@@ -97,6 +98,38 @@ use NEM\Models\MosaicLevy;
                     new MosaicProperty(["name" => "divisibility", "value" => 6]),
                     new MosaicProperty(["name" => "initialSupply", "value" => 290888]),
                     new MosaicProperty(["name" => "supplyMutable", "value" => true]),
+                    new MosaicProperty(["name" => "transferable", "value" => true]),
+                ]),
+                new MosaicLevy()
+            ],
+            [
+                "a1df5306355766bd2f9a64efdc089eb294be265987b3359093ae474c051d7d5a",
+                "dim:coin",
+                "DIM COIN",
+                new MosaicProperties([
+                    new MosaicProperty(["name" => "divisibility", "value" => 6]),
+                    new MosaicProperty(["name" => "initialSupply", "value" => 9000000000]),
+                    new MosaicProperty(["name" => "supplyMutable", "value" => false]),
+                    new MosaicProperty(["name" => "transferable", "value" => true]),
+                ]),
+                new MosaicLevy([
+                    "type" => MosaicLevy::TYPE_PERCENTILE,
+                    "fee"  => 10,
+                    "recipient" => "NCGGLVO2G3CUACVI5GNX2KRBJSQCN4RDL2ZWJ4DP",
+                    "mosaicId" => (new Mosaic([
+                        "namespaceId" => "dim",
+                        "name" => "coin"
+                    ]))->toDTO(),
+                ])
+            ],
+            [
+                "a1df5306355766bd2f9a64efdc089eb294be265987b3359093ae474c051d7d5a",
+                "dim:token",
+                "DIM TOKEN",
+                new MosaicProperties([
+                    new MosaicProperty(["name" => "divisibility", "value" => 6]),
+                    new MosaicProperty(["name" => "initialSupply", "value" => 10000000]),
+                    new MosaicProperty(["name" => "supplyMutable", "value" => false]),
                     new MosaicProperty(["name" => "transferable", "value" => true]),
                 ]),
                 new MosaicLevy()
