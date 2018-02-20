@@ -116,10 +116,6 @@ class DTOTransactionMosaicTransferTest
         $this->assertEquals($expectNamespace, $mosaicNIS["namespaceId"]);
         $this->assertEquals($expectMosaic, $mosaicNIS["name"]);
         $this->assertEquals($expectQuantity, $attachmentNIS["quantity"]);
-
-        // optional fields were not set
-        $this->assertEmpty($content["signer"]);
-        $this->assertEmpty($content["signature"]);
     }
 
     /**

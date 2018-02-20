@@ -64,8 +64,8 @@ class DTOTransactionSpecializedTest
         $this->assertEmpty($content["message"]["payload"]);
 
         // optional fields were not set
-        $this->assertEmpty($content["signer"]);
-        $this->assertEmpty($content["signature"]);
+        $this->assertFalse(isset($content["signer"]));
+        $this->assertFalse(isset($content["signature"]));
     }
 
     public function testDTOOptionalFields()

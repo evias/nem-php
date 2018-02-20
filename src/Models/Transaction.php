@@ -141,13 +141,13 @@ class Transaction
         // look for basic parameters of transactions, only unconfirmed
         // transactions will have those fields empty.
 
-        if ($this->attributes["id"])
+        if (isset($this->attributes["id"]))
             $meta["id"] = (int) $this->attributes["id"];
 
-        if ($this->attributes["height"])
+        if (isset($this->attributes["height"]))
             $meta["height"] = (int) $this->attributes["height"];
 
-        if ($this->attributes["hash"])
+        if (isset($this->attributes["hash"]))
             $meta["hash"] = ["data" => $this->attributes["hash"]];
 
         return $meta;
