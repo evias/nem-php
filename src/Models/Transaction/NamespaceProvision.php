@@ -20,6 +20,7 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\Fee;
 
 class NamespaceProvision
     extends Transaction
@@ -49,6 +50,21 @@ class NamespaceProvision
             "parent" => $this->parent,
             "newPart" => $this->newPart,
         ];
+    }
+
+    /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        if (!empty($this->parent)) {
+            return Fee::SUB_PROVISION_NAMESPACE;
+        }
+
+        return Fee::ROOT_PROVISION_NAMESPACE;
     }
 
     /**

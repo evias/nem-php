@@ -24,6 +24,8 @@ use NEM\Models\Mosaic;
 use NEM\Models\MosaicAttachment;
 use NEM\Models\MosaicAttachments;
 use NEM\Models\MosaicDefinition;
+use NEM\Models\MosaicDefinitions;
+use NEM\Models\Fee;
 
 class MosaicTransfer
     extends Transfer
@@ -48,6 +50,23 @@ class MosaicTransfer
         return [
             "mosaics" => $this->mosaics()->toDTO(),
         ];
+    }
+
+    /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        $definitions = MosaicDefinitions::create();
+        $mosaicsFee = Fee::calculateForMosaics(
+                                $definitions,
+                                $this->mosaics(),
+                                $this->amount()->toMicro());
+
+        return $mosaicsFee;
     }
 
     /**

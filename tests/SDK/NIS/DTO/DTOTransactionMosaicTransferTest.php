@@ -93,7 +93,7 @@ class DTOTransactionMosaicTransferTest
         ];
 
         $transaction = new MosaicTransfer($txData);
-        $transactionNIS = $transaction->toDTO(true);
+        $transactionNIS = $transaction->toDTO();
 
         $meta = $transactionNIS["meta"];
         $content = $transactionNIS["transaction"];
@@ -188,7 +188,7 @@ class DTOTransactionMosaicTransferTest
         $contentTx = $mosaicNIS["transaction"];
 
         // NIS fee is `count_attachments * fee_factor`
-        $expectFee = 2 * Fee::FEE_FACTOR * Amount::XEM; // 0.10 XEM
+        $expectFee = 2 * Fee::FEE_FACTOR; // 0.10 XEM
 
         $this->assertArrayHasKey("mosaics", $contentTx);
         $this->assertNotEmpty($contentTx["mosaics"]);
@@ -203,7 +203,7 @@ class DTOTransactionMosaicTransferTest
         $mosaicTransfer_2->attachMosaic("dim:token", 10);
 
         // NIS fee is `count_attachments * fee_factor`
-        $expectFee_2 = 3 * Fee::FEE_FACTOR * Amount::XEM;
+        $expectFee_2 = 3 * Fee::FEE_FACTOR; // 0.15 XEM
 
         // get content transcribed
         $mosaicNIS_2 = $mosaicTransfer_2->toDTO();

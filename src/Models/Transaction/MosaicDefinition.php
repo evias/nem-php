@@ -62,6 +62,17 @@ class MosaicDefinition
     }
 
     /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        return Fee::MOSAIC_DEFINITION;
+    }
+
+    /**
      * Mutator for the `creationFeeSink` relation.
      *
      * @return  \NEM\Models\Account

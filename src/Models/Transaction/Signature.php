@@ -20,6 +20,7 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\Fee;
 
 class Signature
     extends Transaction
@@ -48,6 +49,17 @@ class Signature
             ],
             "otherAccount" => $this->otherAccount()->address()->toClean()
         ];
+    }
+
+    /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        return floor(Fee::SIGNATURE / pow(10, 6));
     }
 
     /**

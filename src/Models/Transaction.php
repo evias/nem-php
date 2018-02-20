@@ -129,6 +129,20 @@ class Transaction
     }
 
     /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     * 
+     * For example MosaicTransfer transactions define a specific FEE or 
+     * ImportanceTransfer, etc.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        return 0;
+    }
+
+    /**
      * The meta() method must be overloaded by any Transaction Type
      * which needs to extend the base META structure.
      *

@@ -20,6 +20,7 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\Fee;
 
 class MultisigAggregateModification
     extends Transaction
@@ -49,6 +50,17 @@ class MultisigAggregateModification
                 "relativeChange" => $this->relativeChange
             ],
         ];
+    }
+
+    /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        return Fee::MULTISIG_AGGREGATE_MODIFICATION;
     }
 
     /**

@@ -20,6 +20,7 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\Fee;
 
 class Transfer
     extends Transaction
@@ -48,5 +49,18 @@ class Transfer
         // Transfer transaction is *default transaction type* for NEM.
         // No data needs to be added to the base transaction META.
         return [];
+    }
+
+    /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        // Transfer transaction is *default transaction type* for NEM.
+        // No more fees need to be added to the base transaction FEE.
+        return 0;
     }
 }
