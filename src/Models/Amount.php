@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
@@ -44,6 +44,13 @@ class Amount
      * @var integer
      */
     const MAX_AMOUNT = 9000000000000000;
+
+    /**
+     * Define the XEM total supply.
+     *
+     * @var integer
+     */
+    const XEM_SUPPLY = 8999999999;
 
     /**
      * List of fillable attributes
@@ -221,6 +228,6 @@ class Amount
         if ((int) $supply <= 0) return 0;
         if ((int) $divisibility <= 0) $divisibility = 0;
 
-        return 8999999999 * $quantity * $multiplier / $supply / pow(10, $divisibility + 6);
+        return self::XEM_SUPPLY * $quantity * $multiplier / $supply / pow(10, $divisibility + 6);
     }
 }

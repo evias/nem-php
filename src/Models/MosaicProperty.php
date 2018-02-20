@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
@@ -39,9 +39,38 @@ class MosaicProperty
      */
     public function toDTO($filterByKey = null)
     {
+        $value = (string) $this->value;
+        if (in_array($this->name, ["supplyMutable", "transferable"])) {
+            $value = ($this->value !== "false" && (bool) $this->value) ? "true" : "false";
+        }
+        elseif (empty($this->value)
+                || 0 > (int) $this->value) {
+            $value = "0";
+        }
+
         return [
             "name" => $this->name,
-            "value" => $this->value,
+            "value" => $value,
         ];
+    }
+
+    /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *Mosaic Definition Properties* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        $nisData = $this->toDTO();
+
+        // shortcuts
+        $serializer    = $this->getSerializer();
+        $serializedName = $serializer->serializeString($nisData["name"]);
+        $serializedValue = $serializer->serializeString($nisData["value"]);
+
+        return $serializer->aggregate($serializedName, $serializedValue);
     }
 }

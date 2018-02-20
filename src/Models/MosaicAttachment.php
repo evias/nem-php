@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
@@ -73,9 +73,11 @@ class MosaicAttachment
      */
     public function serialize($parameters = null)
     {
+        $nisData = $this->toDTO();
+
         // shortcuts
         $mosaicS = $this->mosaicId()->serialize();
-        $quantity = $this->getSerializer()->serializeLong($this->quantity);
+        $quantity = $this->getSerializer()->serializeLong($nisData["quantity"]);
 
         return $this->getSerializer()->aggregate($mosaicS, $quantity);
     }

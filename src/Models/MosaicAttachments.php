@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
@@ -22,5 +22,44 @@ namespace NEM\Models;
 class MosaicAttachments
     extends ModelCollection
 {
-    /** Nothing needed here. **/
+    /**
+     * Overload of the \NEM\Core\ModelCollection::serialize() method to provide
+     * with a specialization for *MosaicAttachments Arrays* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        // shortcuts
+        $serializer = $this->getSerializer();
+
+        // sort attachments lexicographically
+        $sorted = $this->sort(function($attach1, $attach2)
+        {
+            $lexic1 = $attach1->mosaicId()->getFQN() . " : " . $attach1->quantity;
+            $lexic2 = $attach2->mosaicId()->getFQN() . " : " . $attach2->quantity;
+
+            return $lexic1 < $lexic2 ? -1 : $lexic1 > $lexic2;
+        });
+
+        // serialize attachments
+        // prepend size on 4 bytes
+        $prependSize = $serializer->serializeInt($sorted->count());
+
+        // serialize each attachment
+        $stateUInt8 = $prependSize;
+        for ($i = 0, $len = $sorted->count(); $i < $len; $i++) {
+            // use MosaicAttachment::serialize() specialization
+            $attachment = $sorted->get($i)->serialize();
+
+            // use merge here, no aggregator
+            $stateUInt8 = array_merge($stateUInt8, $attachment);
+        }
+
+        // no need to use the aggregator, we dynamically aggregated
+        // our collection data and prepended the size on 4 bytes.
+        return $stateUInt8;
+    }
 }

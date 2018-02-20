@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
@@ -48,6 +48,16 @@ class MosaicLevy
     ];
 
     /**
+     * List of automatic *value casts*.
+     *
+     * @var array
+     */
+    protected $casts = [
+        "type" => "int",
+        "fee"  => "int",
+    ];
+
+    /**
      * Mosaic Levy DTO builds a package with offsets `type`,
      * `recipient`, `mosaicId` and `fee`. 
      * 
@@ -57,12 +67,45 @@ class MosaicLevy
      */
     public function toDTO($filterByKey = null)
     {
+        if (! $this->getAttribute("recipient") || ! $this->getAttribute("mosaicId"))
+            return [];
+
         return [
             "type" => $this->type,
             "recipient" => $this->recipient()->address()->toClean(),
-            "mosaicId" => $this->mosaic()->toDTO(),
+            "mosaicId" => $this->mosaicId()->toDTO(),
             "fee" => $this->fee,
         ];
+    }
+
+    /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *Mosaic Levy* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        // shortcuts
+        $serializer = $this->getSerializer();
+        $nisData = $this->toDTO();
+
+        if (empty($nisData)) {
+            $emptyLevy = $serializer->serializeInt(null);
+            return $serializer->aggregate($emptyLevy);
+        }
+
+        // serialize
+        $type = $serializer->serializeInt($nisData["type"]);
+        $recipient = $serializer->serializeString($nisData["recipient"]);
+        $fee       = $serializer->serializeLong($nisData["fee"]);
+        $mosaic    = $this->mosaicId()->serialize();
+
+        // prepend size on 4 bytes + concatenate UInt8
+        return $this->getSerializer()
+                    ->aggregate($type, $recipient, $mosaic, $fee);
     }
 
     /**
@@ -73,7 +116,7 @@ class MosaicLevy
      * @param   array   $mosaidId       Array should contain offsets `namespaceId` and `name`.
      * @return  \NEM\Models\Mosaic
      */
-    public function mosaic(array $mosaicId = null)
+    public function mosaicId(array $mosaicId = null)
     {
         return new Mosaic($mosaicId ?: $this->getAttribute("mosaicId"));
     }

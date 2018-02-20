@@ -13,15 +13,16 @@
  * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Tests\SDK\NIS;
+namespace NEM\Tests\SDK\NIS\DTO;
 
+use NEM\Tests\SDK\NIS\NISComplianceTestCase;
 use NEM\Models\Address;
 use NEM\Infrastructure\Network;
 
-class AddressDTOTest
+class DTOAddressTest
     extends NISComplianceTestCase
 {
     /**

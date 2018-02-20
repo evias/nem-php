@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
@@ -32,6 +32,17 @@ class TimeWindow
      */
     protected $fillable = [
         "timeStamp",
+        "utc"
+    ];
+
+    /**
+     * List of automatic *value casts*.
+     *
+     * @var array
+     */
+    protected $casts = [
+        "timeStamp" => "int",
+        "utc" => "int",
     ];
 
     /**
@@ -45,6 +56,10 @@ class TimeWindow
 
     /**
      * TimeWindow DTO represents NIS API's Timestamps.
+     * 
+     * This `toDTO` overload is specific in that it doesn't return
+     * an array! That is because working with NIS you will always
+     * need integers for timestamps rather than sub-dtos.
      *
      * @return  integer         Seconds since NEM genesis block.
      */
@@ -64,8 +79,16 @@ class TimeWindow
      */
     public function toNIS()
     {
-        // NEM Time = Seconds between the `timeStamp` attribute and the NEM Genesis Block Time.
-        return $this->diff($this->attributes["timeStamp"] ?: null, static::$nemesis);
+        if ($this->getAttribute("timeStamp")) {
+            // from NIS timestamp
+            $ts = $this->getAttribute("timeStamp");
+            return $this->diff($ts, static::$nemesis);
+        }
+        else {
+            // from UTC timestamp
+            $utc = $this->getAttribute("utc");
+            return $this->diff($utc, static::$nemesis);
+        }
     }
 
     /**
@@ -76,10 +99,15 @@ class TimeWindow
     public function toUTC() 
     {
         $ts = time();
-        if ($this->attributes["timeStamp"])
-            $ts = static::$nemesis + ((int) $this->attributes["timeStamp"]);
-
-        return $ts;
+        if ($this->getAttribute("timeStamp")) {
+            // from NIS to UTC
+            $ts = (int) $this->getAttribute("timeStamp");
+            return self::$nemesis + (1000 * $ts);
+        }
+        else {
+            // has UTC
+            return $this->getAttribute("utc");
+        }
     }
 
     /**

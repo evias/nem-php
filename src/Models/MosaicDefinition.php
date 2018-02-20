@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
@@ -42,24 +42,64 @@ class MosaicDefinition
      */
     protected $relations = [
         "id",
+        "creator",
         "properties",
         "levy",
+        "description",
     ];
 
     /**
      * Address DTO automatically cleans address representation.
      *
+     * @param   boolean     $filterByKey    When set to `true`, the method will return the description field in hexadecimal format.
      * @return  array       Associative array with key `address` containing a NIS *compliable* address representation.
      */
     public function toDTO($filterByKey = null)
     {
+        $isHexDescription = $filterByKey === true ? true : false;
         return [
-            "creator" => $this->creator,
-            "id" => $this->mosaic()->toDTO(),
-            "description" => $this->description,
+            "creator" => $this->creator()->publicKey,
+            "id" => $this->id()->toDTO(),
+            "description" => $isHexDescription ? $this->description()->toHex()
+                                                 : $this->description()->getPlain(),
             "properties" => $this->properties()->toDTO(),
             "levy" => $this->levy()->toDTO(),
         ];
+    }
+
+    /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *Mosaic Definition* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        $nisData = $this->toDTO(true); // true=hexadecimal description
+
+        // shortcuts
+        $serializer = $this->getSerializer();
+        $publicKey  = hex2bin($nisData["creator"]);
+
+        // bundle with length of pub key and public key in UInt8
+        $publicKey  = $serializer->serializeString($publicKey);
+        //dd($this->description());
+        // serialize content
+        // [64, 0, 0, 0, 6, 8, 7, 4, 7, 4, 7, 0, 7, 3, 3, 0, 2, 0, 2, 0, 6, 7, 6, 9, 7, 4, 6, 8, 7, 5, 6, 2, 2, 0, 6, 3, 6, 0, 6, 0, 2, 0, 6, 5, 7, 6, 6, 9, 6, 1, 7, 3, 2, 0, 6, 0, 6, 5, 6, 0, 2, 0, 7, 0, 6, 8, 7, 0]
+        $desc   = $serializer->serializeString(hex2bin($nisData["description"]));
+        //dd(json_encode($desc));
+        $mosaic = $this->id()->serialize();
+        $props  = $this->properties()->serialize();
+        $levy   = $this->levy()->serialize();
+
+        // concatenate UInt8
+        $output = array_merge($publicKey, $mosaic, $desc, $props, $levy);
+
+        // do not use aggregator because MosaicDefinition's first byte
+        // contains a public key size, not a DTO size.
+        return $output;
     }
 
     /**
@@ -73,6 +113,16 @@ class MosaicDefinition
     public function id(array $mosaicId = null)
     {
         return new Mosaic($mosaicId ?: $this->getAttribute("mosaicId"));
+    }
+
+    /**
+     * Mutator for the recipient Account object.
+     *
+     * @return \NEM\Models\Account
+     */
+    public function creator($publicKey = null)
+    {
+        return new Account(["publicKey" => $publicKey ?: $this->getAttribute("creator")]);
     }
 
     /**
@@ -98,31 +148,47 @@ class MosaicDefinition
      */
     public function properties(array $properties = null)
     {
-        return MosaicProperties($properties ?: $this->getAttribute("properties"));
+        return new MosaicProperties($properties ?: $this->getAttribute("properties"));
+    }
+
+    /**
+     * Mutator for `description` relation.
+     *
+     * @param   array   $mosaidId       Array should contain offsets `namespaceId` and `name`.
+     * @return  \NEM\Models\Mosaic
+     */
+    public function description($description = null)
+    {
+        return new Message(["plain" => $this->getAttribute("description") ?: ""]);
     }
 
     /**
      * Helper to read a given `name` mosaic property name.
+     * 
+     * This is just a proxy method for MosaicProperties::getProperty().
      * 
      * @param   string  $name       Mosaic property name.
      * @return  integer|boolean
      */
     public function getProperty($name)
     {
-        $propertiesNames = [
-            "divisibility"  => 0,
-            "initialSupply" => 1,
-            "supplyMutable" => 2,
-            "transferable"  => 3,
-        ];
+        return $this->properties()->getProperty($name);
+    }
 
-        if (! array_key_exists($name, $propertiesNames)) {
-            throw new InvalidArgumentException("Mosaic property name '" . $name ."' is invalid. Must be one of 'divisibility', "
-                                             . "'initialSupply', 'supplyMutable' or 'transferable'");
-        }
-
-        $index = $propertiesNames[$name];
-        $value = $this->properties()->get($index)->value;
-        return $value;
+    /**
+     * Getter for the Mosaic's Total Supply.
+     * 
+     * Mosaics with mutable supply must provide with a specialization
+     * of this method in order to provide with the correct total supply.
+     * 
+     * In case no class is defined in the Mosaics Registry, the NIS Infrastructur
+     * class will be integrated to provide with Mosaic Supply Requests. (to be implemented)
+     * 
+     * @return integer
+     */
+    public function getTotalSupply()
+    {
+        $initial = (int) $this->getProperty("initialSupply");
+        return $initial;
     }
 }

@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Core;
@@ -240,7 +240,7 @@ class Serializer
      * @param   array   $uint8_X
      * @return  array
      */
-    public function aggregate()
+    public function aggregate(/* [array $uint8_1, array $uint8_2, ...] */)
     {
         // read dynamic arguments
         $count = func_num_args();

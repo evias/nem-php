@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
@@ -50,9 +50,15 @@ class MultisigInfo
      */
     public function toDTO($filterByKey = null)
     {
+        if (empty($this->cosignatoriesCount) || $this->cosignatoriesCount < 0)
+            $this->cosignatoriesCount = 0;
+
+        if (empty($this->minCosignatories) || $this->minCosignatories < 0)
+            $this->minCosignatories = 0;
+
         return [
-            "cosignatoriesCount" => $this->cosignatoriesCount,
-            "minCosignatories" => $this->minCosignatories,
+            "cosignatoriesCount" => (int) $this->cosignatoriesCount,
+            "minCosignatories" => (int) $this->minCosignatories,
         ];
     }
 }

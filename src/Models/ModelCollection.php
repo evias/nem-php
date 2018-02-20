@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
@@ -23,12 +23,22 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Arr as ArrayHelper;
 use NEM\Infrastructure\ServiceInterface;
 use NEM\Contracts\DataTransferObject;
+use NEM\Contracts\Serializable;
 
 use BadMethodCallException;
 
 class ModelCollection
     extends Collection
+    implements Serializable
 {
+    /**
+     * Inject getSerializer() and setSerializer()
+     * 
+     * @see \NEM\Traits\Serializable
+     * @see \NEM\Core\Serializer
+     */
+    use \NEM\Traits\Serializable;
+
     /**
      * Overwrite toArray() functionality to make sure it will always use 
      * Data Transfer Objects when the collection is cast into an array.
@@ -60,6 +70,21 @@ class ModelCollection
         }
 
         return $dtos;
+    }
+
+    /**
+     * This method should return a *byte-array* with UInt8
+     * representation of bytes for the said collection of 
+     * objects.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        $json = json_encode($this->toDTO());
+        return $this->getSerializer()->serializeString($json);
     }
 
     /**

@@ -13,7 +13,7 @@
  * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Tests\SDK\Core;
@@ -22,10 +22,7 @@ use NEM\Tests\TestCase;
 use NEM\Core\Serializer;
 use NEM\Core\Buffer;
 use NEM\Models\Model;
-
-// This unit test will test all serializer process Specializations
-use NEM\Models\Mosaic;
-use NEM\Models\MosaicAttachment;
+use NEM\Models\ModelCollection;
 
 class SerializerSpecializationTest
     extends TestCase
@@ -46,7 +43,7 @@ class SerializerSpecializationTest
             "attribute_three" => "value_pos3",
         ]);
 
-        // test basic serialization
+        // test Model::serialize() specialization
         $serialized = $model->serialize();
 
         $expectJSON = '{"attribute_one":"value_pos1","attribute_two":"value_pos2","attribute_three":"value_pos3"}';
@@ -72,64 +69,39 @@ class SerializerSpecializationTest
     }
 
     /**
-     * Unit test for *serialize process Specialization: Mosaic*.
+     * Unit test for *base Model serialization* without specialization
+     * and using the factory method serialize().
      * 
      * @return void
      */
-    public function testSerializerModelSpecialization_Mosaic()
+    public function testSerializerCollectionBase()
     {
-        $mosaic = new Mosaic([
-            "namespaceId" => "evias.sdk",
-            "name" => "nem-php"
-        ]);
+        $model1 = new Model(["attribute_one" => "value_pos1_1"]);
+        $model2 = new Model(["attribute_one" => "value_pos1_2"]);
+        $collection = new ModelCollection([$model1, $model2]);
 
-        // test specialized Mosaic::serialize() serialization process
-        $serialized = $mosaic->serialize();
-
-        $expectUInt8 = [
-            24,  0,   0,   0,
-            9,   0,   0,   0, 101, 118, 105,  97,
-            115,  46, 115, 100, 107,   7,   0,   0,
-            0, 110, 101, 109,  45, 112, 104, 112
-        ];
-        $expectSize = count($expectUInt8);
-
-        $this->assertEquals($expectSize, count($serialized));
-        $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
-    }
-
-    /**
-     * Unit test for *serialize process Specialization: MosaicAttachment*.
-     * 
-     * @return void
-     */
-    public function testSerializerModelSpecialization_MosaicAttachment()
-    {
-        $mosaic = new Mosaic([
-            "namespaceId" => "evias.sdk",
-            "name" => "nem-php"
-        ]);
-
-        $attachment = new MosaicAttachment([
-            "mosaicId" => $mosaic->toDTO(),
-            "quantity" => 1
-        ]);
-
-        // test specialized MosaicAttachment::serialize() serialization process
-        $serialized = $attachment->serialize();
+        // test ModelCollection::serialize() specialization
+        $serCollection = $collection->serialize();
 
         // expected results
+        $expectJSON = '[{"attribute_one":"value_pos1_1"},'
+                      .'{"attribute_one":"value_pos1_2"}]';
+        $expectSize = 4 + strlen($expectJSON);
         $expectUInt8 = [
-             36,   0,   0,   0,
-             24,   0,   0,   0,   9,   0,   0,   0,
-            101, 118, 105,  97, 115,  46, 115, 100,
-            107,   7,   0,   0,   0, 110, 101, 109,
-             45, 112, 104, 112,   1,   0,   0,   0, 
-              0,   0,   0,   0
+             67,   0,   0,   0, 
+             91, 123,  34,  97, 116, 116, 114, 105,
+             98, 117, 116, 101,  95, 111, 110, 101,
+             34,  58,  34, 118,  97, 108, 117, 101,
+             95, 112, 111, 115,  49,  95,  49,  34,
+            125,  44, 123,  34,  97, 116, 116, 114,
+            105,  98, 117, 116, 101,  95, 111, 110,
+            101,  34,  58,  34, 118,  97, 108, 117,
+            101,  95, 112, 111, 115,  49,  95,  50,
+             34, 125,  93
         ];
-        $expectSize = count($expectUInt8);
 
-        $this->assertEquals($expectSize, count($serialized));
-        $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
+        // assert
+        $this->assertEquals($expectSize, count($serCollection));
+        $this->assertEquals(json_encode($expectUInt8), json_encode($serCollection));
     }
 }
