@@ -13,7 +13,7 @@
  * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Tests\SDK\NIS;
@@ -30,7 +30,7 @@ class DTOTransactionTest
     extends NISComplianceTestCase
 {
     /**
-     * Unit test for *NIS compliance of DTO Structure for TimeWindow class*.
+     * Unit test for *NIS compliance of DTO Structure for Transaction class*.
      * 
      * @return void
      */
@@ -118,7 +118,7 @@ class DTOTransactionTest
      */
     public function testDTOContentVectors(
         $ts, $amt, $recv, $type, $version, $message, $signer, $signature,
-        $expectAmt, $expectRecv, $expectType, $expectMsgHex
+        $expectAmt, $expectRecv, $expectType, $expectVer, $expectMsgHex
     )
     {
         $txData = [
@@ -145,7 +145,9 @@ class DTOTransactionTest
         $this->assertEquals($expectAmt, $content["amount"]);
         $this->assertEquals($expectRecv, $content["recipient"]);
         $this->assertEquals($expectType, $content["type"]);
+        $this->assertEquals($expectVer, $content["version"]);
 
+        $this->assertArrayHasKey("message", $content);
         $this->assertArrayHasKey("payload", $content["message"]);
         $this->assertEquals($expectMsgHex, $content["message"]["payload"]);
     }
@@ -166,7 +168,40 @@ class DTOTransactionTest
                 null, null,
                 // expect
                 10000000, "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
-                TransactionType::MULTISIG, bin2hex("https://github.com/evias/nem-php")
+                TransactionType::MULTISIG, Transaction::VERSION_1,
+                bin2hex("https://github.com/evias/nem-php")
+            ],
+            [
+                // act
+                null, 10, "TDWZ55-R5VIHS-H5WWK6-CEGAIP-7D35XV-FZ3RU2-S5UQ",
+                "257", 2,
+                new Message(["plain" => "https://github.com/evias/pacNEM"]), 
+                null, null,
+                // expect
+                10, "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
+                TransactionType::TRANSFER, Transaction::VERSION_1,
+                bin2hex("https://github.com/evias/pacNEM")
+            ],
+            [
+                // act
+                (new TimeWindow())->toNIS(), 100000.0, "TDWZ55-R5VIHS-H5WWK6-CEGAIP-7D35XV-FZ3RU2-S5UQ",
+                TransactionType::TRANSFER, 1,
+                new Message(["plain" => "https://github.com/evias/nem-nodejs-bot"]), 
+                null, null,
+                // expect
+                100000000000, "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
+                TransactionType::TRANSFER, Transaction::VERSION_1,
+                bin2hex("https://github.com/evias/nem-nodejs-bot")
+            ],
+            [
+                // act
+                (new TimeWindow())->toNIS(), 0, "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
+                TransactionType::TRANSFER, 1,
+                null, null, null,
+                // expect
+                0, "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
+                TransactionType::TRANSFER, Transaction::VERSION_1,
+                ""
             ],
         ];
     }

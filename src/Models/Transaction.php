@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
@@ -220,8 +220,14 @@ class Transaction
      *
      * @return int
      */
-     public function timestamp($timestamp = null) {
-        return new TimeWindow(["timeStamp" => $timestamp ?: $this->getAttribute("timeStamp")]);
+     public function timestamp($timestamp = null) 
+     {
+        $ts = $timestamp ?: $this->getAttribute("timeStamp");
+        if (is_integer($ts) || $ts instanceof TimeWindow) {
+            return new TimeWindow(["timeStamp" => $ts]);
+        }
+
+        return new TimeWindow();
     }
 
     /**
@@ -229,8 +235,14 @@ class Transaction
      *
      * @return int
      */
-    public function deadline($deadline = null) {
-        return new TimeWindow(["timeStamp" => $deadline ?: $this->getAttribute("deadline")]);
+    public function deadline($deadline = null) 
+    {
+        $ts = $timestamp ?: $this->getAttribute("deadline");
+        if (is_integer($ts) || $ts instanceof TimeWindow) {
+            return new TimeWindow(["timeStamp" => $ts]);
+        }
+
+        return new TimeWindow();
     }
 
     /**

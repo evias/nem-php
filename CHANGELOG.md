@@ -15,6 +15,8 @@ This project follows [Semantic Versioning](CONTRIBUTING.md).
 - implement Keccak+ed25519-ref10(donna) KeyPair generation for NEM KeyPair
 - implement some pre-configured MosaicDefinition from the NEM Mainnet Network
 - implement Fee Structure into SDK (minimum, messages, mosaics and transaction fees)
+- implement NIS Serializer features
+- implement Keccak-512 Hasher features
 
 - implement AES encryption for NEM blockchain encrypted messages
 - implement laravel abstraction (Facades and Events)
