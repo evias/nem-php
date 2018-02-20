@@ -28,9 +28,11 @@
         <testsuite name="NEM PHP SDK NIS Core Layer Test Suite">
             <directory suffix="Test.php">./tests/SDK/Core</directory>
         </testsuite>
-
-        <testsuite name="NEM PHP SDK NIS Compliance Test Suite">
-            <directory suffix="Test.php">./tests/SDK/NIS</directory>
+        <testsuite name="NEM PHP SDK NIS Compliance DTO Test Suite">
+            <directory suffix="Test.php">./tests/SDK/NIS/DTO</directory>
+        </testsuite>
+        <testsuite name="NEM PHP SDK NIS Compliance Serializer Test Suite">
+            <directory suffix="Test.php">./tests/SDK/NIS/Serialize</directory>
         </testsuite>
     </testsuites>
     <filter>

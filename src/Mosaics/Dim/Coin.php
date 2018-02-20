@@ -14,17 +14,45 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Models\Mosaics\Dim;
+namespace NEM\Mosaics\Dim;
 
 use NEM\Models\MosaicDefinition;
+use NEM\Models\MosaicProperties;
+use NEM\Models\MosaicProperty;
+use NEM\Models\MosaicLevy;
+use NEM\Models\Mosaic;
 
-class Nemether
+class Coin
     extends MosaicDefinition
 {
-    public $creator = "b089dc609b9ba65d9f5f3b5f58561ec5cc480f6e7eebf22b7ab88479f08706db";
+    /**
+     * The `dim:token` Total Coins Supply
+     * 
+     * @var integer
+     */
+    const TOTAL_SUPPLY = 9000000000;
+
+    /**
+     * The `dim:token` mosaics creator public key
+     * in hexadecimal format.
+     * 
+     * @var string
+     */
+    public $creator = "a1df5306355766bd2f9a64efdc089eb294be265987b3359093ae474c051d7d5a";
+
+    /**
+     * Overload of the getTotalSupply() method for fast
+     * tracking with preconfigured mosaics.
+     * 
+     * @return integer
+     */
+    public function getTotalSupply()
+    {
+        return self::TOTAL_SUPPLY;
+    }
 
     /**
      * Mutator for `mosaic` relation.
@@ -36,7 +64,7 @@ class Nemether
      */
     public function id(array $mosaicId = null)
     {
-        return new Mosaic($mosaicId ?: ["namespaceId" => "nemether", "name" => "nemether"]);
+        return new Mosaic($mosaicId ?: ["namespaceId" => "dim", "name" => "coin"]);
     }
 
     /**
@@ -49,12 +77,11 @@ class Nemether
      */
     public function levy(array $levy = null)
     {
-        $xem = new Mosaic(["namespaceId" => "nem", "name" => "xem"]);
         $data = $levy ?: [
-            "type" => self::TYPE_ABSOLUTE,
+            "type" => MosaicLevy::TYPE_PERCENTILE,
             "fee" => 10,
-            "recipient" => "NC56RYVRUPG3WRNGMVNRKODJZJNZKZYS76UAPO7K",
-            "mosaicId" => $xem->toDTO(),
+            "recipient" => "NCGGLVO2G3CUACVI5GNX2KRBJSQCN4RDL2ZWJ4DP",
+            "mosaicId" => $this->id()->toDTO(),
         ];
 
         return new MosaicLevy($data);
@@ -70,13 +97,13 @@ class Nemether
      */
     public function properties(array $properties = null)
     {
-        $data = $properties ?: [
-            ["name" => "divisibility", "value" => 6],
-            ["name" => "initialSupply", "value" => 95100000],
-            ["name" => "supplyMutable", "value" => true],
-            ["name" => "transferable", "value" => true],
+        $data = [
+            new MosaicProperty(["name" => "divisibility", "value" => 6]),
+            new MosaicProperty(["name" => "initialSupply", "value" => 9000000000]),
+            new MosaicProperty(["name" => "supplyMutable", "value" => false]),
+            new MosaicProperty(["name" => "transferable", "value" => true]),
         ];
 
-        return MosaicProperties($data);
+        return new MosaicProperties($data);
     }
 }

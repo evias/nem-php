@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models\Transaction;
@@ -34,6 +34,19 @@ class Transfer
     {
         // Transfer transaction is *default transaction type* for NEM.
         // No data needs to be added to the base transaction DTO.
+        return [];
+    }
+
+    /**
+     * The extendMeta() method must be overloaded by any Transaction Type
+     * which needs to extend the base META structure.
+     *
+     * @return array
+     */
+    public function extendMeta()
+    {
+        // Transfer transaction is *default transaction type* for NEM.
+        // No data needs to be added to the base transaction META.
         return [];
     }
 }

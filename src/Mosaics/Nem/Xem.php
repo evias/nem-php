@@ -14,17 +14,45 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Models\Mosaics\Dim;
+namespace NEM\Mosaics\Nem;
 
 use NEM\Models\MosaicDefinition;
+use NEM\Models\MosaicProperties;
+use NEM\Models\MosaicProperty;
+use NEM\Models\MosaicLevy;
+use NEM\Models\Mosaic;
 
-class Eur
+class Xem
     extends MosaicDefinition
 {
-    public $creator = "a1df5306355766bd2f9a64efdc089eb294be265987b3359093ae474c051d7d5a";
+    /**
+     * The `nem:xem` Total Coins Supply
+     * 
+     * @var integer
+     */
+    const TOTAL_SUPPLY = 8999999999;
+
+    /**
+     * The `nem:xem` mosaics creator public key
+     * in hexadecimal format.
+     * 
+     * @var string
+     */
+    public $creator = "3e82e1c1e4a75adaa3cba8c101c3cd31d9817a2eb966eb3b511fb2ed45b8e262";
+
+    /**
+     * Overload of the getTotalSupply() method for fast
+     * tracking with preconfigured mosaics.
+     * 
+     * @return integer
+     */
+    public function getTotalSupply()
+    {
+        return self::TOTAL_SUPPLY;
+    }
 
     /**
      * Mutator for `mosaic` relation.
@@ -36,7 +64,7 @@ class Eur
      */
     public function id(array $mosaicId = null)
     {
-        return new Mosaic($mosaicId ?: ["namespaceId" => "dim", "name" => "eur"]);
+        return new Mosaic(["namespaceId" => "nem", "name" => "xem"]);
     }
 
     /**
@@ -49,8 +77,7 @@ class Eur
      */
     public function levy(array $levy = null)
     {
-        $data = $levy ?: [];
-        return new MosaicLevy($data);
+        return new MosaicLevy([]); // no levy on nem:xem
     }
 
     /**
@@ -63,13 +90,13 @@ class Eur
      */
     public function properties(array $properties = null)
     {
-        $data = $properties ?: [
-            ["name" => "divisibility", "value" => 2],
-            ["name" => "initialSupply", "value" => 1000000000],
-            ["name" => "supplyMutable", "value" => true],
-            ["name" => "transferable", "value" => true],
+        $data = [
+            new MosaicProperty(["name" => "divisibility", "value" => 6]),
+            new MosaicProperty(["name" => "initialSupply", "value" => 8999999999]),
+            new MosaicProperty(["name" => "supplyMutable", "value" => false]),
+            new MosaicProperty(["name" => "transferable", "value" => true]),
         ];
 
-        return MosaicProperties($data);
+        return new MosaicProperties($data);
     }
 }

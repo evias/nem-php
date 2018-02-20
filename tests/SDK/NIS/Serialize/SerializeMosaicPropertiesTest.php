@@ -13,10 +13,10 @@
  * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Tests\SDK\Core;
+namespace NEM\Tests\SDK\NIS\Serialize;
 
 use NEM\Tests\TestCase;
 use NEM\Core\Serializer;

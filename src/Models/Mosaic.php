@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
@@ -31,6 +31,36 @@ class Mosaic
         "namespaceId",
         "name"
     ];
+
+    /**
+     * Class method to create a new `Mosaic` object from `namespace`
+     * name and `mosaic` mosaic name.
+     * 
+     * @param   string      $namespace
+     * @param   string      $mosaic
+     * @return  \NEM\Models\Mosaic
+     */
+    static public function create(string $namespace, string $mosaic = null)
+    {
+        if (empty($mosaic)) {
+            // `namespace` should contain `FQN`
+            $fullyQualifiedName = $namespace;
+            $splitRegexp = "/([^:]+):([^:]+)/";
+
+            // split with format: `namespace:mosaic`
+            $namespace = preg_replace($splitRegexp, "$1", $fullyQualifiedName);
+            $mosaic    = preg_replace($splitRegexp, "$2", $fullyQualifiedName);
+        }
+
+        if (empty($namespace) || empty($mosaic)) {
+            throw new RuntimeException("Missing namespace or mosaic name for \\NEM\\Models\\Mosaic instance.");
+        }
+
+        return new static([
+            "namespaceId" => $namespace,
+            "name" => $mosaic
+        ]);
+    }
 
     /**
      * Mosaic DTO build a package with offsets `namespaceId` and
@@ -56,10 +86,12 @@ class Mosaic
      */
     public function serialize($parameters = null)
     {
+        $nisData = $this->toDTO();
+
         // shortcuts
-        $namespace = $this->namespaceId;
-        $mosaicName = $this->name;
         $serializer = $this->getSerializer();
+        $namespace  = $nisData["namespaceId"];
+        $mosaicName = $nisData["name"];
 
         $serializedNS = $serializer->serializeString($namespace);
         $serializedMos = $serializer->serializeString($mosaicName);
@@ -74,6 +106,9 @@ class Mosaic
      */
     public function getFQN()
     {
+        if (empty($this->namespaceId) || empty($this->name))
+            return "";
+
         return sprintf("%s:%s", $this->namespaceId, $this->name);
     }
 }

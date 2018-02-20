@@ -13,11 +13,12 @@
  * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Tests\SDK\NIS;
+namespace NEM\Tests\SDK\NIS\DTO;
 
+use NEM\Tests\SDK\NIS\NISComplianceTestCase;
 use NEM\Models\Message;
 
 class DTOMessageTest
@@ -35,13 +36,19 @@ class DTOMessageTest
     {
         // null message should give empty payload
         $message = new Message(["plain" => null]);
+        $message2 = new Message(["plain" => ""]);
         $messageNIS = $message->toDTO();
+        $message2NIS = $message2->toDTO();
 
         // test Message
         $this->assertArrayHasKey("payload", $messageNIS);
         $this->assertArrayHasKey("type", $messageNIS);
+        $this->assertArrayHasKey("payload", $message2NIS);
+        $this->assertArrayHasKey("type", $message2NIS);
         $this->assertEmpty($message->toHex());
+        $this->assertEmpty($message2->toHex());
         $this->assertEquals(Message::TYPE_SIMPLE, $message->type);
+        $this->assertEquals(Message::TYPE_SIMPLE, $message2->type);
     }
 
     /**
@@ -75,15 +82,25 @@ class DTOMessageTest
     public function messageUtf8VectorsProvider()
     {
         return [
+            // test UTF-8 characters
+            ["Grégory",        "4772c3a9676f7279"],
+            ["éöäüèç^<>",      "c3a9c3b6c3a4c3bcc3a8c3a75e3c3e"],
+            ["ぁあぃいぼも",     "e38181e38182e38183e38184e381bce38282"],
+
+            // test generic texts
             ["test",           bin2hex("test")],
             ["",               bin2hex("")],
             ["Grégory",        bin2hex("Grégory")],
             ["1234567890",     bin2hex("1234567890")],
+            ["€",              bin2hex("€")],
         ];
     }
 
     /**
      * Unit test for *NIS compliant UTF-8 Message formatting*.
+     * 
+     * This test makes sure that our hexadecimal representation of
+     * messages is compliant to the core PHP implementation.
      * 
      * @dataProvider messageUtf8VectorsProvider
      * @return void
@@ -106,11 +123,18 @@ class DTOMessageTest
     {
         return [
             [bin2hex("test"),     "fe".bin2hex("test")],
+            ["d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04",
+             "fe"."d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04"],
         ];
     }
 
     /**
-     * Unit test for *NIS compliant UTF-8 Message formatting*.
+     * Unit test for *NIS compliant Hex Message formatting*.
+     * 
+     * This test makes sure that `fe` is prefixed to hexadecimal
+     * data in case it must be published as is on the blockchain.
+     * 
+     * This `fe` prefix is used for example by Apostille.
      * 
      * @dataProvider messageHexVectorsProvider
      * @return void

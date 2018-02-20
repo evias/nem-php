@@ -14,51 +14,95 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
 
 use NEM\Models\Mutators\ModelMutator;
+use NEM\Models\Mutators\CollectionMutator;
+use NEM\Models\TransactionType;
 
 class Transaction
     extends Model
 {
+    /**
+     * NEM Transaction Versions
+     * 
+     * v1 transaction cannot contain mosaics!
+     * 
+     * v1: 1744830465 (VERSION_1: MainNet)
+     * v2: 1744830466 (VERSION_2: MainNet)
+     * 
+     * @internal
+     * @var integer
+     */
+    const VERSION_1 = 0x68000000 | 1;
+    const VERSION_2 = 0x68000000 | 2;
+    const VERSION_1_TEST = 0x98000000 | 1;
+    const VERSION_2_TEST = 0x98000000 | 2;
+    const VERSION_1_MIJIN = 0x60000000 | 1;
+    const VERSION_2_MIJIN = 0x60000000 | 2;
+
+    /**
+     * List of valid Transaction Types on the NEM network.
+     * 
+     * @var array
+     */
+    static protected $validTypes = [
+        TransactionType::TRANSFER,
+        TransactionType::IMPORTANCE_TRANSFER,
+        TransactionType::MULTISIG_MODIFICATION,
+        TransactionType::MULTISIG_SIGNATURE,
+        TransactionType::MULTISIG,
+        TransactionType::PROVISION_NAMESPACE,
+        TransactionType::MOSAIC_DEFINITION,
+        TransactionType::MOSAIC_SUPPLY_CHANGE,
+    ];
+
     /**
      * List of fillable attributes
      *
      * @var array
      */
     protected $fillable = [
-        "timeStamp" => "transaction.timeStamp",
-        "amount"  => "transaction.amount",
-        "fee"  => "transaction.fee",
-        "recipient"  => "transaction.recipient",
-        "type"  => "transaction.type",
-        "deadline" => "transaction.deadline",
-        "messagePayload" => "transaction.message.payload",
-        "messageType" => "transaction.message.type",
-        "version" => "transaction.version",
-        "signer" => "transaction.signer",
-        "id" => "meta.id", 
-        "height" => "meta.height", 
-        "hash" => "meta.hash",
-        "message" => "transaction.message"
+        /**
+         Alias          =>          NIS Path
+         */
+        // NIS "meta" sub-dto
+        "id"            => "meta.id", 
+        "height"        => "meta.height", 
+        "hash"          => "meta.hash",
+        // NIS "transaction" sub-dto
+        "timeStamp"     => "transaction.timeStamp",
+        "amount"        => "transaction.amount",
+        "fee"           => "transaction.fee",
+        "recipient"     => "transaction.recipient",
+        "type"          => "transaction.type",
+        "deadline"      => "transaction.deadline",
+        "version"       => "transaction.version",
+        "signer"        => "transaction.signer",
+        "signature"     => "transaction.signature",
+        "signatures"    => "transaction.signatures",
+        "message"       => "transaction.message",
+        // NIS "transaction.message" sub-dto
+        "messagePayload"=> "transaction.message.payload",
+        "messageType"   => "transaction.message.type",
     ];
 
-    // /**
-    //  * The model instance's relations configuration
-    //  *
-    //  * @var array
-    //  */
-    // protected $relations = [
-    //     "timeStamp",
-    //     "amount",
-    //     "fee",
-    //     "recipient",
-    //     "message",
-    //     "signatures"
-    // ];
+    /**
+     * The model instance's relations configuration
+     *
+     * @var array
+     */
+    protected $relations = [
+        "timeStamp",
+        "deadline",
+        "amount",
+        "fee",
+        "recipient",
+        "message",
+    ];
 
     /**
      * The extend() method must be overloaded by any Transaction Type
@@ -118,20 +162,58 @@ class Transaction
     public function toDTO($filterByKey = null)
     {
         $baseMeta = $this->meta();
+
         $baseEntity = [
             "timeStamp" => $this->timeStamp()->toDTO(),
             "amount"    => $this->amount()->toMicro(),
             "fee"       => $this->fee()->toMicro(),
             "recipient" => $this->recipient()->address()->toClean(),
-            "type"      => (int) $this->attributes["type"],
-            "deadline"  => $this->deadline()->toDTO(),
             "message"   => $this->message()->toDTO(),
-            "version"   => (int) $this->attributes["version"],
-            "signer"    => $this->attributes["signer"],
         ];
 
+        // extend entity data in sub class
+        // @see \NEM\Models\Transaction\MosaicTransfer
         $meta = array_merge($baseMeta, $this->extendMeta());
         $entity = array_merge($baseEntity, $this->extend());
+
+        // mosaics field is used to determine the version
+        $versionByContent = !isset($entity["mosaics"]) ? self::VERSION_1 
+                                                       : self::VERSION_2;
+
+        // validate version field, should always reflect valid NIS tx version
+        $version = $this->getAttribute("version");
+        if (! $version || !in_array($version, [self::VERSION_1, self::VERSION_2])) {
+            $version = $versionByContent;
+        }
+
+        // validate transaction type, should always be a valid type
+        $type = $this->getAttribute("type");
+        if (! $type || ! in_array($type, self::$validTypes)) {
+            $type = TransactionType::TRANSFER;
+            $this->setAttribute("type", $type);
+        }
+
+        // deadline set to +1 hour if none set
+        $deadline = $this->getAttribute("deadline");
+        if (! $deadline || $deadline <= 0) {
+            $txTime = $entity["timeStamp"];
+            $deadline = $txTime + 3600;
+            $this->setAttribute("deadline", $deadline);
+        }
+
+        // do we have a signer / a signature
+        $optionals = ["signer", "signature"];
+        foreach ($optionals as $field) {
+            $data = $this->getAttribute($field);
+            if (null !== $data) {
+                $entity[$field] = $data;
+            }
+        }
+
+        // push validated input
+        $entity["type"] = $type;
+        $entity["version"] = $version;
+        $entity["deadline"] = $deadline;
 
         $toDTO = [
             "meta" => $meta,
@@ -149,8 +231,14 @@ class Transaction
      *
      * @return int
      */
-     public function timestamp($timestamp = null) {
-        return new TimeWindow(["timeStamp" => $timestamp ?: $this->getAttribute("timeStamp")]);
+     public function timestamp($timestamp = null) 
+     {
+        $ts = $timestamp ?: $this->getAttribute("timeStamp");
+        if (is_integer($ts) || $ts instanceof TimeWindow) {
+            return new TimeWindow(["timeStamp" => $ts]);
+        }
+
+        return new TimeWindow();
     }
 
     /**
@@ -158,8 +246,14 @@ class Transaction
      *
      * @return int
      */
-    public function deadline($deadline = null) {
-        return new TimeWindow(["timeStamp" => $deadline ?: $this->getAttribute("deadline")]);
+    public function deadline($deadline = null) 
+    {
+        $ts = $timestamp ?: $this->getAttribute("deadline");
+        if (is_integer($ts) || $ts instanceof TimeWindow) {
+            return new TimeWindow(["timeStamp" => $ts]);
+        }
+
+        return new TimeWindow();
     }
 
     /**
@@ -205,5 +299,16 @@ class Transaction
     {
         $messagePayload = $payload ?: $this->getAttribute("message") ?: [];
         return (new ModelMutator())->mutate("message", $messagePayload);
+    }
+
+    /**
+     * Mutator for the signatures object collection.
+     *
+     * @return \NEM\Models\ModelCollection
+     */
+    public function signatures(array $data = null)
+    {
+        $signatures = $data ?: $this->getAttribute("signatures") ?: [];
+        return (new CollectionMutator())->mutate("Transaction\\Signature", $signatures);
     }
 }

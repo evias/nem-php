@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models\Transaction;
@@ -44,9 +44,9 @@ class Signature
     {
         return [
             "otherHash" => [
-                "data" => $this->attributes["otherHash"],
+                "data" => $this->getAttribute("otherHash"),
             ],
-            "otherAccount" => $this->otherAccount()->toClean()
+            "otherAccount" => $this->otherAccount()->address()->toClean()
         ];
     }
 

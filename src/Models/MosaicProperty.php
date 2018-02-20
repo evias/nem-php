@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
@@ -41,7 +41,11 @@ class MosaicProperty
     {
         $value = (string) $this->value;
         if (in_array($this->name, ["supplyMutable", "transferable"])) {
-            $value = ((bool) $this->value) ? "true" : "false";
+            $value = ($this->value !== "false" && (bool) $this->value) ? "true" : "false";
+        }
+        elseif (empty($this->value)
+                || 0 > (int) $this->value) {
+            $value = "0";
         }
 
         return [
@@ -60,17 +64,12 @@ class MosaicProperty
      */
     public function serialize($parameters = null)
     {
+        $nisData = $this->toDTO();
+
         // shortcuts
-        $propertyName  = $this->name;
-        $propertyValue = $this->value;
         $serializer    = $this->getSerializer();
-
-        if (in_array($this->name, ["supplyMutable", "transferable"])) {
-            $propertyValue = ((bool) $propertyValue) ? "true" : "false";
-        }
-
-        $serializedName = $serializer->serializeString($propertyName);
-        $serializedValue = $serializer->serializeString($propertyValue);
+        $serializedName = $serializer->serializeString($nisData["name"]);
+        $serializedValue = $serializer->serializeString($nisData["value"]);
 
         return $serializer->aggregate($serializedName, $serializedValue);
     }

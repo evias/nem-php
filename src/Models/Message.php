@@ -14,7 +14,7 @@
  * @author     Grégory Saive <greg@evias.be>
  * @author     Robin Pedersen (https://github.com/RobertoSnap)
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
 namespace NEM\Models;
@@ -104,7 +104,7 @@ class Message
     public function toHex($prefixHexContent = false)
     {
         $chars = $this->getPlain();
-        if ($prefix && ctype_xdigit($chars)) {
+        if ($prefixHexContent && ctype_xdigit($chars)) {
             return "fe" . $chars;
         }
 

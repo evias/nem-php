@@ -13,10 +13,12 @@
  * @version    1.0.0
  * @author     Grégory Saive <greg@evias.be>
  * @license    MIT License
- * @copyright  (c) 2017, Grégory Saive <greg@evias.be>
+ * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Tests\SDK\NIS;
+namespace NEM\Tests\SDK\NIS\DTO;
+
+use NEM\Tests\SDK\NIS\NISComplianceTestCase;
 
 use NEM\Models\Account;
 use NEM\Models\Address;
@@ -189,7 +191,7 @@ class DTOAccountTest
             ["TDVA6KUEMTBMA5DVFURWCLXPOOOJEUGLGFQPM35Z", $this->mockAccounts(3, false), $this->mockAccounts(-1, false), $this->mockMultisigInfo(2, 3)],
             ["TCYUEV7UGUKIH6ZJLRR2ACNU3FFXBQN7Z4NGW3FM", $this->mockAccounts(-1, false), $this->mockAccounts(null, false), $this->mockMultisigInfo(2, 3)],
             ["TDWMSBBXGN62GCP3WYDGGR5DS353KKMZBNEZENFO", $this->mockAccounts(null, false), $this->mockAccounts(null, false), $this->mockMultisigInfo(null, null)],
-            ["TBYOFADTLLVZCTF3B5WCD7GPZGGQ3JRVYD2N76KG", $this->mockAccounts(100, false), $this->mockAccounts(50, false), $this->mockMultisigInfo(50, 100)],
+            ["TBYOFADTLLVZCTF3B5WCD7GPZGGQ3JRVYD2N76KG", $this->mockAccounts(25, false), $this->mockAccounts(50, false), $this->mockMultisigInfo(50, 100)],
             ["TCZWOCUT4RKDE6KQUJZQLCKW2THNZVJ2I222VJAQ", $this->mockAccounts(4, false), $this->mockAccounts(0, false), $this->mockMultisigInfo(2, 3)],
         ];
     }

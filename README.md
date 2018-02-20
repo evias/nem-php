@@ -363,4 +363,4 @@ Important versions listed below. Refer to the [Changelog](CHANGELOG.md) for a fu
 
 This software is released under the [MIT](LICENSE) License.
 
-© 2017 Grégory Saive <greg@evias.be>, All rights reserved.
+© 2017-2018 Grégory Saive <greg@evias.be>, All rights reserved.
