@@ -24,6 +24,8 @@ use NEM\Models\TimeWindow;
 use NEM\Models\Amount;
 use NEM\Models\Message;
 
+use DateTime;
+
 class DTOTransactionTest
     extends NISComplianceTestCase
 {
@@ -54,5 +56,118 @@ class DTOTransactionTest
         $this->assertArrayHasKey("recipient", $content);
         $this->assertArrayHasKey("type", $content);
         $this->assertArrayHasKey("message", $content);
+        $this->assertArrayHasKey("version", $content);
+    }
+
+    /**
+     * Unit test for *invalid data DTO creation*.
+     * 
+     * @dataProvider dtoContentInvalidDataVectorsProvider
+     * @depends testDTOStructure
+     * @return void
+     */
+    public function testDTOContentInvalidDataVectors(
+        $ts, $amt, $recv, $type, $version,
+        $expectAmt, $expectRecv, $expectType, $expectVersion
+    )
+    {
+        $transaction = new Transaction([
+            "timeStamp" => $ts,
+            "amount" => $amt,
+            "recipient" => $recv,
+            "type"      => $type,
+            "version"   => $version,
+        ]);
+        $transactionNIS = $transaction->toDTO();
+
+        $meta = $transactionNIS["meta"];
+        $content = $transactionNIS["transaction"];
+
+        $this->assertEquals($expectAmt, $content["amount"]);
+        $this->assertEquals($expectRecv, $content["recipient"]);
+        $this->assertEquals($expectType, $content["type"]);
+        $this->assertEquals($expectVersion, $content["version"]);
+    }
+
+    /**
+     * Data provider for the testDTOContentInvalidDataVectors()
+     * unit test.
+     * 
+     * @return array
+     */
+    public function dtoContentInvalidDataVectorsProvider()
+    {
+        return [
+            [
+                // act
+                null, -1, null, null, -1,
+                // expect 
+                0,
+                "", 
+                TransactionType::TRANSFER, 
+                Transaction::VERSION_1
+            ],
+        ];
+    }
+
+    /**
+     * Unit test for *DTO content of Transaction instances*
+     * 
+     * @dataProvider dtoContentVectorsProvider
+     * @return void
+     */
+    public function testDTOContentVectors(
+        $ts, $amt, $recv, $type, $version, $message, $signer, $signature,
+        $expectAmt, $expectRecv, $expectType, $expectMsgHex
+    )
+    {
+        $txData = [
+            "timeStamp" => $ts,
+            "amount" => $amt,
+            "recipient" => $recv,
+            "type"      => $type,
+            "version"   => $version,
+            "message"   => $message,
+        ];
+
+        if ($signer !== null)
+            $txData["signer"] = $signer;
+
+        if ($signature !== null)
+            $txData["signature"] = $signature;
+
+        $transaction = new Transaction($txData);
+        $transactionNIS = $transaction->toDTO();
+
+        $meta = $transactionNIS["meta"];
+        $content = $transactionNIS["transaction"];
+
+        $this->assertEquals($expectAmt, $content["amount"]);
+        $this->assertEquals($expectRecv, $content["recipient"]);
+        $this->assertEquals($expectType, $content["type"]);
+
+        $this->assertArrayHasKey("payload", $content["message"]);
+        $this->assertEquals($expectMsgHex, $content["message"]["payload"]);
+    }
+
+    /**
+     * Data provider for the testDTOContentVectors unit test.
+     * 
+     * @return array
+     */
+    public function dtoContentVectorsProvider()
+    {
+        return [
+            [
+                // act
+                null, 10.0, "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
+                "4100", null,
+                new Message(["plain" => "https://github.com/evias/nem-php"]), 
+                null, null,
+                // expect
+                10000000, "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
+                TransactionType::MULTISIG, bin2hex("https://github.com/evias/nem-php")
+            ],
+        ];
     }
 }
