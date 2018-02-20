@@ -36,4 +36,17 @@ class Transfer
         // No data needs to be added to the base transaction DTO.
         return [];
     }
+
+    /**
+     * The extendMeta() method must be overloaded by any Transaction Type
+     * which needs to extend the base META structure.
+     *
+     * @return array
+     */
+    public function extendMeta()
+    {
+        // Transfer transaction is *default transaction type* for NEM.
+        // No data needs to be added to the base transaction META.
+        return [];
+    }
 }

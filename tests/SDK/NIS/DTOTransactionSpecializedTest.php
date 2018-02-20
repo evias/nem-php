@@ -19,6 +19,7 @@
 namespace NEM\Tests\SDK\NIS;
 
 use NEM\Models\Transaction;
+use NEM\Models\TransactionType;
 use NEM\Models\Transaction\Transfer;
 use NEM\Models\Transaction\Multisig;
 use NEM\Models\Transaction\Signature;
@@ -35,7 +36,9 @@ class DTOTransactionSpecializedTest
     /**
      * Unit test for *DTO content of Transaction instances*
      * 
-     * @depends testDTOStructure_Base
+     * This tests the non-specialized \NEM\Models\Transaction
+     * class.
+     * 
      * @return void
      */
     public function testDTOContent_Base()
@@ -52,13 +55,104 @@ class DTOTransactionSpecializedTest
         $meta = $transactionNIS["meta"];
         $content = $transactionNIS["transaction"];
 
-        $this->assertEquals($expectAmt, $content["amount"]);
-        $this->assertEquals($expectRecv, $content["recipient"]);
+        // expected values
+        $expectAmount  = 290888;
+        $expectType    = TransactionType::TRANSFER;
+        $expectVersion = Transaction::VERSION_1;
+        $expectRecipient = "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ";
+
+        $this->assertEquals($expectAmount, $content["amount"]);
         $this->assertEquals($expectType, $content["type"]);
-        $this->assertEquals($expectVer, $content["version"]);
+        $this->assertEquals($expectVersion, $content["version"]);
+        $this->assertEquals($expectRecipient, $content["recipient"]);
 
         $this->assertArrayHasKey("message", $content);
         $this->assertArrayHasKey("payload", $content["message"]);
         $this->assertEmpty($content["message"]["payload"]);
+
+        // optional fields were not set
+        $this->assertEmpty($content["signer"]);
+        $this->assertEmpty($content["signature"]);
+
+        // test optional fields
+        $expectSigner    = "d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04";
+        $expectSignature = "772db34f606969831fb477b3faf6d25fc530e6ea99f0e839085f3313a3279a87"
+                         . "62773605114e13f949c3fd48fd058ffb6f02c258434539cb6ccc6285cea2580d";
+
+        $txData = [
+            "amount"    => 290888,
+            "recipient" => "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
+            "signer"    => $expectSigner,
+            "signature" => $expectSignature,
+        ];
+
+        $transaction = new Transaction($txData);
+        $transactionNIS = $transaction->toDTO();
+
+        $meta = $transactionNIS["meta"];
+        $content = $transactionNIS["transaction"];
+
+        $this->assertEquals($expectAmount, $content["amount"]);
+        $this->assertEquals($expectType, $content["type"]);
+        $this->assertEquals($expectVersion, $content["version"]);
+        $this->assertEquals($expectRecipient, $content["recipient"]);
+        $this->assertEquals($expectSigner, $content["signer"]);
+        $this->assertEquals($expectSignature, $content["signature"]);
+    }
+
+    /**
+     * Unit test for *DTO content of Transaction instances*
+     * 
+     * This tests the specialized \NEM\Models\Transaction\Transfer
+     * class.
+     * 
+     * @return void
+     */
+    public function testDTOContent_Transfer()
+    {
+        // test obligatory fields
+        $txData = [
+            "amount"    => 290888,
+            "recipient" => "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
+        ];
+
+        $transfer = new Transfer($txData);
+        $transferNIS = $transfer->toDTO();
+
+        $meta = $transferNIS["meta"];
+        $content = $transferNIS["transaction"];
+
+        // expected values
+        $expectAmount  = 290888;
+        $expectType    = TransactionType::TRANSFER;
+        $expectVersion = Transaction::VERSION_1;
+        $expectRecipient = "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ";
+
+        $this->assertEquals($expectAmount, $content["amount"]);
+        $this->assertEquals($expectType, $content["type"]);
+        $this->assertEquals($expectVersion, $content["version"]);
+        $this->assertEquals($expectRecipient, $content["recipient"]);
+
+        $this->assertArrayHasKey("message", $content);
+        $this->assertArrayHasKey("payload", $content["message"]);
+        $this->assertEmpty($content["message"]["payload"]);
+
+        // test empty fields
+        $transfer = new Transfer();
+        $transferNIS = $transfer->toDTO();
+
+        $meta = $transferNIS["meta"];
+        $content = $transferNIS["transaction"];
+
+        // expected values
+        $expectAmount  = 0;
+        $expectType    = TransactionType::TRANSFER;
+        $expectVersion = Transaction::VERSION_1;
+        $expectRecipient = "";
+
+        $this->assertEquals($expectAmount, $content["amount"]);
+        $this->assertEquals($expectType, $content["type"]);
+        $this->assertEquals($expectVersion, $content["version"]);
+        $this->assertEquals($expectRecipient, $content["recipient"]);
     }
 }

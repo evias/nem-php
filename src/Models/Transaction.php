@@ -20,6 +20,7 @@
 namespace NEM\Models;
 
 use NEM\Models\Mutators\ModelMutator;
+use NEM\Models\Mutators\CollectionMutator;
 use NEM\Models\TransactionType;
 
 class Transaction
@@ -65,35 +66,44 @@ class Transaction
      * @var array
      */
     protected $fillable = [
-        "timeStamp" => "transaction.timeStamp",
-        "amount"  => "transaction.amount",
-        "fee"  => "transaction.fee",
-        "recipient"  => "transaction.recipient",
-        "type"  => "transaction.type",
-        "deadline" => "transaction.deadline",
-        "messagePayload" => "transaction.message.payload",
-        "messageType" => "transaction.message.type",
-        "version" => "transaction.version",
-        "signer" => "transaction.signer",
-        "id" => "meta.id", 
-        "height" => "meta.height", 
-        "hash" => "meta.hash",
-        "message" => "transaction.message"
+        /**
+         Alias          =>          NIS Path
+         */
+        // NIS "meta" sub-dto
+        "id"            => "meta.id", 
+        "height"        => "meta.height", 
+        "hash"          => "meta.hash",
+        // NIS "transaction" sub-dto
+        "timeStamp"     => "transaction.timeStamp",
+        "amount"        => "transaction.amount",
+        "fee"           => "transaction.fee",
+        "recipient"     => "transaction.recipient",
+        "type"          => "transaction.type",
+        "deadline"      => "transaction.deadline",
+        "version"       => "transaction.version",
+        "signer"        => "transaction.signer",
+        "signature"     => "transaction.signature",
+        "signatures"    => "transaction.signatures",
+        "message"       => "transaction.message",
+        // NIS "transaction.message" sub-dto
+        "messagePayload"=> "transaction.message.payload",
+        "messageType"   => "transaction.message.type",
     ];
 
-    // /**
-    //  * The model instance's relations configuration
-    //  *
-    //  * @var array
-    //  */
-    // protected $relations = [
-    //     "timeStamp",
-    //     "amount",
-    //     "fee",
-    //     "recipient",
-    //     "message",
-    //     "signatures"
-    // ];
+    /**
+     * The model instance's relations configuration
+     *
+     * @var array
+     */
+    protected $relations = [
+        "timeStamp",
+        "deadline",
+        "amount",
+        "fee",
+        "recipient",
+        "message",
+        "signatures"
+    ];
 
     /**
      * The extend() method must be overloaded by any Transaction Type
@@ -288,5 +298,16 @@ class Transaction
     {
         $messagePayload = $payload ?: $this->getAttribute("message") ?: [];
         return (new ModelMutator())->mutate("message", $messagePayload);
+    }
+
+    /**
+     * Mutator for the signatures object collection.
+     *
+     * @return \NEM\Models\ModelCollection
+     */
+    public function signatures(array $data = null)
+    {
+        $signatures = $data ?: $this->getAttribute("signatures") ?: [];
+        return (new CollectionMutator())->mutate("Transaction\\Signature", $signatures);
     }
 }
