@@ -22,14 +22,6 @@ use NEM\Tests\SDK\NIS\NISComplianceTestCase;
 use NEM\Models\Transaction;
 use NEM\Models\TransactionType;
 use NEM\Models\Transaction\Transfer;
-use NEM\Models\Transaction\Multisig;
-use NEM\Models\Transaction\Signature;
-use NEM\Models\Transaction\MosaicTransfer;
-use NEM\Models\Transaction\ImportanceTransfer;
-use NEM\Models\Transaction\MosaicDefinition;
-use NEM\Models\Transaction\MosaicSupplyChange;
-use NEM\Models\Transaction\MultisigAggregateModification;
-use NEM\Models\Transaction\NamespaceProvision;
 
 class DTOTransactionSpecializedTest
     extends NISComplianceTestCase
@@ -74,19 +66,26 @@ class DTOTransactionSpecializedTest
         // optional fields were not set
         $this->assertEmpty($content["signer"]);
         $this->assertEmpty($content["signature"]);
+    }
 
+    public function testDTOOptionalFields()
+    {
         // test optional fields
+
         $expectSigner    = "d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04";
         $expectSignature = "772db34f606969831fb477b3faf6d25fc530e6ea99f0e839085f3313a3279a87"
                          . "62773605114e13f949c3fd48fd058ffb6f02c258434539cb6ccc6285cea2580d";
+        $expectAmount    = 0;
+        $expectRecipient = "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ";
+        $expectType      = TransactionType::TRANSFER;
+        $expectVersion   = Transaction::VERSION_1;
 
         $txData = [
-            "amount"    => 290888,
-            "recipient" => "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
+            "amount"    => 0,
+            "recipient" => $expectRecipient,
             "signer"    => $expectSigner,
             "signature" => $expectSignature,
         ];
-
         $transaction = new Transaction($txData);
         $transactionNIS = $transaction->toDTO();
 

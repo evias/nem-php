@@ -44,9 +44,9 @@ class Signature
     {
         return [
             "otherHash" => [
-                "data" => $this->attributes["otherHash"],
+                "data" => $this->getAttribute("otherHash"),
             ],
-            "otherAccount" => $this->otherAccount()->toClean()
+            "otherAccount" => $this->otherAccount()->address()->toClean()
         ];
     }
 

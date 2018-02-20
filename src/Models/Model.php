@@ -180,7 +180,7 @@ class Model
      * @internal
      * @var array
      */
-    private $related = [];
+    protected $related = [];
 
     /**
      * Construct a Model instance with attributes data.
@@ -190,6 +190,12 @@ class Model
      */
     public function __construct($attributes = [])
     {
+        // merge `fillables` with `append` definition to obtain
+        // all the extensions' field names and aliases.
+        $this->fillable = array_merge(
+            $this->fillable ?: [], 
+            $this->appends ?: []);
+
         if (is_array($attributes) && !empty($attributes)) {
             // assign attributes
             $this->setAttributes($attributes);
@@ -401,10 +407,11 @@ class Model
             return isset($this->dotAttributes[$alias]) ? $this->castValue($alias, $this->dotAttributes[$alias], $doCast) : null;
 
         if ($this->related[$alias] instanceof Model) {
-            // getAttribute should return DTO data.
+            // getAttribute should return DTO data (not the object).
             return $this->attributes[$alias];
         }
         elseif ($this->related[$alias] instanceof ModelCollection) {
+            // getAttribute should return DTO data (not the collection).
             return $this->related[$alias]->toDTO();
         }
 
@@ -642,7 +649,7 @@ class Model
         }
 
         if (method_exists($this, $alias)) {
-            // Use relationship *method*
+            // Use relationship *method* (prevail)
             $related = $this->$alias($data);
             return $related;
         }

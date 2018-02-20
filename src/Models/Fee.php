@@ -20,7 +20,11 @@
 namespace NEM\Models;
 
 use NEM\Models\Transaction;
-use NEM\Models\Mosaics\Registry;
+use NEM\Mosaics\Registry;
+use NEM\Models\MosaicDefinition;
+use NEM\Models\MosaicDefinitions;
+use NEM\Models\MosaicAttachment;
+use NEM\Models\MosaicAttachments;
 
 use RuntimeException;
 
@@ -138,7 +142,11 @@ class Fee
 
         // version 2 transaction fees prevail over version 1 (no mosaics)
         if ($transaction instanceof \NEM\Models\Transaction\MosaicTransfer) {
-            $contentFee = self::calculateForMosaics($transaction->mosaics(), $transaction->amount()->toMicro());
+            $definitions = MosaicDefinitions::create();
+            $contentFee = self::calculateForMosaics(
+                                    $definitions,
+                                    $transaction->mosaics(),
+                                    $transaction->amount()->toMicro());
         }
 
         return floor(($msgFee + $contentFee) * Amount::XEM);
@@ -195,6 +203,11 @@ class Fee
 
         $totalFee = 0;
         foreach ($attachments as $attachment) {
+            if (is_array($attachment)) {
+                // collection contains arrays instead of MosaicAttachment objects
+                $attachment = new MosaicAttachment($attachment);
+            }
+
             $mosaicFQN = $attachment->mosaicId()->getFQN();
 
             // in case user didnt provide the definition, try to

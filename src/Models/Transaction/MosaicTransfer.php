@@ -19,6 +19,12 @@
  */
 namespace NEM\Models\Transaction;
 
+use NEM\Models\Mutators\CollectionMutator;
+use NEM\Models\Mosaic;
+use NEM\Models\MosaicAttachment;
+use NEM\Models\MosaicAttachments;
+use NEM\Models\MosaicDefinition;
+
 class MosaicTransfer
     extends Transfer
 {
@@ -28,7 +34,7 @@ class MosaicTransfer
      * @var array
      */
     protected $appends = [
-        "mosaics",
+        "mosaics" => "transaction.mosaics",
     ];
 
     /**
@@ -40,7 +46,7 @@ class MosaicTransfer
     public function extend() 
     {
         return [
-            "mosaics" => $this->mosaics(),
+            "mosaics" => $this->mosaics()->toDTO(),
         ];
     }
 
@@ -55,7 +61,51 @@ class MosaicTransfer
      */
     public function mosaics(array $data = null)
     {
-        $attachments = $data ?: $this->getAttribute("mosaics") ?: [];
-        return (new CollectionMutator())->mutate("mosaicAttachments", $attachments);
+        return new MosaicAttachments($data ?: $this->getAttribute("mosaics"));
+    }
+
+    /**
+     * Helper to easily attach mosaics to the attachments.
+     * 
+     * @param   string|\NEM\Models\Mosaic|\NEM\Models\MosaicAttachment  $mosaic
+     * @param   null|integer                                            $quantity
+     * @return \NEM\Models\Transaction\MosaicTransfer
+     */
+    public function attachMosaic($mosaic, $quantity = null)
+    {
+        $attachment = $this->prepareAttachment($mosaic);
+        $actualAmt  = $attachment->quantity ?: $quantity ?: 0;
+        $attachment->setAttribute("quantity", $actualAmt);
+
+        // push to internal storage
+        $attachments = $this->getAttribute("mosaics") ?: [];
+        array_push($attachments, $attachment);
+
+        $this->setAttribute("mosaics", $attachments);
+        return $this;
+    }
+
+    /**
+     * Helper to prepare a MosaicAttachment object out of any one of string,
+     */
+    protected function prepareAttachment($mosaic)
+    {
+        if ($mosaic instanceof MosaicAttachment) {
+            return $mosaic;
+        }
+        elseif ($mosaic instanceof MosaicAttachments) {
+            return $mosaic->shift();
+        }
+        elseif ($mosaic instanceof Mosaic) {
+            return new MosaicAttachment(["mosaicId" => $mosaic->toDTO()]);
+        }
+        elseif ($mosaic instanceof MosaicDefinition) {
+            return new MosaicAttachment(["mosaicId" => $mosaic->id()->toDTO()]);
+        }
+        elseif (is_string($mosaic)) {
+            return $this->prepareAttachment(Mosaic::create($mosaic));
+        }
+
+        throw new InvalidArgumentException("Unrecognized mosaic parameter type passed to \\NEM\\Models\\Transaction\\MosaicTransfer::attachMosaic().");
     }
 }

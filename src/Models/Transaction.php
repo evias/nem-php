@@ -102,7 +102,6 @@ class Transaction
         "fee",
         "recipient",
         "message",
-        "signatures"
     ];
 
     /**
@@ -172,12 +171,14 @@ class Transaction
             "message"   => $this->message()->toDTO(),
         ];
 
+        // extend entity data in sub class
+        // @see \NEM\Models\Transaction\MosaicTransfer
         $meta = array_merge($baseMeta, $this->extendMeta());
         $entity = array_merge($baseEntity, $this->extend());
 
         // mosaics field is used to determine the version
-        $versionByContent = empty($entity["mosaics"]) ? self::VERSION_1 
-                                                      : self::VERSION_2;
+        $versionByContent = !isset($entity["mosaics"]) ? self::VERSION_1 
+                                                       : self::VERSION_2;
 
         // validate version field, should always reflect valid NIS tx version
         $version = $this->getAttribute("version");

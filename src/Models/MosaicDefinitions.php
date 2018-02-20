@@ -35,6 +35,10 @@ class MosaicDefinitions
      */
     static public function create()
     {
+        //XXX add multi parameters to pass already 
+        //    fetched mosaic definitions
+
+
         //XXX check and test whether we want to include *all* preconfigured
         //    classes or do that on a dynamic level
         return new static([
