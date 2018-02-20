@@ -16,8 +16,9 @@
  * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Tests\SDK\NIS;
+namespace NEM\Tests\SDK\NIS\DTO;
 
+use NEM\Tests\SDK\NIS\NISComplianceTestCase;
 use NEM\Models\TimeWindow;
 
 use DateTime;

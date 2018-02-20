@@ -16,7 +16,7 @@
  * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Tests\SDK\Core;
+namespace NEM\Tests\SDK\NIS\Serialize;
 
 use NEM\Tests\TestCase;
 use NEM\Core\Serializer;
