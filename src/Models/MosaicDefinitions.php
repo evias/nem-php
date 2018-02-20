@@ -20,6 +20,7 @@
 namespace NEM\Models;
 
 use \NEM\Models\Mosaic;
+use \NEM\Models\MosaicDefinition;
 use \NEM\Mosaics\Registry;
 
 class MosaicDefinitions

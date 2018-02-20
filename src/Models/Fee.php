@@ -143,10 +143,14 @@ class Fee
         // version 2 transaction fees prevail over version 1 (no mosaics)
         if ($transaction instanceof \NEM\Models\Transaction\MosaicTransfer) {
             $definitions = MosaicDefinitions::create();
-            $contentFee = self::calculateForMosaics(
+            $mosaicsFee = self::calculateForMosaics(
                                     $definitions,
                                     $transaction->mosaics(),
                                     $transaction->amount()->toMicro());
+
+            if ($mosaicsFee > 0) {
+                $contentFee = $mosaicsFee;
+            }
         }
 
         return floor(($msgFee + $contentFee) * Amount::XEM);
@@ -261,7 +265,7 @@ class Fee
      * @param   string     $message
      * @return  \NEM\Models\Fee
      */
-    static public function calculateForXEM($amountXEM = Amount::XEM)
+    static public function calculateForXEM($amountXEM = 1)
     {
         $fee = floor(max([1, $amountXEM / 10000]));
         return $fee > self::MAX_AMOUNT_FEE ? self::MAX_AMOUNT_FEE : $fee;

@@ -248,7 +248,7 @@ class Transaction
      */
     public function deadline($deadline = null) 
     {
-        $ts = $timestamp ?: $this->getAttribute("deadline");
+        $ts = $deadline ?: $this->getAttribute("deadline");
         if (is_integer($ts) || $ts instanceof TimeWindow) {
             return new TimeWindow(["timeStamp" => $ts]);
         }
@@ -285,7 +285,7 @@ class Transaction
     {
         $amount = $fee ?: $this->getAttribute("fee");
         if (!$amount)
-            $amount = Fee::calculateForTransaction($this);
+            $amount = (int) Fee::calculateForTransaction($this);
 
         return new Fee(["amount" => $amount]);
     }

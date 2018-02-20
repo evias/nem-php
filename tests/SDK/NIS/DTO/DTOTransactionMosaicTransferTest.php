@@ -20,11 +20,14 @@ namespace NEM\Tests\SDK\NIS\DTO;
 
 use NEM\Tests\SDK\NIS\NISComplianceTestCase;
 use NEM\Models\Transaction;
+use NEM\Models\Fee;
+use NEM\Models\Amount;
 use NEM\Models\MosaicAttachment;
 use NEM\Models\MosaicAttachments;
 use NEM\Mosaics\Dim\Coin;
 use NEM\Models\TransactionType;
 use NEM\Models\Transaction\MosaicTransfer;
+use NEM\Models\Transaction\Transfer;
 
 class DTOTransactionMosaicTransferTest
     extends NISComplianceTestCase
@@ -123,6 +126,7 @@ class DTOTransactionMosaicTransferTest
      * Unit test for *attachMosaic function should attach a mosaic
      * to the attachments collection*.
      * 
+     * @depends testDTOStructure
      * @return void
      */
     public function testAttachMosaicPushesToAttachments()
@@ -144,5 +148,76 @@ class DTOTransactionMosaicTransferTest
         $transaction->attachMosaic($attachDim);
 
         $this->assertEquals(1, $transaction->mosaics()->count());
+
+        $attachmentsNIS = $transaction->mosaics()->toDTO();
+
+        $this->assertCount(1, $attachmentsNIS);
+        $this->assertArrayHasKey("mosaicId", $attachmentsNIS[0]);
+        $this->assertArrayHasKey("quantity", $attachmentsNIS[0]);
+
+        $this->assertEquals(100, $attachmentsNIS[0]["quantity"]);
+
+        $mosaic = $attachmentsNIS[0]["mosaicId"];
+        $this->assertArrayHasKey("namespaceId", $mosaic);
+        $this->assertArrayHasKey("name", $mosaic);
+
+        $this->assertEquals("dim", $mosaic["namespaceId"]);
+        $this->assertEquals("coin", $mosaic["name"]);
+    }
+
+    /**
+     * Unit test for *fee change corresponding to the Transaction
+     * specialization*, here MosaicTransfer.
+     * 
+     * @return void
+     */
+    public function testMosaicTransferFees()
+    {
+        $normalTransfer = new Transfer();
+        $mosaicTransfer = new MosaicTransfer();
+
+        $normalNIS = $normalTransfer->toDTO();
+        $mosaicNIS = $mosaicTransfer->toDTO();
+
+        // if no data is set, the fee will be the same
+        $this->assertEquals($normalNIS["transaction"]["fee"], $mosaicNIS["transaction"]["fee"]);
+
+        // add attachments
+        $mosaicTransfer->attachMosaic("dim:coin", 29);
+        $mosaicTransfer->attachMosaic("nem:xem", 8);
+
+        // now should contain mosaics
+        $mosaicNIS = $mosaicTransfer->toDTO();
+        $metaTx    = $mosaicNIS["meta"];
+        $contentTx = $mosaicNIS["transaction"];
+
+        // NIS fee is `count_attachments * fee_factor`
+        $expectFee = 2 * Fee::FEE_FACTOR * Amount::XEM; // 0.10 XEM
+
+        $this->assertArrayHasKey("mosaics", $contentTx);
+        $this->assertNotEmpty($contentTx["mosaics"]);
+
+        $this->assertNotEquals($normalNIS["transaction"]["fee"], $contentTx["fee"]);
+        $this->assertEquals($expectFee, $contentTx["fee"]);
+
+        // one more mosaic to be sure nothing else triggers the fee change
+        $mosaicTransfer_2 = new MosaicTransfer();
+        $mosaicTransfer_2->attachMosaic("dim:coin", 29);
+        $mosaicTransfer_2->attachMosaic("nem:xem", 8);
+        $mosaicTransfer_2->attachMosaic("dim:token", 10);
+
+        // NIS fee is `count_attachments * fee_factor`
+        $expectFee_2 = 3 * Fee::FEE_FACTOR * Amount::XEM;
+
+        // get content transcribed
+        $mosaicNIS_2 = $mosaicTransfer_2->toDTO();
+        $metaTx_2    = $mosaicNIS_2["meta"];
+        $contentTx_2 = $mosaicNIS_2["transaction"];
+
+        $this->assertArrayHasKey("mosaics", $contentTx_2);
+        $this->assertNotEmpty($contentTx_2["mosaics"]);
+
+        $this->assertNotEquals($contentTx["fee"], $contentTx_2["fee"]);
+        $this->assertEquals($expectFee_2, $contentTx_2["fee"]);
     }
 }
