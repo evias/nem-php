@@ -22,19 +22,28 @@ namespace NEM\Models\Transaction;
 use NEM\Models\Transaction;
 use NEM\Models\TransactionType;
 use NEM\Models\Fee;
+use NEM\Models\Mosaic;
 
 class MosaicSupplyChange
     extends Transaction
 {
+    /**
+     * NIS Mosaic Supply Types
+     * 
+     * @var integer
+     */
+    const TYPE_INCREASE = 1;
+    const TYPE_DECREASE = 2;
+
     /**
      * List of additional fillable attributes
      *
      * @var array
      */
     protected $appends = [
-        "mosaicId",
-        "supplyType",
-        "delta",
+        "mosaicId"      => "transaction.mosaicId",
+        "supplyType"    => "transaction.supplyType",
+        "delta"         => "transaction.delta",
     ];
 
     /**
@@ -45,10 +54,21 @@ class MosaicSupplyChange
      */
     public function extend() 
     {
+        // supply type validation
+        $type = $this->getAttribute("supplyType");
+        $validTypes = [self::TYPE_INCREASE, self::TYPE_DECREASE];
+        if (! $type || ! in_array($type, $validTypes)) {
+            $type = self::TYPE_INCREASE;
+            $this->setAttribute("supplyType", $type);
+        }
+
+        // always positive delta
+        $delta = abs($this->delta ?: 0);
+
         return [
-            "mosaicId" => $this->mosaic()->toDTO(),
-            "supplyType" => $this->supplyType,
-            "delta" => $this->delta,
+            "mosaicId" => $this->mosaicId()->toDTO(),
+            "supplyType" => $type,
+            "delta" => $delta,
             // transaction type specialization
             "type" => TransactionType::MOSAIC_SUPPLY_CHANGE,
         ];
@@ -66,6 +86,22 @@ class MosaicSupplyChange
     }
 
     /**
+     * Overload the constructor to set specialized casts.
+     *
+     * @see \NEM\Models\Model
+     * @param   array   $attributes         Associative array where keys are attribute names and values are attribute values
+     * @return  void
+     */
+    public function __construct($attributes = [])
+    {
+        parent::__construct($attributes);
+
+        // configure casts
+        $this->casts["supplyType"] = "int";
+        $this->casts["delta"] = "int";
+    }
+
+    /**
      * Mutator for `mosaic` relation.
      *
      * This will return a NIS compliant [MosaicId](https://bob.nem.ninja/docs/#mosaicId) object. 
@@ -73,7 +109,7 @@ class MosaicSupplyChange
      * @param   array   $mosaidId       Array should contain offsets `namespaceId` and `name`.
      * @return  \NEM\Models\Mosaic
      */
-    public function mosaic(array $mosaicId = null)
+    public function mosaicId(array $mosaicId = null)
     {
         return new Mosaic($mosaicId ?: $this->getAttribute("mosaicId"));
     }

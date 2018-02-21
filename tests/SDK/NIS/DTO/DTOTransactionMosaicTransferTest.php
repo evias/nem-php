@@ -22,9 +22,9 @@ use NEM\Tests\SDK\NIS\NISComplianceTestCase;
 use NEM\Models\Transaction;
 use NEM\Models\Fee;
 use NEM\Models\Amount;
+use NEM\Models\Mosaic;
 use NEM\Models\MosaicAttachment;
 use NEM\Models\MosaicAttachments;
-use NEM\Mosaics\Dim\Coin;
 use NEM\Models\TransactionType;
 use NEM\Models\Transaction\MosaicTransfer;
 use NEM\Models\Transaction\Transfer;
@@ -68,7 +68,10 @@ class DTOTransactionMosaicTransferTest
     {
         // test obligatory fields
         $attachDim = new MosaicAttachment([
-            "mosaicId" => (new Coin())->id()->toDTO(),
+            "mosaicId" => (new Mosaic([
+                "namespaceId" => "dim",
+                "name" => "coin"
+            ]))->toDTO(),
             "quantity" => 100,
         ]);
 
@@ -113,7 +116,10 @@ class DTOTransactionMosaicTransferTest
     {
         // test obligatory fields
         $attachDim = new MosaicAttachment([
-            "mosaicId" => (new Coin())->id()->toDTO(),
+            "mosaicId" => (new Mosaic([
+                "namespaceId" => "dim",
+                "name" => "coin"
+            ]))->toDTO(),
             "quantity" => 100,
         ]);
 
@@ -126,10 +132,12 @@ class DTOTransactionMosaicTransferTest
 
         $attachmentsNIS = $transaction->mosaics()->toDTO();
 
+        // test internal attachment storage
         $this->assertCount(1, $attachmentsNIS);
         $this->assertArrayHasKey("mosaicId", $attachmentsNIS[0]);
         $this->assertArrayHasKey("quantity", $attachmentsNIS[0]);
 
+        // test content
         $this->assertEquals(100, $attachmentsNIS[0]["quantity"]);
 
         $mosaic = $attachmentsNIS[0]["mosaicId"];

@@ -23,7 +23,6 @@ use NEM\Models\TransactionType;
 use NEM\Models\Transaction;
 use NEM\Models\Fee;
 use NEM\Models\Amount;
-use NEM\Models\Transaction\Transfer;
 use NEM\Models\Transaction\ImportanceTransfer;
 
 class DTOTransactionImportanceTransferTest
@@ -36,7 +35,7 @@ class DTOTransactionImportanceTransferTest
      */
     public function testDTODefaultValues()
     {
-        $transaction = new ImportanceTransfer($txData);
+        $transaction = new ImportanceTransfer();
         $transactionNIS = $transaction->toDTO();
         $meta    = $transactionNIS["meta"];
         $content = $transactionNIS["transaction"];
@@ -45,7 +44,11 @@ class DTOTransactionImportanceTransferTest
         $this->assertArrayHasKey("mode", $content);
 
         // mode has a default value
-        $this->assertEquals(ImportanceTransfer::MODE_ACTIVATE, $content["mode"]);
+        $expectType = TransactionType::IMPORTANCE_TRANSFER;
+        $expectMode = ImportanceTransfer::MODE_ACTIVATE;
+
+        $this->assertEquals($expectType, $content["type"]);
+        $this->assertEquals($expectMode, $content["mode"]);
     }
 
     /**
@@ -86,13 +89,11 @@ class DTOTransactionImportanceTransferTest
      */
     public function testImportanceTransferFees()
     {
-        $normalTransfer = new Transfer();
         $importanceTransfer = new ImportanceTransfer();
-
-        $normalNIS = $normalTransfer->toDTO();
         $importanceNIS = $importanceTransfer->toDTO();
+        $contentTx = $importanceNIS["transaction"];
 
         // if no data is set, the fee will be the same
-        $this->assertEquals(Fee::IMPORTANCE_TRANSFER, $importanceNIS["transaction"]["fee"]);
+        $this->assertEquals(Fee::IMPORTANCE_TRANSFER, $contentTx["fee"]);
     }
 }
