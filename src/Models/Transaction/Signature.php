@@ -20,6 +20,7 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\TransactionType;
 use NEM\Models\Fee;
 
 class Signature
@@ -47,7 +48,9 @@ class Signature
             "otherHash" => [
                 "data" => $this->getAttribute("otherHash"),
             ],
-            "otherAccount" => $this->otherAccount()->address()->toClean()
+            "otherAccount" => $this->otherAccount()->address()->toClean(),
+            // transaction type specialization
+            "type" => TransactionType::MULTISIG_SIGNATURE,
         ];
     }
 

@@ -20,6 +20,7 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\TransactionType;
 use NEM\Models\Fee;
 
 class MosaicSupplyChange
@@ -48,6 +49,8 @@ class MosaicSupplyChange
             "mosaicId" => $this->mosaic()->toDTO(),
             "supplyType" => $this->supplyType,
             "delta" => $this->delta,
+            // transaction type specialization
+            "type" => TransactionType::MOSAIC_SUPPLY_CHANGE,
         ];
     }
 

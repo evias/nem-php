@@ -39,33 +39,19 @@ class DTOTransactionMosaicTransferTest
      */
     public function testDefaultValuesForMosaicTransfer()
     {
-        $txData = [
-            "amount"    => 0,
-            "recipient" => "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
-        ];
-
-        $transaction = new MosaicTransfer($txData);
+        $transaction = new MosaicTransfer();
         $transactionNIS = $transaction->toDTO();
 
         $meta = $transactionNIS["meta"];
         $content = $transactionNIS["transaction"];
 
         // expected *default* values
-        $expectAmount  = 0;
         $expectType    = TransactionType::TRANSFER;
         $expectVersion = Transaction::VERSION_2; // MOSAIC TRANSFER
-        $expectRecipient = "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ";
 
         // base transaction details test
-        $this->assertEquals($expectAmount, $content["amount"]);
         $this->assertEquals($expectType, $content["type"]);
         $this->assertEquals($expectVersion, $content["version"]);
-        $this->assertEquals($expectRecipient, $content["recipient"]);
-
-        // message field empty but present
-        $this->assertArrayHasKey("message", $content);
-        $this->assertArrayHasKey("payload", $content["message"]);
-        $this->assertEmpty($content["message"]["payload"]);
 
         // mosaics field should always be returned
         $this->assertArrayHasKey("mosaics", $content);
@@ -87,8 +73,6 @@ class DTOTransactionMosaicTransferTest
         ]);
 
         $txData = [
-            "amount"    => 0,
-            "recipient" => "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
             "mosaics"   => (new MosaicAttachments([$attachDim]))->toDTO(),
         ];
 
@@ -134,13 +118,8 @@ class DTOTransactionMosaicTransferTest
         ]);
 
         // intentionally exclude "mosaics" field data.
-        $txData = [
-            "amount"    => 0,
-            "recipient" => "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
-        ];
-
         // use attachMosaic to test behaviour
-        $transaction = new MosaicTransfer($txData);
+        $transaction = new MosaicTransfer();
         $transaction->attachMosaic($attachDim);
 
         $this->assertEquals(1, $transaction->mosaics()->count());

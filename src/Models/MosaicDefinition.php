@@ -112,7 +112,7 @@ class MosaicDefinition
      */
     public function id(array $mosaicId = null)
     {
-        return new Mosaic($mosaicId ?: $this->getAttribute("mosaicId"));
+        return new Mosaic($mosaicId ?: $this->getAttribute("id"));
     }
 
     /**

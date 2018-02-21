@@ -20,6 +20,7 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\TransactionType;
 use NEM\Models\Fee;
 
 class MultisigAggregateModification
@@ -49,6 +50,8 @@ class MultisigAggregateModification
             "minCosignatories" => [
                 "relativeChange" => $this->relativeChange
             ],
+            // transaction type specialization
+            "type" => TransactionType::MULTISIG_MODIFICATION,
         ];
     }
 

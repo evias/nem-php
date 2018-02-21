@@ -20,6 +20,7 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\TransactionType;
 use NEM\Models\Fee;
 
 class NamespaceProvision
@@ -49,6 +50,8 @@ class NamespaceProvision
             "rentalFee" => empty($this->parent) ? Fee::ROOT_PROVISION_NAMESPACE : Fee::SUB_PROVISION_NAMESPACE,
             "parent" => $this->parent,
             "newPart" => $this->newPart,
+            // transaction type specialization
+            "type" => TransactionType::PROVISION_NAMESPACE,
         ];
     }
 

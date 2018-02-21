@@ -20,6 +20,7 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\TransactionType;
 use NEM\Models\Account;
 use NEM\Models\Fee;
 
@@ -41,7 +42,7 @@ class ImportanceTransfer
      */
     protected $appends = [
         "remoteAccount" => "transaction.remoteAccount",
-        "mode" => "transaction.mode",
+        "mode"          => "transaction.mode",
     ];
 
     /**
@@ -52,9 +53,18 @@ class ImportanceTransfer
      */
     public function extend() 
     {
+        // set default mode in case its invalid
+        $mode = $this->getAttribute("mode");
+        if (! $mode || ! in_array($mode, [self::MODE_ACTIVATE, self::MODE_DEACTIVATE])) {
+            $mode = self::MODE_ACTIVATE;
+            $this->setAttribute("mode", $mode);
+        }
+
         return [
             "remoteAccount" => $this->remoteAccount()->publicKey,
             "mode" => $this->mode,
+            // transaction type specialization
+            "type"      => TransactionType::IMPORTANCE_TRANSFER,
         ];
     }
 

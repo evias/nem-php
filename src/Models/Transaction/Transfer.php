@@ -20,6 +20,7 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\TransactionType;
 use NEM\Models\Fee;
 
 class Transfer
@@ -33,9 +34,13 @@ class Transfer
      */
     public function extend() 
     {
-        // Transfer transaction is *default transaction type* for NEM.
-        // No data needs to be added to the base transaction DTO.
-        return [];
+        return [
+            "amount"    => $this->amount()->toMicro(),
+            "recipient" => $this->recipient()->address()->toClean(),
+            "message"   => $this->message()->toDTO(),
+            // transaction type specialization
+            "type"      => TransactionType::TRANSFER,
+        ];
     }
 
     /**

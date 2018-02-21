@@ -22,6 +22,13 @@ namespace NEM\Models;
 use NEM\Models\Mutators\ModelMutator;
 use NEM\Models\Mutators\CollectionMutator;
 use NEM\Models\TransactionType;
+use NEM\Models\Transaction\Transfer;
+use NEM\Models\Transaction\Signature;
+use NEM\Models\TimeWindow;
+use NEM\Models\Amount;
+use NEM\Models\Fee;
+use NEM\Models\Account;
+use NEM\Models\Message;
 
 class Transaction
     extends Model
@@ -105,6 +112,18 @@ class Transaction
     ];
 
     /**
+     * List of automatic *value casts*.
+     *
+     * @var array
+     */
+    protected $casts = [
+        "id"        => "int",
+        "height"    => "int",
+        "type"      => "int",
+        "version"   => "int",
+    ];
+
+    /**
      * The extend() method must be overloaded by any Transaction Type
      * which needs to extend the base DTO structure.
      *
@@ -179,10 +198,7 @@ class Transaction
 
         $baseEntity = [
             "timeStamp" => $this->timeStamp()->toDTO(),
-            "amount"    => $this->amount()->toMicro(),
             "fee"       => $this->fee()->toMicro(),
-            "recipient" => $this->recipient()->address()->toClean(),
-            "message"   => $this->message()->toDTO(),
         ];
 
         // extend entity data in sub class
@@ -201,7 +217,7 @@ class Transaction
         }
 
         // validate transaction type, should always be a valid type
-        $type = $this->getAttribute("type");
+        $type = $this->getAttribute("type") ?: (isset($entity["type"]) ? $entity["type"] : null);
         if (! $type || ! in_array($type, self::$validTypes)) {
             $type = TransactionType::TRANSFER;
             $this->setAttribute("type", $type);
@@ -215,7 +231,7 @@ class Transaction
             $this->setAttribute("deadline", $deadline);
         }
 
-        // do we have a signer / a signature
+        // do we have optional fields
         $optionals = ["signer", "signature"];
         foreach ($optionals as $field) {
             $data = $this->getAttribute($field);
@@ -311,8 +327,8 @@ class Transaction
      */
     public function message($payload = null)
     {
-        $messagePayload = $payload ?: $this->getAttribute("message") ?: [];
-        return (new ModelMutator())->mutate("message", $messagePayload);
+        $dto = $payload ?: $this->getAttribute("message") ?: [];
+        return new Message($dto);
     }
 
     /**

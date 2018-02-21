@@ -19,6 +19,7 @@
  */
 namespace NEM\Models\Transaction;
 
+use NEM\Models\TransactionType;
 use NEM\Models\Mutators\CollectionMutator;
 use NEM\Models\Mosaic;
 use NEM\Models\MosaicAttachment;
@@ -40,15 +41,21 @@ class MosaicTransfer
     ];
 
     /**
-     * The Signature transaction type does not need to add an offset to
-     * the transaction base DTO.
+     * The MosaicTransfer transaction type adds the `mosaics` offset
+     * to the Transaction DTO and also adds all fields defined in the
+     * Transfer::extend() overload.
      *
      * @return array
      */
     public function extend() 
     {
         return [
-            "mosaics" => $this->mosaics()->toDTO(),
+            "amount"    => $this->amount()->toMicro(),
+            "recipient" => $this->recipient()->address()->toClean(),
+            "message"   => $this->message()->toDTO(),
+            "mosaics"   => $this->mosaics()->toDTO(),
+            // transaction type specialization
+            "type"      => TransactionType::TRANSFER,
         ];
     }
 

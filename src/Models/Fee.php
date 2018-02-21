@@ -34,7 +34,7 @@ class Fee
     /**
      * NEM network current fee factor.
      *
-     * Expressed in Micro XEM. This is the MINIMUM NETWORK
+     * Expressed in `Micro XEM`. This is the MINIMUM NETWORK
      * FEE for NEM.
      * 
      * @internal
