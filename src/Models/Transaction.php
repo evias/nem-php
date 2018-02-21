@@ -56,15 +56,15 @@ class Transaction
      * 
      * @var array
      */
-    static protected $validTypes = [
-        TransactionType::TRANSFER,
-        TransactionType::IMPORTANCE_TRANSFER,
-        TransactionType::MULTISIG_MODIFICATION,
-        TransactionType::MULTISIG_SIGNATURE,
-        TransactionType::MULTISIG,
-        TransactionType::PROVISION_NAMESPACE,
-        TransactionType::MOSAIC_DEFINITION,
-        TransactionType::MOSAIC_SUPPLY_CHANGE,
+    static protected $typesClassMap = [
+        TransactionType::TRANSFER              => "\\NEM\\Models\\Transaction\\Transfer",
+        TransactionType::IMPORTANCE_TRANSFER   => "\\NEM\\Models\\Transaction\\ImportanceTransfer",
+        TransactionType::MULTISIG_MODIFICATION => "\\NEM\\Models\\Transaction\\MultisigAggregateModification",
+        TransactionType::MULTISIG_SIGNATURE    => "\\NEM\\Models\\Transaction\\Signature",
+        TransactionType::MULTISIG              => "\\NEM\\Models\\Transaction\\Multisig",
+        TransactionType::PROVISION_NAMESPACE   => "\\NEM\\Models\\Transaction\\NamespaceProvision",
+        TransactionType::MOSAIC_DEFINITION     => "\\NEM\\Models\\Transaction\\MosaicDefinition",
+        TransactionType::MOSAIC_SUPPLY_CHANGE  => "\\NEM\\Models\\Transaction\\MosaicSupplyChange",
     ];
 
     /**
@@ -122,6 +122,32 @@ class Transaction
         "type"      => "int",
         "version"   => "int",
     ];
+
+    /**
+     * Class method to create a Transaction object out of
+     * a DTO data set.
+     * 
+     * The `type` field is used to determine which class
+     * must be loaded, see the static `typeClassMap` property
+     * for details.
+     */
+    static public function create(array $data = null)
+    {
+        if (! $data || empty($data["type"])) {
+            return new static($data);
+        }
+
+        // valid transaction type input
+        $type = $data["type"];
+        $validTypes = array_keys(self::$typesClassMap);
+        if (! $type || ! in_array($type, $validTypes)) {
+            $type = TransactionType::TRANSFER;
+        }
+
+        // mutate transaction (morph specialized class)
+        $classTx = self::$typesClassMap[$type];
+        return new $classTx($data);
+    }
 
     /**
      * The extend() method must be overloaded by any Transaction Type
@@ -218,7 +244,8 @@ class Transaction
 
         // validate transaction type, should always be a valid type
         $type = $this->getAttribute("type") ?: (isset($entity["type"]) ? $entity["type"] : null);
-        if (! $type || ! in_array($type, self::$validTypes)) {
+        $validTypes = array_keys(self::$typesClassMap);
+        if (! $type || ! in_array($type, $validTypes)) {
             $type = TransactionType::TRANSFER;
             $this->setAttribute("type", $type);
         }

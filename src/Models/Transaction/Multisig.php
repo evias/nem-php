@@ -21,6 +21,8 @@ namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
 use NEM\Models\TransactionType;
+use NEM\Models\Signatures;
+use NEM\Models\Transaction\Signature;
 use NEM\Models\Fee;
 
 class Multisig
@@ -53,7 +55,7 @@ class Multisig
     public function extend() 
     {
         return [
-            "otherTrans" => $this->otherTrans()->toDTO(),
+            "otherTrans" => $this->otherTrans()->toDTO("transaction"),
             "signatures" => $this->signatures()->toDTO(),
             // transaction type specialization
             "type" => TransactionType::MULTISIG,
@@ -118,7 +120,9 @@ class Multisig
      */
     public function otherTrans(array $transaction = null)
     {
-        return $this->getAttribute("otherTrans") ?: new Transaction($transaction);
+        // morph Transaction extension - will read the type of transaction
+        // and instantiate the correct class extending Transaction.
+        return Transaction::create($transaction ?: $this->getAttribute("otherTrans"));
     }
 
     /**
@@ -128,8 +132,7 @@ class Multisig
      */
     public function signatures(array $signatures = null)
     {
-        return 
         $transactions = $signatures ?: $this->getAttribute("signatures") ?: [];
-        return (new CollectionMutator())->mutate("Transaction\\Signature", $transactions);
+        return new Signatures($transactions);
     }
 }
