@@ -32,9 +32,9 @@ class Multisig
      * @var array
      */
     protected $appends = [
-        "innerHash",
-        "otherTrans",
-        "signatures",
+        "innerHash"     => "meta.innerHash",
+        "otherTrans"    => "transaction.otherTrans",
+        "signatures"    => "transaction.signatures",
     ];
 
     /**
@@ -128,6 +128,7 @@ class Multisig
      */
     public function signatures(array $signatures = null)
     {
+        return 
         $transactions = $signatures ?: $this->getAttribute("signatures") ?: [];
         return (new CollectionMutator())->mutate("Transaction\\Signature", $transactions);
     }

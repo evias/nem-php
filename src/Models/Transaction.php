@@ -330,15 +330,4 @@ class Transaction
         $dto = $payload ?: $this->getAttribute("message") ?: [];
         return new Message($dto);
     }
-
-    /**
-     * Mutator for the signatures object collection.
-     *
-     * @return \NEM\Models\ModelCollection
-     */
-    public function signatures(array $data = null)
-    {
-        $signatures = $data ?: $this->getAttribute("signatures") ?: [];
-        return (new CollectionMutator())->mutate("Transaction\\Signature", $signatures);
-    }
 }
