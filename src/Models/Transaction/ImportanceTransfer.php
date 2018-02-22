@@ -20,19 +20,29 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\TransactionType;
 use NEM\Models\Account;
+use NEM\Models\Fee;
 
 class ImportanceTransfer
     extends Transaction
 {
+    /**
+     * NIS Delegated Harvesting modes.
+     * 
+     * @var integer
+     */
+    const MODE_ACTIVATE   = 1;
+    const MODE_DEACTIVATE = 2;
+
     /**
      * List of additional fillable attributes
      *
      * @var array
      */
     protected $appends = [
-        "remoteAccount",
-        "mode",
+        "remoteAccount" => "transaction.remoteAccount",
+        "mode"          => "transaction.mode",
     ];
 
     /**
@@ -43,19 +53,39 @@ class ImportanceTransfer
      */
     public function extend() 
     {
+        // set default mode in case its invalid
+        $mode = $this->getAttribute("mode");
+        if (! $mode || ! in_array($mode, [self::MODE_ACTIVATE, self::MODE_DEACTIVATE])) {
+            $mode = self::MODE_ACTIVATE;
+            $this->setAttribute("mode", $mode);
+        }
+
         return [
-            "remoteAccount" => $this->remoteAccount()->address()->toClean(),
+            "remoteAccount" => $this->remoteAccount()->publicKey,
             "mode" => $this->mode,
+            // transaction type specialization
+            "type"      => TransactionType::IMPORTANCE_TRANSFER,
         ];
+    }
+
+    /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        return Fee::IMPORTANCE_TRANSFER;
     }
 
     /**
      * Mutator for the `remoteAccount` relationship.
      * 
-     * @param   string      $address
+     * @param   string      $pubKey
      */
-    public function remoteAccount($address = null)
+    public function remoteAccount($pubKey = null)
     {
-        return new Account($address ?: $this->getAttribute("remoteAccount"));
+        return new Account(["publicKey" => $pubKey ?: $this->getAttribute("remoteAccount")]);
     }
 }

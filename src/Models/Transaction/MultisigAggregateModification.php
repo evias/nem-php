@@ -20,6 +20,9 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\TransactionType;
+use NEM\Models\Fee;
+use NEM\Models\MultisigModifications;
 
 class MultisigAggregateModification
     extends Transaction
@@ -30,9 +33,9 @@ class MultisigAggregateModification
      * @var array
      */
     protected $appends = [
-        "modifications",
-        "minCosignatories",
-        "relativeChange",
+        "modifications"     => "transaction.modifications",
+        "minCosignatories"  => "transaction.minCosignatories",
+        "relativeChange"    => "transaction.minCosignatories.relativeChange",
     ];
 
     /**
@@ -43,12 +46,29 @@ class MultisigAggregateModification
      */
     public function extend() 
     {
+        // "minCosignatories" can be used as direct attribute setter
+        if (empty($this->relativeChange) && is_integer($this->minCosignatories))
+            $this->relativeChange = $this->minCosignatories;
+
         return [
             "modifications" => $this->modifications()->toDTO(),
             "minCosignatories" => [
                 "relativeChange" => $this->relativeChange
             ],
+            // transaction type specialization
+            "type" => TransactionType::MULTISIG_MODIFICATION,
         ];
+    }
+
+    /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        return Fee::MULTISIG_AGGREGATE_MODIFICATION;
     }
 
     /**
@@ -59,6 +79,6 @@ class MultisigAggregateModification
     public function modifications(array $modifications = null)
     {
         $mods = $modifications ?: $this->getAttribute("modifications") ?: [];
-        return (new CollectionMutator())->mutate("multisigModification", $mods);
+        return new MultisigModifications($mods);
     }
 }

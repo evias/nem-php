@@ -20,6 +20,12 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\TransactionType;
+use NEM\Models\Signatures;
+use NEM\Models\Transaction\Signature;
+use NEM\Models\Fee;
+
+use InvalidArgumentException;
 
 class Multisig
     extends Transaction
@@ -30,9 +36,9 @@ class Multisig
      * @var array
      */
     protected $appends = [
-        "innerHash",
-        "otherTrans",
-        "signatures",
+        "innerHash"     => "meta.innerHash",
+        "otherTrans"    => "transaction.otherTrans",
+        "signatures"    => "transaction.signatures",
     ];
 
     /**
@@ -51,9 +57,22 @@ class Multisig
     public function extend() 
     {
         return [
-            "otherTrans" => $this->otherTrans()->toDTO(),
+            "otherTrans" => $this->otherTrans()->toDTO("transaction"),
             "signatures" => $this->signatures()->toDTO(),
+            // transaction type specialization
+            "type" => TransactionType::MULTISIG,
         ];
+    }
+
+    /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        return Fee::MULTISIG;
     }
 
     /**
@@ -86,13 +105,7 @@ class Multisig
      */
     public function setOtherTrans(Transaction $otherTrans)
     {
-        if ($otherTrans->type === TransactionType::MULTISIG) {
-            // cannot nest multisig in another multisig.
-            throw RuntimeException("It is forbidden to nest a Multisig transaction in another Multisig transaction.");
-        }
-
-        $this->attributes["otherTrans"] = $otherTrans;
-        return $this;
+        return $this->otherTrans($otherTrans->toDTO("transaction"));
     }
 
     /**
@@ -103,7 +116,20 @@ class Multisig
      */
     public function otherTrans(array $transaction = null)
     {
-        return $this->getAttribute("otherTrans") ?: new Transaction($transaction);
+        // morph Transaction extension - will read the type of transaction
+        // and instantiate the correct class extending Transaction.
+        $morphed = Transaction::create($transaction ?: $this->getAttribute("otherTrans"));
+
+        if ($morphed->type === TransactionType::MULTISIG) {
+            // cannot nest multisig in another multisig.
+            throw new InvalidArgumentException("It is forbidden to nest a Multisig transaction in another Multisig transaction.");
+        }
+        elseif ($morphed->type === TransactionType::MULTISIG_SIGNATURE) {
+            // cannot nest multisig in another multisig.
+            throw new InvalidArgumentException("It is forbidden to nest a Signature transaction in the inner transaction of a Multisig transaction.");
+        }
+
+        return $morphed;
     }
 
     /**
@@ -114,6 +140,6 @@ class Multisig
     public function signatures(array $signatures = null)
     {
         $transactions = $signatures ?: $this->getAttribute("signatures") ?: [];
-        return (new CollectionMutator())->mutate("Transaction\\Signature", $transactions);
+        return new Signatures($transactions);
     }
 }

@@ -20,6 +20,9 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\TransactionType;
+use NEM\Models\Account;
+use NEM\Models\Fee;
 
 class NamespaceProvision
     extends Transaction
@@ -30,10 +33,10 @@ class NamespaceProvision
      * @var array
      */
     protected $appends = [
-        "rentalFeeSink",
-        "rentalFee",
-        "parent",
-        "newPart"
+        "rentalFeeSink"     => "transaction.rentalFeeSink",
+        "rentalFee"         => "transaction.rentalFee",
+        "parent"            => "transaction.parent",
+        "newPart"           => "transaction.newPart",
     ];
 
     /**
@@ -48,7 +51,24 @@ class NamespaceProvision
             "rentalFee" => empty($this->parent) ? Fee::ROOT_PROVISION_NAMESPACE : Fee::SUB_PROVISION_NAMESPACE,
             "parent" => $this->parent,
             "newPart" => $this->newPart,
+            // transaction type specialization
+            "type" => TransactionType::PROVISION_NAMESPACE,
         ];
+    }
+
+    /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        if (!empty($this->parent)) {
+            return Fee::SUB_PROVISION_NAMESPACE;
+        }
+
+        return Fee::ROOT_PROVISION_NAMESPACE;
     }
 
     /**
@@ -58,6 +78,6 @@ class NamespaceProvision
      */
     public function rentalFeeSink($address = null)
     {
-        return new Account($address ?: $this->getAttribute("rentalFeeSink"));
+        return new Account(["address" => $address ?: $this->getAttribute("rentalFeeSink")]);
     }
 }

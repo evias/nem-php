@@ -20,7 +20,10 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\TransactionType;
 use NEM\Models\Fee;
+use NEM\Models\Account;
+use NEM\Models\MosaicDefinition as DefinitionModel;
 
 class MosaicDefinition
     extends Transaction
@@ -31,9 +34,9 @@ class MosaicDefinition
      * @var array
      */
     protected $appends = [
-        "mosaicDefinition",
-        "creationFeeSink",
-        "creationFee",
+        "mosaicDefinition"   => "transaction.mosaicDefinition",
+        "creationFeeSink"    => "transaction.creationFeeSink",
+        "creationFee"        => "transaction.creationFee",
     ];
 
     /**
@@ -57,8 +60,23 @@ class MosaicDefinition
         return [
             "creationFeeSink" => $this->creationFeeSink()->address()->toClean(),
             "creationFee" => Fee::MOSAIC_DEFINITION,
-            "mosaicDefinition" => $this->mosaicDefinition()->toDTO()
+            "mosaicDefinition" => $this->mosaicDefinition()->toDTO(),
+            // transaction type specialization
+            "type"      => TransactionType::MOSAIC_DEFINITION,
         ];
+    }
+
+    /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        // careful here, the `Fee::MOSAIC_DEFINITION` constant
+        // defines the `creationFee`, not the transaction fee.
+        return Fee::NAMESPACE_AND_MOSAIC;
     }
 
     /**
@@ -68,7 +86,7 @@ class MosaicDefinition
      */
     public function creationFeeSink($address = null)
     {
-        return new Account($address ?: $this->getAttribute("creationFeeSink"));
+        return new Account(["address" => $address ?: $this->getAttribute("creationFeeSink")]);
     }
 
     /**
@@ -81,6 +99,6 @@ class MosaicDefinition
      */
     public function mosaicDefinition(array $definition = null)
     {
-        return new MosaicDefinition($definition ?: $this->getAttribute("mosaicDefinition"));
+        return new DefinitionModel($definition ?: $this->getAttribute("mosaicDefinition"));
     }
 }

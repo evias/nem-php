@@ -34,10 +34,13 @@ class Fee
     /**
      * NEM network current fee factor.
      *
+     * Expressed in `Micro XEM`. This is the MINIMUM NETWORK
+     * FEE for NEM.
+     * 
      * @internal
      * @var integer
      */
-    public const FEE_FACTOR = 0.05;
+    public const FEE_FACTOR = 50000;
 
     /**
      * NEM network transaction fee.
@@ -64,7 +67,7 @@ class Fee
      * @internal
      * @var integer
      */
-    public const MULTISIG = (Fee::TRANSACTION_FEE * Fee::FEE_FACTOR) * Amount::XEM;
+    public const MULTISIG = Fee::TRANSACTION_FEE * Fee::FEE_FACTOR;
 
     /**
      * NEM Mosaic AND Namespaces common Fee (in microXEM).
@@ -72,7 +75,7 @@ class Fee
      * @internal
      * @var integer
      */
-    public const NAMESPACE_AND_MOSAIC = (Fee::TRANSACTION_FEE * Fee::FEE_FACTOR) * Amount::XEM;
+    public const NAMESPACE_AND_MOSAIC = Fee::TRANSACTION_FEE * Fee::FEE_FACTOR;
 
     /**
      * NEM Root Namespace Provision Transaction Fee (in microXEM).
@@ -104,7 +107,7 @@ class Fee
      * @internal
      * @var integer
      */
-    public const SIGNATURE = (Fee::TRANSACTION_FEE * Fee::FEE_FACTOR) * Amount::XEM;
+    public const SIGNATURE = Fee::TRANSACTION_FEE * Fee::FEE_FACTOR;
 
     /**
      * NEM Importance Transfer Transaction Fee (in microXEM).
@@ -112,7 +115,7 @@ class Fee
      * @internal
      * @var integer
      */
-    public const IMPORTANCE_TRANSFER = (Fee::TRANSACTION_FEE * Fee::FEE_FACTOR) * Amount::XEM;
+    public const IMPORTANCE_TRANSFER = Fee::TRANSACTION_FEE * Fee::FEE_FACTOR;
 
     /**
      * NEM Multisig Aggregate Modification Transaction Fee (in microXEM).
@@ -120,7 +123,7 @@ class Fee
      * @internal
      * @var integer
      */
-    public const MULTISIG_AGGREGATE_MODIFICATION = (10 * Fee::FEE_FACTOR) * Amount::XEM;
+    public const MULTISIG_AGGREGATE_MODIFICATION = 10 * Fee::FEE_FACTOR;
 
     /**
      * Calculate the needed fee for a provided `$transaction` NEM transaction
@@ -140,16 +143,14 @@ class Fee
         // default content fee is XEM amount transfer fee
         $contentFee = Fee::FEE_FACTOR * self::calculateForXEM($transaction->amount()->toMicro() / Amount::XEM);
 
-        // version 2 transaction fees prevail over version 1 (no mosaics)
-        if ($transaction instanceof \NEM\Models\Transaction\MosaicTransfer) {
-            $definitions = MosaicDefinitions::create();
-            $contentFee = self::calculateForMosaics(
-                                    $definitions,
-                                    $transaction->mosaics(),
-                                    $transaction->amount()->toMicro());
+        // get the Transaction extension fee
+        $extensionFee = $transaction->extendFee();
+
+        if ($extensionFee > 0) {
+            $contentFee = (int) $extensionFee;
         }
 
-        return floor(($msgFee + $contentFee) * Amount::XEM);
+        return $msgFee + $contentFee;
     }
 
     /**
@@ -261,7 +262,7 @@ class Fee
      * @param   string     $message
      * @return  \NEM\Models\Fee
      */
-    static public function calculateForXEM($amountXEM = Amount::XEM)
+    static public function calculateForXEM($amountXEM = 1)
     {
         $fee = floor(max([1, $amountXEM / 10000]));
         return $fee > self::MAX_AMOUNT_FEE ? self::MAX_AMOUNT_FEE : $fee;

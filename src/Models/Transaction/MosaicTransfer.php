@@ -19,11 +19,14 @@
  */
 namespace NEM\Models\Transaction;
 
+use NEM\Models\TransactionType;
 use NEM\Models\Mutators\CollectionMutator;
 use NEM\Models\Mosaic;
 use NEM\Models\MosaicAttachment;
 use NEM\Models\MosaicAttachments;
 use NEM\Models\MosaicDefinition;
+use NEM\Models\MosaicDefinitions;
+use NEM\Models\Fee;
 
 class MosaicTransfer
     extends Transfer
@@ -38,16 +41,39 @@ class MosaicTransfer
     ];
 
     /**
-     * The Signature transaction type does not need to add an offset to
-     * the transaction base DTO.
+     * The MosaicTransfer transaction type adds the `mosaics` offset
+     * to the Transaction DTO and also adds all fields defined in the
+     * Transfer::extend() overload.
      *
      * @return array
      */
     public function extend() 
     {
         return [
-            "mosaics" => $this->mosaics()->toDTO(),
+            "amount"    => $this->amount()->toMicro(),
+            "recipient" => $this->recipient()->address()->toClean(),
+            "message"   => $this->message()->toDTO(),
+            "mosaics"   => $this->mosaics()->toDTO(),
+            // transaction type specialization
+            "type"      => TransactionType::TRANSFER,
         ];
+    }
+
+    /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        $definitions = MosaicDefinitions::create();
+        $mosaicsFee = Fee::calculateForMosaics(
+                                $definitions,
+                                $this->mosaics(),
+                                $this->amount()->toMicro());
+
+        return $mosaicsFee;
     }
 
     /**

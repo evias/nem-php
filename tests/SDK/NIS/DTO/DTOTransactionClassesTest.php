@@ -21,95 +21,149 @@ namespace NEM\Tests\SDK\NIS\DTO;
 use NEM\Tests\SDK\NIS\NISComplianceTestCase;
 use NEM\Models\Transaction;
 use NEM\Models\TransactionType;
-use NEM\Models\TimeWindow;
-use NEM\Models\Amount;
 use NEM\Models\Message;
+use NEM\Models\TimeWindow;
+use NEM\Models\Transaction\Transfer;
 
-use DateTime;
-
-class DTOTransactionTest
+class DTOTransactionClassesTest
     extends NISComplianceTestCase
 {
     /**
-     * Unit test for *NIS compliance of DTO Structure for Transaction class*.
+     * Unit test for *DTO content of Transaction instances*
+     * 
+     * This tests the non-specialized \NEM\Models\Transaction
+     * class.
      * 
      * @return void
      */
     public function testDTOStructure()
     {
-        $transaction = new Transaction([
-            "timeStamp" => (new TimeWindow(["utc" => 1516196048585]))->toDTO(),
-            "amount" => (new Amount(["amount" => 15]))->toDTO(),
+        // test obligatory fields
+        $txData = [
+            "amount"    => 290888,
             "recipient" => "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
-            "type"      => TransactionType::TRANSFER,
-            "message"   => (new Message(["plain" => "Hello, Greg!"]))->toDTO(),
-        ]);
-        $transactionNIS = $transaction->toDTO();
+        ];
 
-        $this->assertArrayHasKey("transaction", $transactionNIS);
-        $this->assertArrayHasKey("meta", $transactionNIS);
+        $transaction = new Transfer($txData);
+        $transactionNIS = $transaction->toDTO();
 
         $meta = $transactionNIS["meta"];
         $content = $transactionNIS["transaction"];
 
-        $this->assertArrayHasKey("timeStamp", $content);
-        $this->assertArrayHasKey("amount", $content);
-        $this->assertArrayHasKey("recipient", $content);
-        $this->assertArrayHasKey("type", $content);
+        // expected values
+        $expectAmount  = 290888;
+        $expectType    = TransactionType::TRANSFER;
+        $expectVersion = Transaction::VERSION_1;
+        $expectRecipient = "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ";
+
+        $this->assertEquals($expectAmount, $content["amount"]);
+        $this->assertEquals($expectType, $content["type"]);
+        $this->assertEquals($expectVersion, $content["version"]);
+        $this->assertEquals($expectRecipient, $content["recipient"]);
+
         $this->assertArrayHasKey("message", $content);
-        $this->assertArrayHasKey("version", $content);
+        $this->assertArrayHasKey("payload", $content["message"]);
+        $this->assertEmpty($content["message"]["payload"]);
+
+        // optional fields were not set
+        $this->assertFalse(isset($content["signer"]));
+        $this->assertFalse(isset($content["signature"]));
     }
 
     /**
-     * Unit test for *invalid data DTO creation*.
+     * Unit test for *optional fields of Transfer instances*.
      * 
-     * @dataProvider dtoContentInvalidDataVectorsProvider
      * @depends testDTOStructure
      * @return void
      */
-    public function testDTOContentInvalidDataVectors(
-        $ts, $amt, $recv, $type, $version,
-        $expectAmt, $expectRecv, $expectType, $expectVersion
-    )
+    public function testDTOOptionalFields()
     {
-        $transaction = new Transaction([
-            "timeStamp" => $ts,
-            "amount" => $amt,
-            "recipient" => $recv,
-            "type"      => $type,
-            "version"   => $version,
-        ]);
+        // test optional fields
+
+        $expectSigner    = "d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04";
+        $expectSignature = "772db34f606969831fb477b3faf6d25fc530e6ea99f0e839085f3313a3279a87"
+                         . "62773605114e13f949c3fd48fd058ffb6f02c258434539cb6ccc6285cea2580d";
+        $expectAmount    = 0;
+        $expectRecipient = "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ";
+        $expectType      = TransactionType::TRANSFER;
+        $expectVersion   = Transaction::VERSION_1;
+
+        $txData = [
+            "amount"    => 0,
+            "recipient" => $expectRecipient,
+            "signer"    => $expectSigner,
+            "signature" => $expectSignature,
+        ];
+        $transaction = new Transfer($txData);
         $transactionNIS = $transaction->toDTO();
 
         $meta = $transactionNIS["meta"];
         $content = $transactionNIS["transaction"];
 
-        $this->assertEquals($expectAmt, $content["amount"]);
-        $this->assertEquals($expectRecv, $content["recipient"]);
+        $this->assertEquals($expectAmount, $content["amount"]);
         $this->assertEquals($expectType, $content["type"]);
         $this->assertEquals($expectVersion, $content["version"]);
+        $this->assertEquals($expectRecipient, $content["recipient"]);
+        $this->assertEquals($expectSigner, $content["signer"]);
+        $this->assertEquals($expectSignature, $content["signature"]);
     }
 
     /**
-     * Data provider for the testDTOContentInvalidDataVectors()
-     * unit test.
+     * Unit test for *DTO content of Transaction instances*
      * 
-     * @return array
+     * This tests the specialized \NEM\Models\Transaction\Transfer
+     * class.
+     * 
+     * @return void
      */
-    public function dtoContentInvalidDataVectorsProvider()
+    public function testDTOContent_Transfer()
     {
-        return [
-            [
-                // act
-                null, -1, null, null, -1,
-                // expect 
-                0,
-                "", 
-                TransactionType::TRANSFER, 
-                Transaction::VERSION_1
-            ],
+        // test obligatory fields
+        $txData = [
+            "amount"    => 290888,
+            "recipient" => "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
         ];
+
+        $transfer = new Transfer($txData);
+        $transferNIS = $transfer->toDTO();
+
+        $meta = $transferNIS["meta"];
+        $content = $transferNIS["transaction"];
+
+        // expected values
+        $expectAmount  = 290888;
+        $expectType    = TransactionType::TRANSFER;
+        $expectVersion = Transaction::VERSION_1;
+        $expectRecipient = "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ";
+
+        $this->assertEquals($expectAmount, $content["amount"]);
+        $this->assertEquals($expectType, $content["type"]);
+        $this->assertEquals($expectVersion, $content["version"]);
+        $this->assertEquals($expectRecipient, $content["recipient"]);
+
+        $this->assertArrayHasKey("message", $content);
+        $this->assertArrayHasKey("payload", $content["message"]);
+        $this->assertEmpty($content["message"]["payload"]);
+
+        // test empty fields
+        $transfer = new Transfer();
+        $transferNIS = $transfer->toDTO();
+
+        $meta = $transferNIS["meta"];
+        $content = $transferNIS["transaction"];
+
+        // expected values
+        $expectAmount  = 0;
+        $expectType    = TransactionType::TRANSFER;
+        $expectVersion = Transaction::VERSION_1;
+        $expectRecipient = "";
+
+        $this->assertEquals($expectAmount, $content["amount"]);
+        $this->assertEquals($expectType, $content["type"]);
+        $this->assertEquals($expectVersion, $content["version"]);
+        $this->assertEquals($expectRecipient, $content["recipient"]);
     }
+
 
     /**
      * Unit test for *DTO content of Transaction instances*
@@ -137,7 +191,7 @@ class DTOTransactionTest
         if ($signature !== null)
             $txData["signature"] = $signature;
 
-        $transaction = new Transaction($txData);
+        $transaction = new Transfer($txData);
         $transactionNIS = $transaction->toDTO();
 
         $meta = $transactionNIS["meta"];

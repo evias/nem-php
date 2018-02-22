@@ -20,6 +20,9 @@
 namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
+use NEM\Models\Account;
+use NEM\Models\TransactionType;
+use NEM\Models\Fee;
 
 class Signature
     extends Transaction
@@ -30,24 +33,78 @@ class Signature
      * @var array
      */
     protected $appends = [
-        "otherHash",
-        "otherAccount",
+        "otherHash" => "otherHash",
+        "otherAccount" => "otherAccount",
     ];
 
     /**
+     * Overload of the toDTO() logic to skip "meta" and "transaction"
+     * sub-dto pairing.
+     *
+     * @return  array       Associative array containing a NIS *compliable* account representation.
+     */
+    public function toDTO($filterByKey = null)
+    {
+        $baseMeta = $this->meta();
+
+        $baseEntity = [
+            "timeStamp" => $this->timeStamp()->toDTO(),
+            "fee"       => $this->fee()->toMicro(),
+            "otherHash" => [
+                "data" => $this->getAttribute("otherHash"),
+            ],
+            "otherAccount" => $this->otherAccount()->address()->toClean(),
+            "version"      => Transaction::VERSION_2,
+            // transaction type specialization
+            "type" => TransactionType::MULTISIG_SIGNATURE,
+        ];
+
+        // extend entity data in sub class
+        // @see \NEM\Models\Transaction\MosaicTransfer
+        $entity = array_merge($baseEntity, $this->extend());
+
+        // deadline set to +1 hour if none set
+        $deadline = $this->getAttribute("deadline");
+        if (! $deadline || $deadline <= 0) {
+            $txTime = $entity["timeStamp"];
+            $deadline = $txTime + 3600;
+            $this->setAttribute("deadline", $deadline);
+        }
+
+        // do we have optional fields
+        $optionals = ["signer", "signature"];
+        foreach ($optionals as $field) {
+            $data = $this->getAttribute($field);
+            if (null !== $data) {
+                $entity[$field] = $data;
+            }
+        }
+
+        // push validated input
+        $entity["deadline"] = $deadline;
+        return $entity;
+    }
+
+    /**
      * The Signature transaction type does not need to add an offset to
-     * the transaction base DTO.
+     * the transaction base DTO because it overloads the toDTO() method.
      *
      * @return array
      */
     public function extend() 
     {
-        return [
-            "otherHash" => [
-                "data" => $this->getAttribute("otherHash"),
-            ],
-            "otherAccount" => $this->otherAccount()->address()->toClean()
-        ];
+        return [];
+    }
+
+    /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        return Fee::SIGNATURE;
     }
 
     /**
@@ -57,6 +114,16 @@ class Signature
      */
     public function otherAccount($address = null)
     {
-        return new Account($address ?: $this->getAttribute("otherAccount"));
+        return new Account(["address" => $address ?: $this->getAttribute("otherAccount")]);
+    }
+
+    /**
+     * Mutator for the recipient Account object.
+     *
+     * @return \NEM\Models\Account
+     */
+    public function signer($publicKey = null)
+    {
+        return new Account(["publicKey" => $publicKey ?: $this->getAttribute("publicKey")]);
     }
 }
