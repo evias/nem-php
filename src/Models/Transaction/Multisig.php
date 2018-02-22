@@ -25,6 +25,8 @@ use NEM\Models\Signatures;
 use NEM\Models\Transaction\Signature;
 use NEM\Models\Fee;
 
+use InvalidArgumentException;
+
 class Multisig
     extends Transaction
 {
@@ -103,13 +105,7 @@ class Multisig
      */
     public function setOtherTrans(Transaction $otherTrans)
     {
-        if ($otherTrans->type === TransactionType::MULTISIG) {
-            // cannot nest multisig in another multisig.
-            throw RuntimeException("It is forbidden to nest a Multisig transaction in another Multisig transaction.");
-        }
-
-        $this->attributes["otherTrans"] = $otherTrans;
-        return $this;
+        return $this->otherTrans($otherTrans->toDTO("transaction"));
     }
 
     /**
@@ -122,7 +118,18 @@ class Multisig
     {
         // morph Transaction extension - will read the type of transaction
         // and instantiate the correct class extending Transaction.
-        return Transaction::create($transaction ?: $this->getAttribute("otherTrans"));
+        $morphed = Transaction::create($transaction ?: $this->getAttribute("otherTrans"));
+
+        if ($morphed->type === TransactionType::MULTISIG) {
+            // cannot nest multisig in another multisig.
+            throw new InvalidArgumentException("It is forbidden to nest a Multisig transaction in another Multisig transaction.");
+        }
+        elseif ($morphed->type === TransactionType::MULTISIG_SIGNATURE) {
+            // cannot nest multisig in another multisig.
+            throw new InvalidArgumentException("It is forbidden to nest a Signature transaction in the inner transaction of a Multisig transaction.");
+        }
+
+        return $morphed;
     }
 
     /**

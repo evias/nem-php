@@ -33,7 +33,7 @@ class DTOTransactionMultisigTest
     extends NISComplianceTestCase
 {
     /**
-     * Unit test for *default values in case of empty ImportanceTransfer*.
+     * Unit test for *default values in case of empty Multisig*.
      * 
      * @return void
      */
@@ -55,6 +55,48 @@ class DTOTransactionMultisigTest
 
     /**
      * Unit test for *DTO structure of ImportanceTransfer instances*
+     * 
+     * @depends testDTODefaultValues
+     * @expectedException \InvalidArgumentException
+     * @return void
+     */
+    public function testNestingMultisigNotPossible()
+    {
+        $otherTrans = new Multisig();
+        $txData = [
+            "otherTrans" => $otherTrans->toDTO("transaction"),
+            "signatures" => (new Signatures([
+                new Signature(["signer" => "72117b4254b9e49cdfbaa6b7c1825f002cdd55c838ca78485291dca9834ec176"])
+            ]))->toDTO(),
+        ];
+
+        // @throws InvalidArgumentException
+        $transaction = new Multisig($txData);
+    }
+
+    /**
+     * Unit test for *DTO structure of ImportanceTransfer instances*
+     * 
+     * @depends testDTODefaultValues
+     * @expectedException \InvalidArgumentException
+     * @return void
+     */
+    public function testNestingSignatureNotPossible()
+    {
+        $otherTrans = new Signature();
+        $txData = [
+            "otherTrans" => $otherTrans->toDTO("transaction"),
+            "signatures" => (new Signatures([
+                new Signature(["signer" => "72117b4254b9e49cdfbaa6b7c1825f002cdd55c838ca78485291dca9834ec176"])
+            ]))->toDTO(),
+        ];
+
+        // @throws InvalidArgumentException
+        $transaction = new Multisig($txData);
+    }
+
+    /**
+     * Unit test for *DTO structure of Multisig instances*
      * 
      * @depends testDTODefaultValues
      * @return void
