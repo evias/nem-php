@@ -128,7 +128,7 @@ class SerializeMosaicDefinitionTest
         $this->assertNotEmpty($serialized);
 
         // WIP: serialize needs correctly functioning DTOs.
-        //$this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
-        //$this->assertEquals($expectSize, count($serialized));
+        $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
+        $this->assertEquals($expectSize, count($serialized));
     }
 }

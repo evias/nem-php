@@ -93,8 +93,8 @@ class MosaicLevy
         $nisData = $this->toDTO();
 
         if (empty($nisData)) {
-            $emptyLevy = $serializer->serializeInt(null);
-            return $serializer->aggregate($emptyLevy);
+            $emptyLevy = $serializer->serializeInt(0);
+            return $emptyLevy;
         }
 
         // serialize
