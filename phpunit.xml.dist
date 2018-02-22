@@ -11,8 +11,8 @@
          failOnRisky="true"
          failOnWarning="true"
          processIsolation="false"
-         stopOnError="false"
-         stopOnFailure="false"
+         stopOnError="true"
+         stopOnFailure="true"
          verbose="true"
 >
     <testsuites>

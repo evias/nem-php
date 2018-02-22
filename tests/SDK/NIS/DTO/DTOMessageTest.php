@@ -153,4 +153,24 @@ class DTOMessageTest
         $this->assertEquals($expectHex, $message->toHex(true));
         $this->assertEquals($expectHex, $messageNIS["payload"]);
     }
+
+    /**
+     * Unit test for *create Message from payload*.
+     * 
+     * @return void
+     */
+    public function testNISMessageWithPayload() 
+    {
+        $message = new Message(["payload" => "4772c3a9676f7279"]);
+        $messageNIS = $message->toDTO();
+
+        $expectHex = "4772c3a9676f7279";
+        $expectPlain = "Grégory";
+        $expectType = Message::TYPE_SIMPLE;
+
+        $this->assertEquals($expectHex, $message->toHex());
+        $this->assertEquals($expectHex, $messageNIS["payload"]);
+        $this->assertEquals($expectType, $messageNIS["type"]);
+        $this->assertEquals($expectPlain, $message->getPlain());
+    }
 }

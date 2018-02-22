@@ -22,6 +22,13 @@ namespace NEM\Models;
 use NEM\Models\Mutators\ModelMutator;
 use NEM\Models\Mutators\CollectionMutator;
 use NEM\Models\TransactionType;
+use NEM\Models\Transaction\Transfer;
+use NEM\Models\Transaction\Signature;
+use NEM\Models\TimeWindow;
+use NEM\Models\Amount;
+use NEM\Models\Fee;
+use NEM\Models\Account;
+use NEM\Models\Message;
 
 class Transaction
     extends Model
@@ -49,15 +56,15 @@ class Transaction
      * 
      * @var array
      */
-    static protected $validTypes = [
-        TransactionType::TRANSFER,
-        TransactionType::IMPORTANCE_TRANSFER,
-        TransactionType::MULTISIG_MODIFICATION,
-        TransactionType::MULTISIG_SIGNATURE,
-        TransactionType::MULTISIG,
-        TransactionType::PROVISION_NAMESPACE,
-        TransactionType::MOSAIC_DEFINITION,
-        TransactionType::MOSAIC_SUPPLY_CHANGE,
+    static protected $typesClassMap = [
+        TransactionType::TRANSFER              => "\\NEM\\Models\\Transaction\\Transfer",
+        TransactionType::IMPORTANCE_TRANSFER   => "\\NEM\\Models\\Transaction\\ImportanceTransfer",
+        TransactionType::MULTISIG_MODIFICATION => "\\NEM\\Models\\Transaction\\MultisigAggregateModification",
+        TransactionType::MULTISIG_SIGNATURE    => "\\NEM\\Models\\Transaction\\Signature",
+        TransactionType::MULTISIG              => "\\NEM\\Models\\Transaction\\Multisig",
+        TransactionType::PROVISION_NAMESPACE   => "\\NEM\\Models\\Transaction\\NamespaceProvision",
+        TransactionType::MOSAIC_DEFINITION     => "\\NEM\\Models\\Transaction\\MosaicDefinition",
+        TransactionType::MOSAIC_SUPPLY_CHANGE  => "\\NEM\\Models\\Transaction\\MosaicSupplyChange",
     ];
 
     /**
@@ -105,6 +112,44 @@ class Transaction
     ];
 
     /**
+     * List of automatic *value casts*.
+     *
+     * @var array
+     */
+    protected $casts = [
+        "id"        => "int",
+        "height"    => "int",
+        "type"      => "int",
+        "version"   => "int",
+    ];
+
+    /**
+     * Class method to create a Transaction object out of
+     * a DTO data set.
+     * 
+     * The `type` field is used to determine which class
+     * must be loaded, see the static `typeClassMap` property
+     * for details.
+     */
+    static public function create(array $data = null)
+    {
+        if (! $data || empty($data["type"])) {
+            return new static($data);
+        }
+
+        // valid transaction type input
+        $type = $data["type"];
+        $validTypes = array_keys(self::$typesClassMap);
+        if (! $type || ! in_array($type, $validTypes)) {
+            $type = TransactionType::TRANSFER;
+        }
+
+        // mutate transaction (morph specialized class)
+        $classTx = self::$typesClassMap[$type];
+        return new $classTx($data);
+    }
+
+    /**
      * The extend() method must be overloaded by any Transaction Type
      * which needs to extend the base DTO structure.
      *
@@ -129,6 +174,20 @@ class Transaction
     }
 
     /**
+     * The extendFee() method must be overloaded by any Transaction Type
+     * which needs to extend the base FEE to a custom FEE.
+     * 
+     * For example MosaicTransfer transactions define a specific FEE or 
+     * ImportanceTransfer, etc.
+     *
+     * @return array
+     */
+    public function extendFee()
+    {
+        return 0;
+    }
+
+    /**
      * The meta() method must be overloaded by any Transaction Type
      * which needs to extend the base META structure.
      *
@@ -141,13 +200,13 @@ class Transaction
         // look for basic parameters of transactions, only unconfirmed
         // transactions will have those fields empty.
 
-        if ($this->attributes["id"])
+        if (isset($this->attributes["id"]))
             $meta["id"] = (int) $this->attributes["id"];
 
-        if ($this->attributes["height"])
+        if (isset($this->attributes["height"]))
             $meta["height"] = (int) $this->attributes["height"];
 
-        if ($this->attributes["hash"])
+        if (isset($this->attributes["hash"]))
             $meta["hash"] = ["data" => $this->attributes["hash"]];
 
         return $meta;
@@ -165,10 +224,7 @@ class Transaction
 
         $baseEntity = [
             "timeStamp" => $this->timeStamp()->toDTO(),
-            "amount"    => $this->amount()->toMicro(),
             "fee"       => $this->fee()->toMicro(),
-            "recipient" => $this->recipient()->address()->toClean(),
-            "message"   => $this->message()->toDTO(),
         ];
 
         // extend entity data in sub class
@@ -187,8 +243,9 @@ class Transaction
         }
 
         // validate transaction type, should always be a valid type
-        $type = $this->getAttribute("type");
-        if (! $type || ! in_array($type, self::$validTypes)) {
+        $type = $this->getAttribute("type") ?: (isset($entity["type"]) ? $entity["type"] : null);
+        $validTypes = array_keys(self::$typesClassMap);
+        if (! $type || ! in_array($type, $validTypes)) {
             $type = TransactionType::TRANSFER;
             $this->setAttribute("type", $type);
         }
@@ -201,7 +258,7 @@ class Transaction
             $this->setAttribute("deadline", $deadline);
         }
 
-        // do we have a signer / a signature
+        // do we have optional fields
         $optionals = ["signer", "signature"];
         foreach ($optionals as $field) {
             $data = $this->getAttribute($field);
@@ -248,7 +305,7 @@ class Transaction
      */
     public function deadline($deadline = null) 
     {
-        $ts = $timestamp ?: $this->getAttribute("deadline");
+        $ts = $deadline ?: $this->getAttribute("deadline");
         if (is_integer($ts) || $ts instanceof TimeWindow) {
             return new TimeWindow(["timeStamp" => $ts]);
         }
@@ -285,7 +342,7 @@ class Transaction
     {
         $amount = $fee ?: $this->getAttribute("fee");
         if (!$amount)
-            $amount = Fee::calculateForTransaction($this);
+            $amount = (int) Fee::calculateForTransaction($this);
 
         return new Fee(["amount" => $amount]);
     }
@@ -297,18 +354,7 @@ class Transaction
      */
     public function message($payload = null)
     {
-        $messagePayload = $payload ?: $this->getAttribute("message") ?: [];
-        return (new ModelMutator())->mutate("message", $messagePayload);
-    }
-
-    /**
-     * Mutator for the signatures object collection.
-     *
-     * @return \NEM\Models\ModelCollection
-     */
-    public function signatures(array $data = null)
-    {
-        $signatures = $data ?: $this->getAttribute("signatures") ?: [];
-        return (new CollectionMutator())->mutate("Transaction\\Signature", $signatures);
+        $dto = $payload ?: $this->getAttribute("message") ?: [];
+        return new Message($dto);
     }
 }

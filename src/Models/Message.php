@@ -81,7 +81,13 @@ class Message
         }
         elseif ($this->type == Message::TYPE_SIMPLE) {
             // simple message, unencrypted
-            $payload = $this->toHex();
+            if (empty($plain)) {
+                $plain = $this->toPlain();
+                $payload = $this->payload;
+            }
+            else {
+                $payload = $this->toHex();
+            }
         }
         elseif ($this->type == Message::TYPE_ENCRYPTED) {
             // encrypted message
