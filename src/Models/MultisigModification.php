@@ -73,7 +73,7 @@ class MultisigModification
 
         return [
             "modificationType" => (int) $this->modificationType,
-            "cosignatoryAccount" => $this->cosignatoryAccount()->address()->toClean(),
+            "cosignatoryAccount" => $this->cosignatoryAccount()->publicKey,
         ];
     }
 
@@ -82,8 +82,8 @@ class MultisigModification
      *
      * @return \NEM\Models\Account
      */
-    public function cosignatoryAccount($address = null)
+    public function cosignatoryAccount($publicKey = null)
     {
-        return new Account(["address" => $address ?: $this->getAttribute("cosignatoryAccount")]);
+        return new Account(["publicKey" => $publicKey ?: $this->getAttribute("cosignatoryAccount")]);
     }
 }

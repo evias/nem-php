@@ -126,6 +126,7 @@ class DTOTransactionMultisigTest
         $this->assertArrayHasKey("otherTrans", $content);
         $this->assertArrayHasKey("signatures", $content);
 
+        // test inner transaction structure
         $this->assertInternalType("array", $content["otherTrans"]);
         $this->assertArrayHasKey("recipient", $content["otherTrans"]);
         $this->assertArrayHasKey("amount", $content["otherTrans"]);
@@ -136,16 +137,28 @@ class DTOTransactionMultisigTest
         $expectOtherType = TransactionType::TRANSFER;
         $expectOtherAcct = "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ";
         $expectOtherAmt  = 10;
+        $expectOtherMsg  = "48656c6c6f2c204772656721";
 
+        // test inner transaction content
         $this->assertEquals($expectOtherType, $otherTransNIS["type"]);
         $this->assertEquals($expectOtherAcct, $otherTransNIS["recipient"]);
         $this->assertEquals($expectOtherAmt, $otherTransNIS["amount"]);
 
+        // test 2nd-level sub-dto (message in transfer)
+        $this->assertInternalType("array", $otherTransNIS["message"]);
+        $this->assertArrayHasKey("payload", $otherTransNIS["message"]);
+        $this->assertArrayHasKey("type", $otherTransNIS["message"]);
+
+        $message = $otherTransNIS["message"];
+        $this->assertEquals($expectOtherMsg, $message["payload"]);
+
+        // test signatures in root transaction
         $this->assertInternalType("array", $content["signatures"]);
         $this->assertCount(1, $content["signatures"]);
 
         $signature = $content["signatures"][0];
 
+        // signature structure validation
         $this->assertArrayHasKey("timeStamp", $signature);
         $this->assertArrayHasKey("fee", $signature);
         $this->assertArrayHasKey("type", $signature);

@@ -21,6 +21,7 @@ namespace NEM\Models\Transaction;
 
 use NEM\Models\Transaction;
 use NEM\Models\TransactionType;
+use NEM\Models\Account;
 use NEM\Models\Fee;
 
 class NamespaceProvision
@@ -32,10 +33,10 @@ class NamespaceProvision
      * @var array
      */
     protected $appends = [
-        "rentalFeeSink",
-        "rentalFee",
-        "parent",
-        "newPart"
+        "rentalFeeSink"     => "transaction.rentalFeeSink",
+        "rentalFee"         => "transaction.rentalFee",
+        "parent"            => "transaction.parent",
+        "newPart"           => "transaction.newPart",
     ];
 
     /**
@@ -77,6 +78,6 @@ class NamespaceProvision
      */
     public function rentalFeeSink($address = null)
     {
-        return new Account($address ?: $this->getAttribute("rentalFeeSink"));
+        return new Account(["address" => $address ?: $this->getAttribute("rentalFeeSink")]);
     }
 }
