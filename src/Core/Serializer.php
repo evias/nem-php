@@ -229,7 +229,7 @@ class Serializer
      * byte arrays.
      * 
      * It will also prepend a size on 4 bytes representing
-     * the *size of the merged/aggregated byte arrays*.
+     * the *count of the merged/aggregated byte arrays*.
      * 
      * This method accepts *any* count of array arguments.
      * The passed array must contain UInt8 representation

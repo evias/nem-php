@@ -68,15 +68,16 @@ class NamespaceProvision
     }
 
     /**
-     * The extendSerialize() method must be overloaded by any Transaction Type
-     * which needs to extend the base serialization of Transaction with its own
-     * serialized data.
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *NamespaceProvision* serialization.
      *
-     * @see \NEM\Models\Transaction\Transaction::serialize()
-     * @return array   Returns a byte-array with values in UInt8 representation.
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
      */
-    public function extendSerialize()
+    public function serialize($parameters = null)
     {
+        $baseTx  = parent::serialize($parameters);
         $nisData = $this->extend();
 
         // shortcuts
@@ -100,7 +101,9 @@ class NamespaceProvision
             $uint8_rental,
             $uint8_newPart,
             $uint8_parent);
-        return $output;
+
+        // specialized data is concatenated to `base transaction data`.
+        return array_merge($baseTx, $output);
     }
 
     /**

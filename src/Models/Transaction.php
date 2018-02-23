@@ -203,21 +203,6 @@ class Transaction
     }
 
     /**
-     * The extendSerialize() method must be overloaded by any Transaction Type
-     * which needs to extend the base serialization of Transaction with its own
-     * serialized data.
-     *
-     * @see \NEM\Models\Transaction\Transfer
-     * @return array   Returns a byte-array with values in UInt8 representation.
-     */
-    public function extendSerialize()
-    {
-        // Base Transaction does not specify any extension fields
-        // @see \NEM\Models\Transaction\Transfer
-        return [];
-    }
-
-    /**
      * The meta() method must be overloaded by any Transaction Type
      * which needs to extend the base META structure.
      *
@@ -338,8 +323,6 @@ class Transaction
         $uint8_fee = $serializer->serializeLong($nisData["fee"]);
         $uint8_deadline = $serializer->serializeInt($nisData["deadline"]);
 
-        // intermediary storage
-
         // step 1: meta data at the beginning
         $output = array_merge(
             $uint8_type,
@@ -352,11 +335,7 @@ class Transaction
             $uint8_fee,
             $uint8_deadline);
 
-        // step 3: serialize transaction specialization content
-        $output = array_merge($output, $this->extendSerialize($parameters));
-
-        // do not use aggregator because MosaicDefinition's first byte
-        // contains a public key size, not a DTO size.
+        // done with `base transaction data` serialization.
         return $output;
     }
 

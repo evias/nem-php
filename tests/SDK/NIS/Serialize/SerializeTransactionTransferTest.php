@@ -25,9 +25,9 @@ use NEM\Models\Model;
 use NEM\Models\TimeWindow;
 
 // This unit test will test all serializer process Specializations
-use NEM\Models\Transaction\NamespaceProvision;
+use NEM\Models\Transaction\Transfer;
 
-class SerializeTransactionNamespaceProvisionTest
+class SerializeTransactionTransferTest
     extends TestCase
 {
     /**
@@ -35,20 +35,18 @@ class SerializeTransactionNamespaceProvisionTest
      * 
      * @return void
      */
-    public function testSerializerModelSpecialization_NamespaceProvision()
+    public function testSerializerModelSpecialization_Transfer_EmptyMessage()
     {
-        $transaction = new NamespaceProvision([
-            "timeStamp" => (new TimeWindow(["timeStamp" => 91298537]))->toDTO(),
-            "deadline"  => (new TimeWindow(["timeStamp" => 91302137]))->toDTO(),
-            "rentalFeeSink" => "TAMESPACEWH4MKFMBCVFERDPOOP4FK7MTDJEYP35",
-            "rentalFee" => 10000000,
+        $transaction = new Transfer([
+            "timeStamp" => (new TimeWindow(["timeStamp" => 91793055]))->toDTO(),
+            "deadline"  => (new TimeWindow(["timeStamp" => 91796655]))->toDTO(),
             "version"   => -1744830463,
-            "fee"       => 150000,
-            "parent"    => "evias",
-            "newPart"   => "sdk",
+            "fee"       => 50000,
+            "amount"    => 10000000,
+            "recipient" => "TD2PEY23Y6O3LNGAO4YJYNDRQS3IRTEC7PZUIWLT",
             "signer"    => "d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04",
-            "signature" => "3356f5543474d0b0bd10c74092a34ddd67e106c696361bb49f937321720e7a7c"
-                          ."46099ea9eaf73022b17aaf41715c53f114b14aac918ef609b2b8ebfe2057c401",
+            "signature" => "764da83b32baf3fcdbb482e44e2943b42998c697856a409874699a2a87ac9bd0"
+                          ."802d4f6d80a0dc64e808895d5aa2cce40d38edb1b93ed4b0640175816eab210c",
         ]);
 
         // test specialized MosaicAttachment::serialize() serialization process
@@ -57,9 +55,9 @@ class SerializeTransactionNamespaceProvisionTest
         // expected results
         $expectUInt8 = [
             1,
-           32,   0,   0,   1,
-            0,   0, 152, 233,
-           26, 113,   5,  32,
+            1,   0,   0,   1,
+            0,   0, 152, 159,
+          166, 120,   5,  32,
             0,   0,   0, 217,
            12,   8, 207, 187,
           249,  24, 217,  48,
@@ -68,33 +66,27 @@ class SerializeTransactionNamespaceProvisionTest
           144, 165, 250, 207,
           243, 223,  23, 237,
            92,   9, 108,  76,
-          207,  13,   4, 240,
-           73,   2,   0,   0,
-            0,   0,   0, 249,
-           40, 113,   5,  40,
+          207,  13,   4,  80,
+          195,   0,   0,   0,
+            0,   0,   0, 175,
+          180, 120,   5,  40,
             0,   0,   0,  84,
-           65,  77,  69,  83,
-           80,  65,  67,  69,
-           87,  72,  52,  77,
-           75,  70,  77,  66,
-           67,  86,  70,  69,
-           82,  68,  80,  79,
-           79,  80,  52,  70,
-           75,  55,  77,  84,
-           68,  74,  69,  89,
-           80,  51,  53, 128,
+           68,  50,  80,  69,
+           89,  50,  51,  89,
+           54,  79,  51,  76,
+           78,  71,  65,  79,
+           52,  89,  74,  89,
+           78,  68,  82,  81,
+           83,  51,  73,  82,
+           84,  69,  67,  55,
+           80,  90,  85,  73,
+           87,  76,  84, 128,
           150, 152,   0,   0,
-            0,   0,   0,   3,
-            0,   0,   0, 115,
-          100, 107,   5,   0,
-            0,   0, 101, 118,
-          105,  97, 115
+            0,   0,   0
         ];
         $expectSize = count($expectUInt8);
 
         $this->assertNotEmpty($serialized);
-
-        // WIP: serialize needs correctly functioning DTOs.
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
         $this->assertEquals($expectSize, count($serialized));
     }

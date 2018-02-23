@@ -68,4 +68,51 @@ class Transfer
         // No more fees need to be added to the base transaction FEE.
         return 0;
     }
+
+    /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *Transfer* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        $baseTx  = parent::serialize($parameters);
+        $nisData = $this->extend();
+
+        // shortcuts
+        $serializer = $this->getSerializer();
+        $output     = [];
+
+        // serialize specialized fields
+        $uint8_acct = $serializer->serializeString($nisData["recipient"]);
+        $uint8_amt  = $serializer->serializeLong($nisData["amount"]);
+
+        $messagePayload = $nisData["message"]["payload"];
+        $messageType = $nisData["message"]["type"];
+
+        // message payload is optional
+        $uint8_msg   = [];
+        if (!empty($messagePayload)) {
+            $uint8_len  = $serializer->serializeInt(8 + strlen(hex2bin($messagePayload)));
+            $uint8_type = $serializer->serializeInt($messageType);
+            $uint8_hex  = $serializer->serializeString(hex2bin($messagePayload));
+    
+            $uint8_msg = array_merge($uint8_len, $uint8_type, $uint8_hex);
+        }
+        // else { // empty message is 0 on-chain
+        //     $uint8_msg = $serializer->serializeInt(0);
+        // }
+
+        // concatenate the UInt8 representation
+        $output = array_merge(
+            $uint8_acct,
+            $uint8_amt,
+            $uint8_msg);
+
+        // specialized data is concatenated to `base transaction data`.
+        return array_merge($baseTx, $output);
+    }
 }
