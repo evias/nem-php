@@ -19,6 +19,8 @@
  */
 namespace NEM\Models;
 
+use NEM\Models\MosaicAttachment;
+
 class MosaicAttachments
     extends ModelCollection
 {
@@ -51,11 +53,17 @@ class MosaicAttachments
         // serialize each attachment
         $stateUInt8 = $prependSize;
         for ($i = 0, $len = $sorted->count(); $i < $len; $i++) {
+
+            $attachment = $sorted->get($i);
+            if (! ($attachment instanceof MosaicAttachment)) {
+                $attachment = new MosaicAttachment($attachment);
+            }
+
             // use MosaicAttachment::serialize() specialization
-            $attachment = $sorted->get($i)->serialize();
+            $uint8_attach = $attachment->serialize();
 
             // use merge here, no aggregator
-            $stateUInt8 = array_merge($stateUInt8, $attachment);
+            $stateUInt8 = array_merge($stateUInt8, $uint8_attach);
         }
 
         // no need to use the aggregator, we dynamically aggregated

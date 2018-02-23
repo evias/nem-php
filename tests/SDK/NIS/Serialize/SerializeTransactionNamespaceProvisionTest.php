@@ -22,6 +22,7 @@ use NEM\Tests\TestCase;
 use NEM\Core\Serializer;
 use NEM\Core\Buffer;
 use NEM\Models\Model;
+use NEM\Models\Fee;
 use NEM\Models\TimeWindow;
 
 // This unit test will test all serializer process Specializations
@@ -43,7 +44,7 @@ class SerializeTransactionNamespaceProvisionTest
             "rentalFeeSink" => "TAMESPACEWH4MKFMBCVFERDPOOP4FK7MTDJEYP35",
             "rentalFee" => 10000000,
             "version"   => -1744830463,
-            "fee"       => 150000,
+            "fee"       => Fee::NAMESPACE_AND_MOSAIC,
             "parent"    => "evias",
             "newPart"   => "sdk",
             "signer"    => "d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04",

@@ -46,6 +46,36 @@ class ImportanceTransfer
     ];
 
     /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *ImportanceTransfer* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        $baseTx  = parent::serialize($parameters);
+        $nisData = $this->extend();
+
+        // shortcuts
+        $serializer = $this->getSerializer();
+        $output     = [];
+
+        // serialize specialized fields
+        $uint8_mode = $serializer->serializeInt($nisData["mode"]);
+        $uint8_acct = $serializer->serializeString(hex2bin($nisData["remoteAccount"]));
+
+        // concatenate the UInt8 representation
+        $output = array_merge(
+            $uint8_mode,
+            $uint8_acct);
+
+        // specialized data is concatenated to `base transaction data`.
+        return array_merge($baseTx, $output);
+    }
+
+    /**
      * The Signature transaction type does not need to add an offset to
      * the transaction base DTO.
      *

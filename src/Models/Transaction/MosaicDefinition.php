@@ -80,6 +80,40 @@ class MosaicDefinition
     }
 
     /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *MosaicDefinition transaction* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        $baseTx  = parent::serialize($parameters);
+        $nisData = $this->extend();
+
+        // shortcuts
+        $serializer = $this->getSerializer();
+        $output     = [];
+
+        // serialize specialized fields
+        $uint8_def   = $this->mosaicDefinition()->serialize();
+        $uint8_len   = $serializer->serializeInt(count($uint8_def));
+        $uint8_sink  = $serializer->serializeString($nisData["creationFeeSink"]);
+        $uint8_fee   = $serializer->serializeLong($nisData["creationFee"]);
+
+        // concatenate the UInt8 representation
+        $output = array_merge(
+            $uint8_len,
+            $uint8_def,
+            $uint8_sink,
+            $uint8_fee);
+
+        // specialized data is concatenated to `base transaction data`.
+        return array_merge($baseTx, $output);
+    }
+
+    /**
      * Mutator for the `creationFeeSink` relation.
      *
      * @return  \NEM\Models\Account
