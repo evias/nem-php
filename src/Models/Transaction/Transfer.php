@@ -102,6 +102,10 @@ class Transfer
     
             $uint8_msg = array_merge($uint8_len, $uint8_type, $uint8_hex);
         }
+        // WARN: It is optional to include the message payload for *NIS* so it 
+        //       is in NIS' best interest to leave it out completely as it will
+        //       obviously require 4bits less than storing 0.
+        //
         // else { // empty message is 0 on-chain
         //     $uint8_msg = $serializer->serializeInt(0);
         // }
