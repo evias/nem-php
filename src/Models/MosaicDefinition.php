@@ -85,11 +85,9 @@ class MosaicDefinition
 
         // bundle with length of pub key and public key in UInt8
         $publicKey  = $serializer->serializeString($publicKey);
-        //dd($this->description());
+
         // serialize content
-        // [64, 0, 0, 0, 6, 8, 7, 4, 7, 4, 7, 0, 7, 3, 3, 0, 2, 0, 2, 0, 6, 7, 6, 9, 7, 4, 6, 8, 7, 5, 6, 2, 2, 0, 6, 3, 6, 0, 6, 0, 2, 0, 6, 5, 7, 6, 6, 9, 6, 1, 7, 3, 2, 0, 6, 0, 6, 5, 6, 0, 2, 0, 7, 0, 6, 8, 7, 0]
         $desc   = $serializer->serializeString(hex2bin($nisData["description"]));
-        //dd(json_encode($desc));
         $mosaic = $this->id()->serialize();
         $props  = $this->properties()->serialize();
         $levy   = $this->levy()->serialize();

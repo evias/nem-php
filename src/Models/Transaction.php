@@ -188,6 +188,21 @@ class Transaction
     }
 
     /**
+     * The extendSerializeMeta() method must be overloaded by any Transaction Type
+     * which needs to extend the base meta data serialization of Transaction with 
+     * its own serialized meta data.
+     *
+     * @see \NEM\Models\Transaction\Transfer
+     * @return array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function extendSerializeMeta()
+    {
+        // Base Transaction does not specify any extension meta data
+        // @see \NEM\Models\Transaction\Transfer
+        return [];
+    }
+
+    /**
      * The meta() method must be overloaded by any Transaction Type
      * which needs to extend the base META structure.
      *
@@ -238,7 +253,8 @@ class Transaction
 
         // validate version field, should always reflect valid NIS tx version
         $version = $this->getAttribute("version");
-        if (! $version || !in_array($version, [self::VERSION_1, self::VERSION_2])) {
+        //XXX
+        if (! $version || !in_array($version, [self::VERSION_1, self::VERSION_2, -1744830463, -1744830462])) {
             $version = $versionByContent;
         }
 
@@ -251,7 +267,7 @@ class Transaction
         }
 
         // deadline set to +1 hour if none set
-        $deadline = $this->getAttribute("deadline");
+        $deadline = $this->deadline()->toDTO();
         if (! $deadline || $deadline <= 0) {
             $txTime = $entity["timeStamp"];
             $deadline = $txTime + 3600;
@@ -284,11 +300,51 @@ class Transaction
     }
 
     /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *Transaction* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        $nisData = $this->toDTO("transaction");
+
+        // shortcuts
+        $serializer = $this->getSerializer();
+        $output = [];
+
+        // serialize all the base data
+        $uint8_type = $serializer->serializeInt($nisData["type"]);
+        $uint8_version = $serializer->serializeInt($nisData["version"]);
+        $uint8_timestamp = $serializer->serializeInt($nisData["timeStamp"]);
+        $uint8_signer = $serializer->serializeString(hex2bin($nisData["signer"]));
+        $uint8_fee = $serializer->serializeLong($nisData["fee"]);
+        $uint8_deadline = $serializer->serializeInt($nisData["deadline"]);
+
+        // step 1: meta data at the beginning
+        $output = array_merge(
+            $uint8_type,
+            $uint8_version,
+            $uint8_timestamp,
+            $uint8_signer);
+
+        // step 2: serialize fee and deadline
+        $output = array_merge($output,
+            $uint8_fee,
+            $uint8_deadline);
+
+        // done with `base transaction data` serialization.
+        return $output;
+    }
+
+    /**
      * Returns timestamp of the transaction.
      *
      * @return int
      */
-     public function timestamp($timestamp = null) 
+     public function timeStamp($timestamp = null) 
      {
         $ts = $timestamp ?: $this->getAttribute("timeStamp");
         if (is_integer($ts) || $ts instanceof TimeWindow) {

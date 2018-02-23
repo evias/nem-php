@@ -103,15 +103,20 @@ class DTOTransactionNamespaceProvisionTest
         $aggregateTx = new NamespaceProvision();
         $aggregateNIS = $aggregateTx->toDTO();
         $contentTx = $aggregateNIS["transaction"];
+        $this->assertEquals(Fee::NAMESPACE_AND_MOSAIC, $contentTx["fee"]);
+
+        $aggregateTx = new NamespaceProvision([]);
+        $aggregateNIS = $aggregateTx->toDTO();
+        $contentTx = $aggregateNIS["transaction"];
 
         // if no data is set, the fee will be for root namespace
-        $this->assertEquals(Fee::ROOT_PROVISION_NAMESPACE, $contentTx["fee"]);
+        $this->assertEquals(Fee::ROOT_PROVISION_NAMESPACE, $contentTx["rentalFee"]);
 
-        $aggregateTx = new NamespaceProvision(["parent" => "test"]);
+        $aggregateTx->setAttribute("parent", "test");
         $aggregateNIS = $aggregateTx->toDTO();
         $contentTx = $aggregateNIS["transaction"];
 
         // if parent namespace is set, the fee will be for sub namespace
-        $this->assertEquals(Fee::SUB_PROVISION_NAMESPACE, $contentTx["fee"]);
+        $this->assertEquals(Fee::SUB_PROVISION_NAMESPACE, $contentTx["rentalFee"]);
     }
 }
