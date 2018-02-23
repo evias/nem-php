@@ -41,17 +41,30 @@ class Transaction
      * to have the transaction **signed locally** by the SDK instead of letting
      * the remote NIS sign for you*. The local signing method **is recommended**.
      * 
+     * WARNING: In case you don't provide this method with a KeyPair, 
+     * you must provide a `privateKey` in the transaction attributes. 
+     * It is *not* recommended to send `privateKey` data over any network,
+     * even local.
+     * 
      * @param   \NEM\Models\Transaction     $transaction
      * @return  \NEM\Models\Transaction
      */
     public function announce(TxModel $transaction, KeyPair $kp = null)
     {
-        $serializer = new Serializer();
-        $serialized = $serializer->serialize($transaction);
+        // set optional `signer`
+        if (null !== $kp) {
+            $transaction->setAttribute("signer", $kp->publicKey);
+        }
+
+        // now we can serialize and sign
+        $serialized = $transaction->serialize();
         $signature  = null !== $kp ? $kp->sign($serialized) : null;
         $broadcast  = [];
 
         if ($signature) {
+            // valid KeyPair provided, signature was created.
+
+            // recommended signed transaction broadcast method.
             $endpoint  = "transaction/announce";
             $broadcast = [
                 "data" => $serialized,
@@ -59,6 +72,8 @@ class Transaction
             ];
         }
         else {
+            // WARNING: with this you must provide a `privateKey`
+            // in the transaction attributes. This is *not* recommended.
             $endpoint  = "transaction/prepare-announce";
             $broadcast = $transaction->toDTO();
         }

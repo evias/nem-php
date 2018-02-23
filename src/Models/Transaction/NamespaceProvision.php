@@ -64,11 +64,43 @@ class NamespaceProvision
      */
     public function extendFee()
     {
-        if (!empty($this->parent)) {
-            return Fee::SUB_PROVISION_NAMESPACE;
+        return Fee::NAMESPACE_AND_MOSAIC;
+    }
+
+    /**
+     * The extendSerialize() method must be overloaded by any Transaction Type
+     * which needs to extend the base serialization of Transaction with its own
+     * serialized data.
+     *
+     * @see \NEM\Models\Transaction\Transaction::serialize()
+     * @return array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function extendSerialize()
+    {
+        $nisData = $this->extend();
+
+        // shortcuts
+        $serializer = $this->getSerializer();
+        $output     = [];
+
+        // serialize specialized fields
+        $uint8_sink = $serializer->serializeString($nisData["rentalFeeSink"]);
+        $uint8_rental = $serializer->serializeLong($nisData["rentalFee"]);
+        $uint8_newPart = $serializer->serializeString($nisData["newPart"]);
+
+        // empty parent is *null* on-chain
+        $uint8_parent = $serializer->serializeInt(null);
+        if (!empty($nisData["parent"])) {
+            $uint8_parent = $serializer->serializeString($nisData["parent"]);
         }
 
-        return Fee::ROOT_PROVISION_NAMESPACE;
+        // concatenate the UInt8 representation
+        $output = array_merge(
+            $uint8_sink,
+            $uint8_rental,
+            $uint8_newPart,
+            $uint8_parent);
+        return $output;
     }
 
     /**
