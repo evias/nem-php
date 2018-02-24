@@ -54,9 +54,9 @@ class Signature
                 "data" => $this->getAttribute("otherHash"),
             ],
             "otherAccount" => $this->otherAccount()->address()->toClean(),
-            "version"      => Transaction::VERSION_2,
             // transaction type specialization
             "type" => TransactionType::MULTISIG_SIGNATURE,
+            "version" => $this->getAttribute("version") ?: Transaction::VERSION_1,
         ];
 
         // extend entity data in sub class
@@ -83,6 +83,39 @@ class Signature
         // push validated input
         $entity["deadline"] = $deadline;
         return $entity;
+    }
+
+    /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *Signature transaction* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        $baseTx  = parent::serialize($parameters);
+        $nisData = $this->toDTO();
+
+        // shortcuts
+        $serializer = $this->getSerializer();
+        $output     = [];
+        $binHash    = hex2bin($nisData["otherHash"]["data"]);
+
+        // serialize specialized fields
+        $uint8_hashLen = $serializer->serializeInt(4 + strlen($binHash));
+        $uint8_hash = $serializer->serializeString($binHash);
+        $uint8_acct = $serializer->serializeString($nisData["otherAccount"]);
+
+        // concatenate the UInt8 representation
+        $output = array_merge(
+            $uint8_hashLen,
+            $uint8_hash,
+            $uint8_acct);
+
+        // specialized data is concatenated to `base transaction data`.
+        return array_merge($baseTx, $output);
     }
 
     /**
