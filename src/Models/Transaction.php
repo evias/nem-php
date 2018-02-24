@@ -46,8 +46,8 @@ class Transaction
      */
     const VERSION_1 = 0x68000000 | 1;
     const VERSION_2 = 0x68000000 | 2;
-    const VERSION_1_TEST = 0x98000000 | 1;
-    const VERSION_2_TEST = 0x98000000 | 2;
+    const VERSION_1_TEST = -1744830463;
+    const VERSION_2_TEST = -1744830462;
     const VERSION_1_MIJIN = 0x60000000 | 1;
     const VERSION_2_MIJIN = 0x60000000 | 2;
 
@@ -133,12 +133,17 @@ class Transaction
      */
     static public function create(array $data = null)
     {
-        if (! $data || empty($data["type"])) {
+        if (empty($data["type"]) && isset($data["transaction"])) {
+            $type = $data["transaction"]["type"];
+        }
+        elseif (! $data || empty($data["type"])) {
             return new static($data);
+        }
+        else {
+            $type = $data["type"];
         }
 
         // valid transaction type input
-        $type = $data["type"];
         $validTypes = array_keys(self::$typesClassMap);
         if (! $type || ! in_array($type, $validTypes)) {
             $type = TransactionType::TRANSFER;
@@ -253,8 +258,12 @@ class Transaction
 
         // validate version field, should always reflect valid NIS tx version
         $version = $this->getAttribute("version");
-        //XXX
-        if (! $version || !in_array($version, [self::VERSION_1, self::VERSION_2, -1744830463, -1744830462])) {
+        $versions = [
+            self::VERSION_1,        self::VERSION_2,
+            self::VERSION_1_TEST,   self::VERSION_2_TEST,
+            self::VERSION_1_MIJIN,  self::VERSION_2_MIJIN
+        ];
+        if (! $version || !in_array($version, $versions)) {
             $version = $versionByContent;
         }
 

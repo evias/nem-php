@@ -27,6 +27,7 @@ use NEM\Models\MosaicAttachments;
 use NEM\Models\MosaicDefinition;
 use NEM\Models\MosaicDefinitions;
 use NEM\Models\Fee;
+use NEM\Models\Transaction;
 
 class MosaicTransfer
     extends Transfer
@@ -41,6 +42,30 @@ class MosaicTransfer
     ];
 
     /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *Transfer* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @see \NEM\Models\Transaction\Transfer::serialize()
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        // @see NEM\Models\Transaction\Transfer::serialize()
+        $baseTx  = parent::serialize($parameters);
+        $nisData = $this->extend();
+
+        // shortcuts
+        $serializer = $this->getSerializer();
+        $output     = [];
+
+        // serialize specialized fields
+        $uint8_mosaics = $this->mosaics()->serialize();
+        return array_merge($baseTx, $uint8_mosaics);
+    }
+
+    /**
      * The MosaicTransfer transaction type adds the `mosaics` offset
      * to the Transaction DTO and also adds all fields defined in the
      * Transfer::extend() overload.
@@ -49,6 +74,26 @@ class MosaicTransfer
      */
     public function extend() 
     {
+        $version = $this->getAttribute("version");
+        $twoByOld = [
+            Transaction::VERSION_1       => Transaction::VERSION_2,
+            Transaction::VERSION_1_TEST  => Transaction::VERSION_2_TEST,
+            Transaction::VERSION_1_MIJIN => Transaction::VERSION_2_MIJIN,
+        ];
+
+        // MosaicTransfer always use *VERSION 2 TRANSACTIONS*.
+        // this small block will make sure to stay on the correct
+        // network in case a version was set before.
+
+        if (in_array($version, array_keys($twoByOld))) {
+            // switch to v2
+            $version = $twoByOld[$version];
+        }
+        elseif (!$version || !in_array($version, array_values($twoByOld))) {
+            // invalid version provided, set default
+            $version = Transaction::VERSION_2_TEST;
+        }
+
         return [
             "amount"    => $this->amount()->toMicro(),
             "recipient" => $this->recipient()->address()->toClean(),
@@ -56,6 +101,7 @@ class MosaicTransfer
             "mosaics"   => $this->mosaics()->toDTO(),
             // transaction type specialization
             "type"      => TransactionType::TRANSFER,
+            "version"   => $version,
         ];
     }
 

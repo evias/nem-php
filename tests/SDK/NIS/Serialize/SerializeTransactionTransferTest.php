@@ -24,6 +24,7 @@ use NEM\Core\Buffer;
 use NEM\Models\Model;
 use NEM\Models\TimeWindow;
 use NEM\Models\Message;
+use NEM\Models\Fee;
 
 // This unit test will test all serializer process Specializations
 use NEM\Models\Transaction\Transfer;
@@ -42,7 +43,7 @@ class SerializeTransactionTransferTest
             "timeStamp" => (new TimeWindow(["timeStamp" => 91793055]))->toDTO(),
             "deadline"  => (new TimeWindow(["timeStamp" => 91796655]))->toDTO(),
             "version"   => -1744830463,
-            "fee"       => 50000,
+            "fee"       => Fee::FEE_FACTOR,
             "amount"    => 10000000,
             "recipient" => "TD2PEY23Y6O3LNGAO4YJYNDRQS3IRTEC7PZUIWLT",
             "signer"    => "d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04",

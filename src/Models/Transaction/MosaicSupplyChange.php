@@ -86,6 +86,38 @@ class MosaicSupplyChange
     }
 
     /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *MosaicSupplyChange* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        $baseTx  = parent::serialize($parameters);
+        $nisData = $this->extend();
+
+        // shortcuts
+        $serializer = $this->getSerializer();
+        $output     = [];
+
+        // serialize specialized fields
+        $uint8_mosaic = $this->mosaicId()->serialize();
+        $uint8_supType = $serializer->serializeInt($nisData["supplyType"]);
+        $uint8_delta   = $serializer->serializeLong($nisData["delta"]);
+
+        // concatenate the UInt8 representation
+        $output = array_merge(
+            $uint8_mosaic,
+            $uint8_supType,
+            $uint8_delta);
+
+        // specialized data is concatenated to `base transaction data`.
+        return array_merge($baseTx, $output);
+    }
+
+    /**
      * Overload the constructor to set specialized casts.
      *
      * @see \NEM\Models\Model

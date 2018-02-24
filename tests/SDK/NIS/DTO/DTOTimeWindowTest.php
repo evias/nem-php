@@ -49,7 +49,7 @@ class DTOTimeWindowTest
      */
     public function testDTOContentVectors(DateTime $date, $expectNIS, $expectUTC)
     {
-        $nemTime = new TimeWindow(["timeStamp" => $date->getTimestamp()]);
+        $nemTime = new TimeWindow(["utc" => $date->getTimestamp()]);
         $nemTimeNIS = $nemTime->toDTO();
 
         // test content
@@ -69,17 +69,17 @@ class DTOTimeWindowTest
             [
                 ($t = new DateTime("2018-01-01 01:01:01")),
                 87180876, // NIS
-                1516196048585 // UTC
+                1514768461 // UTC
             ],
             [
                 ($t1 = new DateTime("2018-01-01 00:01:01")),
                 87180876 - 3600, 
-                TimeWindow::$nemesis + ($t1->getTimestamp() * 1000)
+                $t1->getTimestamp()
             ],
             [
                 ($t2 = new DateTime("2018-01-02 03:33:33")),
                 87180876 + 95552, 
-                TimeWindow::$nemesis + ($t2->getTimestamp() * 1000)
+                $t2->getTimestamp()
             ],
         ];
     }

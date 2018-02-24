@@ -41,10 +41,9 @@ class MosaicProperty
     {
         $value = (string) $this->value;
         if (in_array($this->name, ["supplyMutable", "transferable"])) {
-            $value = ($this->value !== "false" && (bool) $this->value) ? "true" : "false";
+            $value = ($value !== "false" && (bool) $value) ? "true" : "false";
         }
-        elseif (empty($this->value)
-                || 0 > (int) $this->value) {
+        elseif (empty($value) || 0 > (int) $value) {
             $value = "0";
         }
 

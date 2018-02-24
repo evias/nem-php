@@ -42,6 +42,41 @@ class Multisig
     ];
 
     /**
+     * The polymorphic otherTrans attribute instance.
+     * 
+     * @var \NEM\Models\Transaction
+     */
+    protected $otherTransInstance = null;
+
+    /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *Multisig transaction* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        $baseTx  = parent::serialize($parameters);
+        $nisData = $this->extend();
+
+        // shortcuts
+        $serializer = $this->getSerializer();
+        $output     = [];
+
+        // serialize specialized fields
+        $uint8_tx = $this->otherTrans()->serialize($parameters);
+        $uint8_len = $serializer->serializeInt(count($uint8_tx));
+
+        // concatenate the UInt8 representation
+        $output = array_merge($uint8_len, $uint8_tx);
+
+        // specialized data is concatenated to `base transaction data`.
+        return array_merge($baseTx, $output);
+    }
+
+    /**
      * The Multisig transaction type adds offsets `otherTrans` and
      * `signatures`.
      *
@@ -116,20 +151,24 @@ class Multisig
      */
     public function otherTrans(array $transaction = null)
     {
-        // morph Transaction extension - will read the type of transaction
-        // and instantiate the correct class extending Transaction.
-        $morphed = Transaction::create($transaction ?: $this->getAttribute("otherTrans"));
+        if (! isset($this->otherTransInstance)) {
+            // morph Transaction extension - will read the type of transaction
+            // and instantiate the correct class extending Transaction.
+            $morphed = Transaction::create($transaction ?: $this->getAttribute("otherTrans"));
 
-        if ($morphed->type === TransactionType::MULTISIG) {
-            // cannot nest multisig in another multisig.
-            throw new InvalidArgumentException("It is forbidden to nest a Multisig transaction in another Multisig transaction.");
-        }
-        elseif ($morphed->type === TransactionType::MULTISIG_SIGNATURE) {
-            // cannot nest multisig in another multisig.
-            throw new InvalidArgumentException("It is forbidden to nest a Signature transaction in the inner transaction of a Multisig transaction.");
+            if ($morphed->type === TransactionType::MULTISIG) {
+                // cannot nest multisig in another multisig.
+                throw new InvalidArgumentException("It is forbidden to nest a Multisig transaction in another Multisig transaction.");
+            }
+            elseif ($morphed->type === TransactionType::MULTISIG_SIGNATURE) {
+                // cannot nest multisig in another multisig.
+                throw new InvalidArgumentException("It is forbidden to nest a Signature transaction in the inner transaction of a Multisig transaction.");
+            }
+
+            $this->otherTransInstance = $morphed;
         }
 
-        return $morphed;
+        return $this->otherTransInstance;
     }
 
     /**

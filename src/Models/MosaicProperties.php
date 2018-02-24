@@ -98,22 +98,32 @@ class MosaicProperties
         // prepend size on 4 bytes
         $prependSize = $serializer->serializeInt($cntProps);
 
-        // serialize each attachment
-        $stateUInt8 = $prependSize;
-        for ($i = 0; $i < $cntProps; $i++) {
-            $propData = $nisPropertiesData[$i];
-            $property = new MosaicProperty($propData);
+        // prepare objects
+        $props = [
+            new MosaicProperty(["name" => "divisibility", "value" => $nisPropertiesData[0]["value"]]),
+            new MosaicProperty(["name" => "initialSupply", "value" => $nisPropertiesData[1]["value"]]),
+            new MosaicProperty(["name" => "supplyMutable", "value" => $nisPropertiesData[2]["value"]]),
+            new MosaicProperty(["name" => "transferable", "value" => $nisPropertiesData[3]["value"]]),
+        ];
 
-            // use MosaicProperty::serialize() specialization
-            $serialized = $property->serialize();
+        // serialize properties in strict order
+        $uint8_divisibility = $props[0]->serialize();
+        $uint8_supply       = $props[1]->serialize();
+        $uint8_mutable      = $props[2]->serialize();
+        $uint8_transfer     = $props[3]->serialize();
 
-            // use merge here, no aggregator
-            $stateUInt8 = array_merge($stateUInt8, $serialized);
-        }
+        // concatenate uint8 representation
+        $output = array_merge(
+            $prependSize,
+            $uint8_divisibility,
+            $uint8_supply,
+            $uint8_mutable,
+            $uint8_transfer
+        );
 
         // no need to use the aggregator, we dynamically aggregated
         // our collection data and prepended the size on 4 bytes.
-        return $stateUInt8;
+        return $output;
     }
 
     /**
