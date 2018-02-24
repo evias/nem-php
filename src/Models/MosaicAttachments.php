@@ -37,14 +37,18 @@ class MosaicAttachments
         // shortcuts
         $serializer = $this->getSerializer();
 
+        $mapped = $this->map(function(&$attach) {
+            return new MosaicAttachment($attach);
+        });
+
         // sort attachments lexicographically
-        $sorted = $this->sort(function($attach1, $attach2)
+        $sorted = $mapped->sort(function($attach1, $attach2)
         {
             $lexic1 = $attach1->mosaicId()->getFQN() . " : " . $attach1->quantity;
             $lexic2 = $attach2->mosaicId()->getFQN() . " : " . $attach2->quantity;
 
             return $lexic1 < $lexic2 ? -1 : $lexic1 > $lexic2;
-        });
+        })->values();
 
         // serialize attachments
         // prepend size on 4 bytes
@@ -55,9 +59,6 @@ class MosaicAttachments
         for ($i = 0, $len = $sorted->count(); $i < $len; $i++) {
 
             $attachment = $sorted->get($i);
-            if (! ($attachment instanceof MosaicAttachment)) {
-                $attachment = new MosaicAttachment($attachment);
-            }
 
             // use MosaicAttachment::serialize() specialization
             $uint8_attach = $attachment->serialize();

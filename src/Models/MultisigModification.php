@@ -78,6 +78,32 @@ class MultisigModification
     }
 
     /**
+     * Overload of the \NEM\Core\Model::serialize() method to provide
+     * with a specialization for *mosaicId* serialization.
+     *
+     * @see \NEM\Contracts\Serializable
+     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @return  array   Returns a byte-array with values in UInt8 representation.
+     */
+    public function serialize($parameters = null)
+    {
+        $nisData = $this->toDTO();
+
+        // shortcuts
+        $serializer = $this->getSerializer();
+        $output     = [];
+
+        // serialize specialized fields
+        $uint8_struct = $serializer->serializeInt(40); // length of structure
+        $uint8_type   = $serializer->serializeInt($nisData["modificationType"]);
+        $uint8_acct   = $serializer->serializeString(hex2bin($nisData["cosignatoryAccount"]));
+
+        // concatenate uint8 representations
+        $output = array_merge($uint8_struct, $uint8_type, $uint8_acct);
+        return $output;
+    }
+
+    /**
      * Mutator for the cosignatoryAccount Account object.
      *
      * @return \NEM\Models\Account

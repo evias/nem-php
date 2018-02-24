@@ -133,12 +133,17 @@ class Transaction
      */
     static public function create(array $data = null)
     {
-        if (! $data || empty($data["type"])) {
+        if (empty($data["type"]) && isset($data["transaction"])) {
+            $type = $data["transaction"]["type"];
+        }
+        elseif (! $data || empty($data["type"])) {
             return new static($data);
+        }
+        else {
+            $type = $data["type"];
         }
 
         // valid transaction type input
-        $type = $data["type"];
         $validTypes = array_keys(self::$typesClassMap);
         if (! $type || ! in_array($type, $validTypes)) {
             $type = TransactionType::TRANSFER;

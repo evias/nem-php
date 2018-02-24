@@ -70,7 +70,7 @@ class DTOTransactionMultisigAggregateModificationTest
                     "cosignatoryAccount" => "d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04"
                 ])
             ]))->toDTO(),
-            "minCosignatories" => 1,
+            "relativeChange" => 1,
         ];
 
         $transaction = new MultisigAggregateModification($txData);
