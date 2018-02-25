@@ -26,7 +26,7 @@ namespace NEM\Models;
  * to provide with an integration of NEM's mosaic 
  * definition objects (not transaction).
  * 
- * @link https://nemproject.github.io/#mosaic
+ * @link https://nemproject.github.io/#mosaicDefinition
  */
 class MosaicDefinition
     extends Model

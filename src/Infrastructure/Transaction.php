@@ -61,7 +61,7 @@ class Transaction
      */
     public function announce(TxModel $transaction, KeyPair $kp = null)
     {
-        // set optional `signer`
+        // set optional `signer` in case we provide a KeyPair
         if (null !== $kp) {
             $transaction->setAttribute("signer", $kp->publicKey);
         }

@@ -26,7 +26,7 @@ namespace NEM\Models;
  * to provide with an integration of NEM's Mosaic 
  * objects.
  * 
- * @link https://nemproject.github.io/#transaction-data-with-decoded-messages
+ * @link https://nemproject.github.io/#mosaicId
  */
 class Mosaic
     extends Model

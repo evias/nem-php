@@ -31,7 +31,7 @@ use NEM\Models\Mosaic;
  * to provide with an integration of NEM's mosaic 
  * supply change transactions.
  * 
- * @link https://nemproject.github.io/#mosaicDefinitionCreationTransaction
+ * @link https://nemproject.github.io/#mosaicSupplyChangeTransaction
  */
 class MosaicSupplyChange
     extends Transaction
