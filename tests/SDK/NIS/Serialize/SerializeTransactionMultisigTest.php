@@ -70,14 +70,17 @@ class SerializeTransactionMultisigTest
 
         // test specialized MosaicAttachment::serialize() serialization process
         $serialized = $transaction->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [
             4,16,0,0,1,0,0,152,192,47,121,5,32,0,0,0,217,12,8,207,187,249,24,217,48,77,221,69,246,67,37,100,195,144,165,250,207,243,223,23,237,92,9,108,76,207,13,4,240,73,2,0,0,0,0,0,208,61,121,5,142,0,0,0,1,1,0,0,1,0,0,152,192,47,121,5,32,0,0,0,72,14,84,195,143,237,208,242,191,45,83,19,43,129,156,53,186,66,112,169,20,74,245,90,115,243,37,104,106,169,60,150,160,134,1,0,0,0,0,0,208,61,121,5,40,0,0,0,84,68,50,80,69,89,50,51,89,54,79,51,76,78,71,65,79,52,89,74,89,78,68,82,81,83,51,73,82,84,69,67,55,80,90,85,73,87,76,84,128,150,152,0,0,0,0,0,26,0,0,0,1,0,0,0,18,0,0,0,72,101,108,108,111,44,32,77,117,108,116,105,45,71,114,101,103,33
         ];
         $expectSize = count($expectUInt8);
+        $expectHex  = "0410000001000098c02f790520000000d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04f049020000000000d03d79058e0000000101000001000098c02f790520000000480e54c38fedd0f2bf2d53132b819c35ba4270a9144af55a73f325686aa93c96a086010000000000d03d790528000000544432504559323359364f334c4e47414f34594a594e4452515333495254454337505a5549574c5480969800000000001a000000010000001200000048656c6c6f2c204d756c74692d4772656721";
 
         $this->assertNotEmpty($serialized);
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
         $this->assertEquals($expectSize, count($serialized));
     }
@@ -119,14 +122,17 @@ class SerializeTransactionMultisigTest
 
         // test specialized MosaicAttachment::serialize() serialization process
         $serialized = $transaction->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [
             4,16,0,0,1,0,0,152,212,107,121,5,32,0,0,0,217,12,8,207,187,249,24,217,48,77,221,69,246,67,37,100,195,144,165,250,207,243,223,23,237,92,9,108,76,207,13,4,240,73,2,0,0,0,0,0,228,121,121,5,116,0,0,0,1,16,0,0,2,0,0,152,212,107,121,5,32,0,0,0,72,14,84,195,143,237,208,242,191,45,83,19,43,129,156,53,186,66,112,169,20,74,245,90,115,243,37,104,106,169,60,150,32,161,7,0,0,0,0,0,228,121,121,5,1,0,0,0,40,0,0,0,2,0,0,0,32,0,0,0,114,17,123,66,84,185,228,156,223,186,166,183,193,130,95,0,44,221,85,200,56,202,120,72,82,145,220,169,131,78,193,118,4,0,0,0,255,255,255,255
         ];
         $expectSize = count($expectUInt8);
+        $expectHex  = "0410000001000098d46b790520000000d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04f049020000000000e4797905740000000110000002000098d46b790520000000480e54c38fedd0f2bf2d53132b819c35ba4270a9144af55a73f325686aa93c9620a1070000000000e47979050100000028000000020000002000000072117b4254b9e49cdfbaa6b7c1825f002cdd55c838ca78485291dca9834ec17604000000ffffffff";
 
         $this->assertNotEmpty($serialized);
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
         $this->assertEquals($expectSize, count($serialized));
     }

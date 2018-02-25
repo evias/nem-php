@@ -54,6 +54,7 @@ class SerializeTransactionNamespaceProvisionTest
 
         // test specialized MosaicAttachment::serialize() serialization process
         $serialized = $transaction->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [
@@ -92,8 +93,10 @@ class SerializeTransactionNamespaceProvisionTest
           105,  97, 115
         ];
         $expectSize = count($expectUInt8);
+        $expectHex  = "0120000001000098e91a710520000000d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04f049020000000000f92871052800000054414d4553504143455748344d4b464d42435646455244504f4f5034464b374d54444a455950333580969800000000000300000073646b050000006576696173";
 
         $this->assertNotEmpty($serialized);
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
         $this->assertEquals($expectSize, count($serialized));
     }

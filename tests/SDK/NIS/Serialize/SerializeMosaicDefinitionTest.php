@@ -63,6 +63,7 @@ class SerializeMosaicDefinitionTest
 
         // test specialized MosaicAttachment::serialize() serialization process
         $serialized = $definition->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [
@@ -124,10 +125,10 @@ class SerializeMosaicDefinitionTest
              0
         ];
         $expectSize = count($expectUInt8);
+        $expectHex  = "20000000d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04180000000900000065766961732e73646b070000006e656d2d7068702000000068747470733a2f2f6769746875622e636f6d2f65766961732f6e656d2d70687004000000150000000c00000064697669736962696c69747901000000301b0000000d000000696e697469616c537570706c7906000000323930383838190000000d000000737570706c794d757461626c650400000074727565180000000c0000007472616e7366657261626c65040000007472756500000000";
 
         $this->assertNotEmpty($serialized);
-
-        // WIP: serialize needs correctly functioning DTOs.
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
         $this->assertEquals($expectSize, count($serialized));
     }

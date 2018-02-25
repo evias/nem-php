@@ -53,6 +53,7 @@ class SerializeTransactionImportanceTransferTest
 
         // test specialized MosaicAttachment::serialize() serialization process
         $serialized = $transaction->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [
@@ -83,8 +84,10 @@ class SerializeTransactionImportanceTransferTest
           197,  99,  24,   4
         ];
         $expectSize = count($expectUInt8);
+        $expectHex  = "0108000001000098e9b9780520000000d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04f049020000000000f9c7780501000000200000009dc1d7549c714775c4accfd62e0cf750ee370ed47e158d2bebff46f3c5631804";
 
         $this->assertNotEmpty($serialized);
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
         $this->assertEquals($expectSize, count($serialized));
     }
