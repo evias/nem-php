@@ -25,7 +25,16 @@ use NEM\Core\Encoder;
 use NEM\Core\Encryption;
 use \ParagonIE_Sodium_Core_Ed25519;
 
-
+/**
+ * This is the KeyGenerator class
+ *
+ * This class implements the NEM Public Key derivation
+ * system. Public Keys on NEM are generated from a Keccak-512
+ * hash of the KeyPair's secret key.
+ * 
+ * Scalar multiplication is done using the ParagonIE library
+ * internally. See the `sk_to_pk` call which handle ED25519.
+ */
 class KeyGenerator
 {
     /**

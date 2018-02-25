@@ -22,6 +22,15 @@ namespace NEM\Models;
 use DateTime;
 use DateTimeZone;
 
+/**
+ * This is the TimeWindow class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's timeStamp
+ * system.
+ * 
+ * @link https://nemproject.github.io/
+ */
 class TimeWindow
     extends Model
 {

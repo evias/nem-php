@@ -19,6 +19,16 @@
  */
 namespace NEM\Contracts;
 
+/**
+ * This is the DataTransferObject interface
+ *
+ * This interface defines a Contract for generic
+ * NIS compliant objects.
+ *
+ * A "DTO" defines `attributes` and a `toDTO()`
+ * method used easy formatting in NIS compliant
+ * formats.
+ */
 interface DataTransferObject
 {
     /**

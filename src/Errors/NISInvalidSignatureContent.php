@@ -20,6 +20,14 @@ namespace NEM\Errors;
 
 use RuntimeException;
 
+/**
+ * This is the NISInvalidSignatureContent Exception
+ *
+ * This exception is thrown when an invalid content
+ * is detected on passed data for a signature
+ * 
+ * @see \NEM\Core\KeyPair
+ */
 class NISInvalidSignatureContent
     extends RuntimeException
 {

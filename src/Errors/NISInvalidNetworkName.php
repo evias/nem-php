@@ -20,6 +20,14 @@ namespace NEM\Errors;
 
 use RuntimeException;
 
+/**
+ * This is the NISInvalidNetworkName Exception
+ *
+ * This exception is thrown when an invalid Network
+ * name is provided to Network class.
+ * 
+ * @see \NEM\Models\Network
+ */
 class NISInvalidNetworkName
     extends RuntimeException
 {

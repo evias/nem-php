@@ -28,6 +28,15 @@ use NEM\Models\MosaicAttachments;
 
 use RuntimeException;
 
+/**
+ * This is the Fee class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's fee 
+ * structure implementation.
+ * 
+ * @link https://nemproject.github.io/
+ */
 class Fee
     extends Amount
 {

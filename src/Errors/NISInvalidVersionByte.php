@@ -20,6 +20,14 @@ namespace NEM\Errors;
 
 use RuntimeException;
 
+/**
+ * This is the NISInvalidVersionByte Exception
+ *
+ * This exception is thrown when an invalid version
+ * byte is provided to the Network class.
+ * 
+ * @see \NEM\Models\Network
+ */
 class NISInvalidVersionByte
     extends RuntimeException
 {

@@ -19,6 +19,14 @@
  */
 namespace NEM\Models;
 
+/**
+ * This is the TransactionType class
+ *
+ * This class defines the valid Transaction Types
+ * on the NEM network.
+ * 
+ * @link https://nemproject.github.io/
+ */
 class TransactionType
 {
     /**

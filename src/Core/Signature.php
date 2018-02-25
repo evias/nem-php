@@ -27,6 +27,12 @@ use \ParagonIE_Sodium_Compat;
 use \ParagonIE_Sodium_Core_Ed25519;
 USE \SodiumException;
 
+/**
+ * This is the Signature class
+ *
+ * This class implements an easy interface for signatures
+ * in the ED25519 scheme with Keccak-512 hashing algorithm.
+ */
 class Signature
     extends ParagonIE_Sodium_Core_Ed25519
 {

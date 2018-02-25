@@ -19,6 +19,15 @@
  */
 namespace NEM\Models;
 
+/**
+ * This is the MultisigInfo class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's multisig 
+ * information objects.
+ * 
+ * @link https://nemproject.github.io/#accountInfo
+ */
 class MultisigInfo
     extends Model
 {

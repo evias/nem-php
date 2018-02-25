@@ -25,6 +25,18 @@ use NEM\Models\MosaicProperty;
 use NEM\Models\MosaicLevy;
 use NEM\Models\Mosaic;
 
+/**
+ * This is the Nem\Xem class
+ *
+ * This class defines the parameters of mosaic
+ * definition of the asset `nem:xem` on the
+ * NEM Mainnet Network.
+ * 
+ * This mosaic is special on the NEM network as
+ * it is also used for paying fees of transactions.
+ * 
+ * @link https://docs.nem.io
+ */
 class Xem
     extends MosaicDefinition
 {

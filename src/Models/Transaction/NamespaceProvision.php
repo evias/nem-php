@@ -24,6 +24,15 @@ use NEM\Models\TransactionType;
 use NEM\Models\Account;
 use NEM\Models\Fee;
 
+/**
+ * This is the NamespaceProvision class
+ *
+ * This class extends the NEM\Models\Transaction class
+ * to provide with an integration of NEM's namespace 
+ * provision transactions
+ * 
+ * @link https://nemproject.github.io/#provisionNamespaceTransaction
+ */
 class NamespaceProvision
     extends Transaction
 {

@@ -27,6 +27,18 @@ use \ParagonIE_Sodium_Core_X25519 as Ed25519ref10;
 use \SodiumException;
 use RuntimeException;
 
+/**
+ * This is the Encryption class
+ *
+ * This class provides with a layer of abstraction for
+ * Encryption and Hashing using Keccak.
+ * 
+ * Keccak-512 is used as a default hashing algorithm in
+ * case you don't specify any.
+ * 
+ * Internally, the \NEM\Core\Buffer class is used to work
+ * with byte-level representation of data more easily.
+ */
 class Encryption
 {
     /**

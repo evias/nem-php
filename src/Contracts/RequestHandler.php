@@ -29,8 +29,6 @@ namespace NEM\Contracts;
  * GET and POST requests as of the first version.
  * Further methods could be added to this contract in
  * case implemented NEM API calls need those.
- *
- * @author Grégory Saive <greg@evias.be>
  */
 interface RequestHandler
     extends Connector

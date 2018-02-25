@@ -26,6 +26,12 @@ use NEM\Models\Mutators\CollectionMutator;
 
 use BadMethodCallException;
 
+/**
+ * This is the SDK class
+ *
+ * This class defines base parameters for the integration
+ * of the NEM blockchain.
+ */
 class SDK
 {
     /**

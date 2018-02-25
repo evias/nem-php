@@ -28,6 +28,15 @@ use NEM\Models\MultisigModifications;
 use NEM\Models\MultisigModification;
 use NEM\Core\Serializer;
 
+/**
+ * This is the MultisigAggregateModification class
+ *
+ * This class extends the NEM\Models\Transaction class
+ * to provide with an integration of NEM's multisig 
+ * aggregate modification transactions
+ * 
+ * @link https://nemproject.github.io/#multisigAggregateModificationTransaction
+ */
 class MultisigAggregateModification
     extends Transaction
 {

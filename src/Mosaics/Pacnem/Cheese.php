@@ -25,6 +25,20 @@ use NEM\Models\MosaicProperty;
 use NEM\Models\MosaicLevy;
 use NEM\Models\Mosaic;
 
+/**
+ * This is the Pacnem\Cheese class
+ *
+ * This class defines the parameters of mosaic
+ * definition of the asset `pacnem:cheese` on the
+ * NEM Testnet Network.
+ * 
+ * The `pacnem:cheese` asset is integrated as a 
+ * Score Token in the PacNEM game. Any player reaching
+ * the High Score top 10 list will be rewarded with the
+ * equivalent amount of tokens.
+ * 
+ * @link https://www.pacnem.com
+ */
 class Cheese
     extends MosaicDefinition
 {

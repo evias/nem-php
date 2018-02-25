@@ -22,6 +22,16 @@ use NEM\Contracts\Serializable;
 use InvalidArgumentException;
 use RuntimeException;
 
+/**
+ * This is the Encoder class
+ *
+ * This class provides with a few utility methods to work
+ * with transcribe UInt8 objects and hexadecimal payloads.
+ * 
+ * The Encoder class is used internally when UInt8 types
+ * must be converted to hexadecimal representation or 
+ * Int32 (Words) representation.
+ */
 class Encoder
 {
     /**

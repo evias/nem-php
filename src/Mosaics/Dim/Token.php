@@ -25,6 +25,15 @@ use NEM\Models\MosaicProperty;
 use NEM\Models\MosaicLevy;
 use NEM\Models\Mosaic;
 
+/**
+ * This is the Dim\Token class
+ *
+ * This class defines the parameters of mosaic
+ * definition of the asset `dim:token` on the
+ * NEM Mainnet Network.
+ * 
+ * @link https://dimcoin.io
+ */
 class Token
     extends MosaicDefinition
 {

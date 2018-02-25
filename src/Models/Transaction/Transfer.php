@@ -23,6 +23,15 @@ use NEM\Models\Transaction;
 use NEM\Models\TransactionType;
 use NEM\Models\Fee;
 
+/**
+ * This is the Transfer class
+ *
+ * This class extends the NEM\Models\Transaction class
+ * to provide with an integration of NEM's transfer 
+ * transactions
+ * 
+ * @link https://nemproject.github.io/#transferTransaction
+ */
 class Transfer
     extends Transaction
 {

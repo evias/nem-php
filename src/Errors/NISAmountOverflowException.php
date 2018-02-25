@@ -20,6 +20,14 @@ namespace NEM\Errors;
 
 use RuntimeException;
 
+/**
+ * This is the NISAmountOverflowException Exception
+ *
+ * This exception is thrown when an amount overflow
+ * error happens when working with the Amount class.
+ * 
+ * @see \NEM\Models\Amount
+ */
 class NISAmountOverflowException
     extends RuntimeException
 {

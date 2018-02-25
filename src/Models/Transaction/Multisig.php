@@ -27,6 +27,15 @@ use NEM\Models\Fee;
 
 use InvalidArgumentException;
 
+/**
+ * This is the Multisig class
+ *
+ * This class extends the NEM\Models\Transaction class
+ * to provide with an integration of NEM's multisignature 
+ * transactions
+ * 
+ * @link https://nemproject.github.io/#multisigTransaction
+ */
 class Multisig
     extends Transaction
 {

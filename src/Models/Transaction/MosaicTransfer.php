@@ -29,6 +29,15 @@ use NEM\Models\MosaicDefinitions;
 use NEM\Models\Fee;
 use NEM\Models\Transaction;
 
+/**
+ * This is the MosaicTransfer class
+ *
+ * This class extends the NEM\Models\Transfer class
+ * to provide with an integration of NEM's mosaic 
+ * transfer transactions (version 2 transactions).
+ * 
+ * @link https://nemproject.github.io/#transferTransaction
+ */
 class MosaicTransfer
     extends Transfer
 {

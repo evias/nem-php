@@ -20,6 +20,15 @@ namespace NEM\Errors;
 
 use RuntimeException;
 
+/**
+ * This is the NISInvalidPublicKeyFormat Exception
+ *
+ * This exception is thrown when an invalid format
+ * is detected on passed data for the public key
+ * of a KeyPair.
+ * 
+ * @see \NEM\Core\KeyPair
+ */
 class NISInvalidPublicKeyFormat
     extends RuntimeException
 {

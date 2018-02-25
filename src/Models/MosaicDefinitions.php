@@ -23,6 +23,15 @@ use \NEM\Models\Mosaic;
 use \NEM\Models\MosaicDefinition;
 use \NEM\Mosaics\Registry;
 
+/**
+ * This is the MosaicDefinitions class
+ *
+ * This class extends the NEM\Models\ModelCollection class
+ * to provide with an integration of NEM's mosaic 
+ * definition lists (not transaction).
+ * 
+ * @link https://nemproject.github.io/#mosaicDefinition
+ */
 class MosaicDefinitions
     extends ModelCollection
 {

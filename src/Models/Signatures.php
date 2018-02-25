@@ -19,6 +19,15 @@
  */
 namespace NEM\Models;
 
+/**
+ * This is the Signatures class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's multisig 
+ * signature lists.
+ * 
+ * @link https://nemproject.github.io/#multisigAggregateModificationTransaction
+ */
 class Signatures
     extends ModelCollection
 {

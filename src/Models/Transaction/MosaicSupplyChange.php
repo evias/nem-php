@@ -24,6 +24,15 @@ use NEM\Models\TransactionType;
 use NEM\Models\Fee;
 use NEM\Models\Mosaic;
 
+/**
+ * This is the MosaicSupplyChange class
+ *
+ * This class extends the NEM\Models\Transaction class
+ * to provide with an integration of NEM's mosaic 
+ * supply change transactions.
+ * 
+ * @link https://nemproject.github.io/#mosaicDefinitionCreationTransaction
+ */
 class MosaicSupplyChange
     extends Transaction
 {

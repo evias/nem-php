@@ -21,6 +21,16 @@ namespace NEM\Core;
 use kornrunner\Keccak;
 use NEM\Core\Buffer;
 
+/**
+ * This is the KeccakHasher class
+ *
+ * This class currently only defines a `hash()` method 
+ * which allows one of: keccak-512, keccak-384, keccak-256
+ * and keccak-228.
+ * 
+ * The package kornrunner/Keccak is used to handle Keccak
+ * hashing.
+ */
 class KeccakHasher
 {
     /**

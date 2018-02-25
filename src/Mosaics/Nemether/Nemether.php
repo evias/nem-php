@@ -25,6 +25,13 @@ use NEM\Models\MosaicProperty;
 use NEM\Models\MosaicLevy;
 use NEM\Models\Mosaic;
 
+/**
+ * This is the Nemether\Nemether class
+ *
+ * This class defines the parameters of mosaic
+ * definition of the asset `nemether:nemether` on the
+ * NEM Mainnet Network.
+ */
 class Nemether
     extends MosaicDefinition
 {

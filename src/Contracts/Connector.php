@@ -26,9 +26,6 @@ namespace NEM\Contracts;
  *
  * A "Connector" object must define the properties
  * `use_ssl`, `host`, `port` and `endpoint`.
- *
- * @see  \NEM\Contracts\ConnectionPolicy
- * @author Grégory Saive <greg@evias.be>
  */
 interface Connector
 {

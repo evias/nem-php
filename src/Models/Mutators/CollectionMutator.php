@@ -26,6 +26,14 @@ use NEM\Contracts\DataTransferObject;
 
 use BadMethodCallException;
 
+/**
+ * This is the CollectionMutator class
+ *
+ * This class provides with an abstraction to create
+ * collections of Models. 
+ * 
+ * @see \NEM\Models\ModelCollection
+ */
 class CollectionMutator
 {
     /**

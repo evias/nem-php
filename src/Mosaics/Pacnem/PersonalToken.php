@@ -25,6 +25,22 @@ use NEM\Models\MosaicProperty;
 use NEM\Models\MosaicLevy;
 use NEM\Models\Mosaic;
 
+/**
+ * This is the Pacnem\PersonalToken class
+ *
+ * This class defines the parameters of mosaic
+ * definition of the asset `pacnem:personal-token` 
+ * on the NEM Testnet Network.
+ * 
+ * The `pacnem:personal-token` asset is integrated as a 
+ * Utility Token in the PacNEM game. This token is used
+ * for authentication on the blockchain. It is clearly
+ * not recommended to use this in any *business* integration
+ * but for the matter of the showcase that PacNEM is, it
+ * was integrated for user authentication.
+ * 
+ * @link https://www.pacnem.com
+ */
 class PersonalToken
     extends MosaicDefinition
 {

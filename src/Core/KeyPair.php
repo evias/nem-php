@@ -30,6 +30,15 @@ use NEM\Errors\NISInvalidPublicKeyContent;
 use NEM\Errors\NISInvalidSignatureContent;
 use \ParagonIE_Sodium_Core_Ed25519;
 
+/**
+ * This is the KeyPair class
+ *
+ * This class implements NEM KeyPairs. A KeyPair consists
+ * of a Public Key and a Private Key.
+ * 
+ * Out of a KeyPair's public key, you can build a NEM Wallet
+ * Address.
+ */
 class KeyPair
     implements KeyPairContract
 {
