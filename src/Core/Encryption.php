@@ -70,6 +70,10 @@ class Encryption
         elseif (is_string($data)) {
             return new Buffer($data);
         }
+        elseif (is_array($data)) {
+            // Uint8 provided (serialized data)
+            return Buffer::fromUInt8($data);
+        }
 
         return new Buffer((string) $data);
     }

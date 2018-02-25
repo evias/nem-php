@@ -132,6 +132,10 @@ class Signature
         elseif (is_string($data)) {
             $this->data = new Buffer($data); // auto-sized
         }
+        elseif (is_array($data)) {
+            // Uint8 provided (serialized data)
+            $this->data = Buffer::fromUInt8($data);
+        }
         else {
             throw new NISInvalidSignatureContent("Invalid content provided for \\NEM\\Core\\Signature object.");
         }

@@ -55,9 +55,9 @@ class Service
      *
      * @return void
      */
-    public function __construct(API $api) 
+    public function __construct(API $api = null) 
     {
-        $this->api = $api;
+        $this->api = $api ?: new API([]);
     }
 
     /**

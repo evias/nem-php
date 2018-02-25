@@ -21,6 +21,7 @@ namespace NEM\Infrastructure;
 
 use NEM\Models\Transaction as TxModel;
 use NEM\Core\KeyPair;
+use NEM\Core\Buffer;
 use NEM\Core\Serializer;
 
 /**
@@ -44,6 +45,47 @@ class Transaction
     protected $baseUrl = "/transaction";
 
     /**
+     * Helper method to retrieve the transaction announce endpoint URL
+     * given a pair of `transaction` and `kp` keypair parameters.
+     * 
+     * In cases where you don't provide a KeyPair, the `prepare-announce`
+     * method will be used, please be warned that this only works on a 
+     * locally running NIS API connection.
+     * 
+     * in case a `kp` keypair is provided, we will sign the transaction
+     * locally so we can use `/transaction/announce` directly.
+     * 
+     * @param   \NEM\Models\Transaction     $transaction
+     * @param   null|\NEM\Core\KeyPair      $kp
+     * @return  string
+     */
+    public function getAnnouncePath(TxModel $transaction, KeyPair $kp = null)
+    {
+        // in case a `kp` keypair is provided, we will sign the transaction
+        // locally so we can use `/transaction/announce` directly.
+        return null !== $kp ? "announce" : "prepare-announce";
+    }
+
+    /**
+     * Helper method to sign a transaction with a given keypair `kp`.
+     * 
+     * If no keypair is provided, this method will return `null`.
+     * 
+     * @internal This method is used internally to determined whether
+     *           instanciated keypairs are detected and to make sure that
+     *           Client Signatures are always created when possible.
+     * 
+     * @param   \NEM\Models\Transaction     $transaction
+     * @param   null|\NEM\Core\KeyPair      $kp
+     * @param   array                       $serialized     The serialized UInt8 byte array
+     * @return  null|\NEM\Core\Buffer
+     */
+    public function signTransaction(TxModel $transaction, KeyPair $kp = null, array $serialized = [])
+    {
+        return null !== $kp ? $kp->sign($serialized) : null;
+    }
+
+    /**
      * Announce a transaction. The transaction will be serialized before
      * it is sent to the server. 
      * 
@@ -57,7 +99,7 @@ class Transaction
      * even local.
      * 
      * @param   \NEM\Models\Transaction     $transaction
-     * @return  \NEM\Models\Transaction
+     * @return  \NEM\Models\Model
      */
     public function announce(TxModel $transaction, KeyPair $kp = null)
     {
@@ -68,28 +110,28 @@ class Transaction
 
         // now we can serialize and sign
         $serialized = $transaction->serialize();
-        $signature  = null !== $kp ? $kp->sign($serialized) : null;
+        $signature  = $this->signTransaction($transaction, $kp, $serialized);
         $broadcast  = [];
 
         if ($signature) {
             // valid KeyPair provided, signature was created.
 
             // recommended signed transaction broadcast method.
-            $endpoint  = "transaction/announce";
+            // this will use the /transaction/announce endpoint.
             $broadcast = [
-                "data" => $serialized,
-                "signature" => $signature,
+                "data" => Buffer::fromUInt8($serialized)->getHex(),
+                "signature" => $signature->getHex(),
             ];
         }
         else {
             // WARNING: with this you must provide a `privateKey`
             // in the transaction attributes. This is *not* recommended.
-            $endpoint  = "transaction/prepare-announce";
             $broadcast = $transaction->toDTO();
         }
 
-        $apiUrl = $this->getPath($endpoint, []);
-        $response = $this->api->post($apiUrl, $params);
+        $endpoint = $this->getAnnouncePath($transaction, $kp);
+        $apiUrl   = $this->getPath($endpoint, []);
+        $response = $this->api->post($apiUrl, $broadcast);
 
         //XXX include Error checks
         $object = json_decode($response);
@@ -103,7 +145,7 @@ class Transaction
     public function byHash($hash)
     {
         $params = ["hash" => $hash];
-        $apiUrl = $this->getPath('transfers/incoming', $params);
+        $apiUrl = $this->getPath('get', $params);
         $response = $this->api->getJSON($apiUrl);
 
         //XXX include Error checks

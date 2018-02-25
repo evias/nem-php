@@ -34,6 +34,9 @@
         <testsuite name="NEM PHP SDK NIS Compliance Serializer Test Suite">
             <directory suffix="Test.php">./tests/SDK/NIS/Serialize</directory>
         </testsuite>
+        <testsuite name="NEM PHP SDK NIS Compliance Infrastructure Test Suite">
+            <directory suffix="Test.php">./tests/SDK/NIS/Service</directory>
+        </testsuite>
     </testsuites>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
