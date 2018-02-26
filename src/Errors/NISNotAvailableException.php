@@ -20,6 +20,14 @@ namespace NEM\Errors;
 
 use RuntimeException;
 
+/**
+ * This is the NISNotAvailableException Exception
+ *
+ * This exception is thrown when the NIS API is not 
+ * available on the connected (or not) node.
+ * 
+ * @see \NEM\API
+ */
 class NISNotAvailableException
     extends RuntimeException
 {

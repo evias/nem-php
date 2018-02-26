@@ -22,6 +22,15 @@ namespace NEM\Models;
 use NEM\Core\Encryption as CryptoHelper;
 use RuntimeException;
 
+/**
+ * This is the Message class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's message 
+ * payload objects.
+ * 
+ * @link https://nemproject.github.io/#transaction-data-with-decoded-messages
+ */
 class Message
     extends Model
 {

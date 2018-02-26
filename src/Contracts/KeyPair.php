@@ -26,8 +26,6 @@ namespace NEM\Contracts;
  * A Key Pair consists of a Public Key and a Private Key. The 
  * address of the account can always be computed from the 
  * Public Key.
- *
- * @author Grégory Saive <greg@evias.be>
  */
 interface KeyPair
 {

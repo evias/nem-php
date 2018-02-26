@@ -20,6 +20,15 @@ namespace NEM\Errors;
 
 use RuntimeException;
 
+/**
+ * This is the NISInvalidPrivateKeySize Exception
+ *
+ * This exception is thrown when an invalid size
+ * is detected on passed data for the private key
+ * of a KeyPair.
+ * 
+ * @see \NEM\Core\KeyPair
+ */
 class NISInvalidPrivateKeySize
     extends RuntimeException
 {

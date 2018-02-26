@@ -24,6 +24,15 @@ use NEM\Models\TransactionType;
 use NEM\Models\Fee;
 use NEM\Models\Mosaic;
 
+/**
+ * This is the MosaicSupplyChange class
+ *
+ * This class extends the NEM\Models\Transaction class
+ * to provide with an integration of NEM's mosaic 
+ * supply change transactions.
+ * 
+ * @link https://nemproject.github.io/#mosaicSupplyChangeTransaction
+ */
 class MosaicSupplyChange
     extends Transaction
 {
@@ -114,7 +123,7 @@ class MosaicSupplyChange
             $uint8_delta);
 
         // specialized data is concatenated to `base transaction data`.
-        return array_merge($baseTx, $output);
+        return ($this->serialized = array_merge($baseTx, $output));
     }
 
     /**

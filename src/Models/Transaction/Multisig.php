@@ -27,6 +27,15 @@ use NEM\Models\Fee;
 
 use InvalidArgumentException;
 
+/**
+ * This is the Multisig class
+ *
+ * This class extends the NEM\Models\Transaction class
+ * to provide with an integration of NEM's multisignature 
+ * transactions
+ * 
+ * @link https://nemproject.github.io/#multisigTransaction
+ */
 class Multisig
     extends Transaction
 {
@@ -73,7 +82,7 @@ class Multisig
         $output = array_merge($uint8_len, $uint8_tx);
 
         // specialized data is concatenated to `base transaction data`.
-        return array_merge($baseTx, $output);
+        return ($this->serialized = array_merge($baseTx, $output));
     }
 
     /**

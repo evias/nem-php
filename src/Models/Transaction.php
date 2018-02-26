@@ -30,6 +30,24 @@ use NEM\Models\Fee;
 use NEM\Models\Account;
 use NEM\Models\Message;
 
+/**
+ * This is the Transaction class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's transactions.
+ * 
+ * The transaction class provides with an abstraction layer for
+ * any typed transaction on the NEM network. Classes extending 
+ * this one define specializations for transactions data on the
+ * blockchain.
+ * 
+ * @internal This class should not be used directly by your
+ *           program. Please have a look at the classes extending
+ *           this one under \NEM\Models\Transaction\. For example
+ *           \NEM\Models\Transaction\Transfer.
+ * 
+ * @link https://nemproject.github.io/
+ */
 class Transaction
     extends Model
 {
@@ -122,6 +140,16 @@ class Transaction
         "type"      => "int",
         "version"   => "int",
     ];
+
+    /**
+     * This contains the serialized copy of a transaction.
+     * 
+     * This array will be filled the first time you call the
+     * serialize() method.
+     * 
+     * @var array
+     */
+    protected $serialized = null;
 
     /**
      * Class method to create a Transaction object out of
@@ -345,7 +373,7 @@ class Transaction
             $uint8_deadline);
 
         // done with `base transaction data` serialization.
-        return $output;
+        return ($this->serialized = $output);
     }
 
     /**

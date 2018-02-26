@@ -21,6 +21,15 @@ namespace NEM\Models;
 
 use NEM\Errors\NISAmountOverflowException;
 
+/**
+ * This is the Amount class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's mosaics 
+ * amounts objects.
+ * 
+ * @link https://nemproject.github.io/
+ */
 class Amount
     extends Model
 {

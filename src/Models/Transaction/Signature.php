@@ -24,6 +24,15 @@ use NEM\Models\Account;
 use NEM\Models\TransactionType;
 use NEM\Models\Fee;
 
+/**
+ * This is the Signature class
+ *
+ * This class extends the NEM\Models\Transaction class
+ * to provide with an integration of NEM's signature 
+ * transactions
+ * 
+ * @link https://nemproject.github.io/#multisigSignatureTransaction
+ */
 class Signature
     extends Transaction
 {
@@ -115,7 +124,7 @@ class Signature
             $uint8_acct);
 
         // specialized data is concatenated to `base transaction data`.
-        return array_merge($baseTx, $output);
+        return ($this->serialized = array_merge($baseTx, $output));
     }
 
     /**

@@ -21,6 +21,15 @@ namespace NEM\Models;
 
 use InvalidArgumentException;
 
+/**
+ * This is the MosaicProperties class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's mosaic 
+ * properties lists.
+ * 
+ * @link https://nemproject.github.io/#mosaicProperties
+ */
 class MosaicProperties
     extends ModelCollection
 {

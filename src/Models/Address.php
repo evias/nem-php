@@ -30,6 +30,15 @@ use NEM\Core\Encryption;
 use kornrunner\Keccak;
 use Base32\Base32;
 
+/**
+ * This is the Address class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's Wallet 
+ * Addresses objects.
+ * 
+ * @link https://nemproject.github.io/
+ */
 class Address
     extends Model
 {

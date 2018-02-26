@@ -23,6 +23,16 @@ use NEM\Models\Address;
 use NEM\Errors\NISInvalidAddressFormat;
 use NEM\Errors\NISInvalidNetworkId;
 
+/**
+ * This is the Network Infrastructure service
+ *
+ * This service implements API endpoints of the NEM
+ * Infrastructure.
+ * 
+ * @internal This class is currently *not* unit tested.
+ *           Parts of this class may be malfunctioning or 
+ *           not working all.
+ */
 class Network
     extends Service
 {

@@ -27,6 +27,12 @@ use \ParagonIE_Sodium_Compat;
 use \ParagonIE_Sodium_Core_Ed25519;
 USE \SodiumException;
 
+/**
+ * This is the Signature class
+ *
+ * This class implements an easy interface for signatures
+ * in the ED25519 scheme with Keccak-512 hashing algorithm.
+ */
 class Signature
     extends ParagonIE_Sodium_Core_Ed25519
 {
@@ -125,6 +131,10 @@ class Signature
         }
         elseif (is_string($data)) {
             $this->data = new Buffer($data); // auto-sized
+        }
+        elseif (is_array($data)) {
+            // Uint8 provided (serialized data)
+            $this->data = Buffer::fromUInt8($data);
         }
         else {
             throw new NISInvalidSignatureContent("Invalid content provided for \\NEM\\Core\\Signature object.");

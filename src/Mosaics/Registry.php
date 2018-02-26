@@ -25,6 +25,13 @@ use NEM\Models\MosaicDefinition;
 use InvalidArgumentException;
 use RuntimeException;
 
+/**
+ * This is the Mosaics\Registry class
+ *
+ * This class defines an abstraction layer and factory
+ * pattern for loading pre-configured NEM Mosaics into
+ * your PHP classes.
+ */
 final class Registry
 {
     /**

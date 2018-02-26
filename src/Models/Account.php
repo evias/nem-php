@@ -21,6 +21,15 @@ namespace NEM\Models;
 
 use NEM\Models\Mutators\CollectionMutator;
 
+/**
+ * This is the Account class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's Account 
+ * objects.
+ * 
+ * @link https://nemproject.github.io/#accountMetaDataPair
+ */
 class Account
     extends Model
 {

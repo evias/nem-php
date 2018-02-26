@@ -28,6 +28,17 @@ use \ParagonIE_Sodium_Compat;
 use \ParagonIE_Sodium_Core_Ed25519 as Ed25519;
 USE \SodiumException;
 
+/**
+ * This is the Serializer class
+ *
+ * This class provides the rules for low level serialization
+ * of data for the NEM network.
+ * 
+ * Methods for serialization include `serializeInt()`, 
+ * `serializeLong()`, `serializeString()` and `serializeUInt8()`.
+ * You can also use the `aggregate()` method to merge multiple
+ * UInt8 representation into one array, prefixed by its height.
+ */
 class Serializer
 {
 

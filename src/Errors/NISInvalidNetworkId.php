@@ -20,6 +20,14 @@ namespace NEM\Errors;
 
 use RuntimeException;
 
+/**
+ * This is the NISInvalidNetworkId Exception
+ *
+ * This exception is thrown when an invalid Network
+ * ID is provided to Network class.
+ * 
+ * @see \NEM\Models\Network
+ */
 class NISInvalidNetworkId
     extends RuntimeException
 {

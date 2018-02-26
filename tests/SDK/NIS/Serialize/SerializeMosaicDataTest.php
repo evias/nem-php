@@ -48,6 +48,7 @@ class SerializeMosaicDataTest
 
         // test specialized Mosaic::serialize() serialization process
         $serialized = $mosaic->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         $expectUInt8 = [
             24,  0,   0,   0,
@@ -56,9 +57,11 @@ class SerializeMosaicDataTest
             0, 110, 101, 109,  45, 112, 104, 112
         ];
         $expectSize = count($expectUInt8);
+        $expectHex  = "180000000900000065766961732e73646b070000006e656d2d706870";
 
-        $this->assertEquals($expectSize, count($serialized));
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
+        $this->assertEquals($expectSize, count($serialized));
     }
 
     /**
@@ -80,6 +83,7 @@ class SerializeMosaicDataTest
 
         // test specialized MosaicAttachment::serialize() serialization process
         $serialized = $attachment->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [
@@ -91,9 +95,11 @@ class SerializeMosaicDataTest
               0,   0,   0,   0
         ];
         $expectSize = count($expectUInt8);
+        $expectHex  = "24000000180000000900000065766961732e73646b070000006e656d2d7068700100000000000000";
 
-        $this->assertEquals($expectSize, count($serialized));
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
+        $this->assertEquals($expectSize, count($serialized));
     }
 
     /**
@@ -123,6 +129,7 @@ class SerializeMosaicDataTest
 
         // test specialized MosaicAttachments::serialize() serialization process
         $serialized = $collection->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [
@@ -139,9 +146,11 @@ class SerializeMosaicDataTest
               2,   0,   0,   0,   0,   0,   0,   0
         ];
         $expectSize = count($expectUInt8);
+        $expectHex  = "0200000024000000180000000900000065766961732e73646b070000006e656d2d706870010000000000000024000000180000000900000065766961732e73646b070000006e656d2d7068700200000000000000";
 
-        $this->assertEquals($expectSize, count($serialized));
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
+        $this->assertEquals($expectSize, count($serialized));
     }
 
     /**
@@ -165,6 +174,7 @@ class SerializeMosaicDataTest
 
         // test specialized MosaicLevy::serialize() serialization process
         $serialized = $levy->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [
@@ -192,9 +202,11 @@ class SerializeMosaicDataTest
              0,   0,   0,   0
         ];
         $expectSize = count($expectUInt8);
+        $expectHex  = "5400000001000000280000005444575a3535523556494853483557574b36434547414950374433355856465a3352553253355551180000000900000065766961732e73646b070000006e656d2d7068700a00000000000000";
 
-        $this->assertEquals($expectSize, count($serialized));
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
+        $this->assertEquals($expectSize, count($serialized));
     }
 
     /**
@@ -212,10 +224,12 @@ class SerializeMosaicDataTest
 
         // test specialized MosaicAttachment::serialize() serialization process
         $serialized = $property->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [21,0,0,0,12,0,0,0,100,105,118,105,115,105,98,105,108,105,116,121,1,0,0,0,48];
         $expectSize = count($expectUInt8);
+        $expectHex  = "150000000c00000064697669736962696c6974790100000030";
 
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
         $this->assertEquals($expectSize, count($serialized));
@@ -228,11 +242,14 @@ class SerializeMosaicDataTest
 
         // test specialized MosaicAttachment::serialize() serialization process
         $serialized = $property->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [27,0,0,0,13,0,0,0,105,110,105,116,105,97,108,83,117,112,112,108,121,6,0,0,0,50,57,48,56,56,56];
         $expectSize = count($expectUInt8);
+        $expectHex  = "1b0000000d000000696e697469616c537570706c7906000000323930383838";
 
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
         $this->assertEquals($expectSize, count($serialized));
 
@@ -244,11 +261,14 @@ class SerializeMosaicDataTest
 
         // test specialized MosaicAttachment::serialize() serialization process
         $serialized = $property->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [25,0,0,0,13,0,0,0,115,117,112,112,108,121,77,117,116,97,98,108,101,4,0,0,0,116,114,117,101];
         $expectSize = count($expectUInt8);
+        $expectHex  = "190000000d000000737570706c794d757461626c650400000074727565";
 
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
         $this->assertEquals($expectSize, count($serialized));
 
@@ -260,11 +280,14 @@ class SerializeMosaicDataTest
 
         // test specialized MosaicAttachment::serialize() serialization process
         $serialized = $property->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [25,0,0,0,12,0,0,0,116,114,97,110,115,102,101,114,97,98,108,101,5,0,0,0,102,97,108,115,101];
         $expectSize = count($expectUInt8);
+        $expectHex  = "190000000c0000007472616e7366657261626c650500000066616c7365";
 
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
         $this->assertEquals($expectSize, count($serialized));
     }
@@ -286,11 +309,14 @@ class SerializeMosaicDataTest
 
         // test specialized MosaicProperties::serialize() serialization process
         $serialized = $collection->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [4,0,0,0,21,0,0,0,12,0,0,0,100,105,118,105,115,105,98,105,108,105,116,121,1,0,0,0,48,27,0,0,0,13,0,0,0,105,110,105,116,105,97,108,83,117,112,112,108,121,6,0,0,0,50,57,48,56,56,56,25,0,0,0,13,0,0,0,115,117,112,112,108,121,77,117,116,97,98,108,101,4,0,0,0,116,114,117,101,24,0,0,0,12,0,0,0,116,114,97,110,115,102,101,114,97,98,108,101,4,0,0,0,116,114,117,101];
         $expectSize = count($expectUInt8);
+        $expectHex  = "04000000150000000c00000064697669736962696c69747901000000301b0000000d000000696e697469616c537570706c7906000000323930383838190000000d000000737570706c794d757461626c650400000074727565180000000c0000007472616e7366657261626c650400000074727565";
 
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals($expectSize, count($serialized));
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
     }

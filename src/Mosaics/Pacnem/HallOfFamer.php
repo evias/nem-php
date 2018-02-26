@@ -25,6 +25,21 @@ use NEM\Models\MosaicProperty;
 use NEM\Models\MosaicLevy;
 use NEM\Models\Mosaic;
 
+/**
+ * This is the Pacnem\HallOfFamer class
+ *
+ * This class defines the parameters of mosaic
+ * definition of the asset `pacnem:hall-of-famer` on the
+ * NEM Testnet Network.
+ * 
+ * The `pacnem:cheese` asset is integrated as a 
+ * Vanity Token in the PacNEM game. Any player 
+ * who reaches the High Score Top 10 (the Hall 
+ * of Fame) will also be rewarded with 1 of these
+ * vanity tokens.
+ * 
+ * @link https://www.pacnem.com
+ */
 class HallOfFamer
     extends MosaicDefinition
 {

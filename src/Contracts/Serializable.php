@@ -19,13 +19,13 @@
 namespace NEM\Contracts;
 
 /**
+ * This is the Serializable interface
  *
- * Interface to provide with easy Serialization.
+ * This interface defines a Contract for serialized
+ * NIS objects.
  *
- * Serialization is best done when data can be represented
- * in binary form, this will be handled internally with the
- * provided Serializer class.
- *
+ * Serialized objects are expressed in UInt8 using
+ * the \NEM\Core\Serializer class.
  */
 interface Serializable
 {

@@ -24,6 +24,15 @@ use NEM\Models\TransactionType;
 use NEM\Models\Account;
 use NEM\Models\Fee;
 
+/**
+ * This is the NamespaceProvision class
+ *
+ * This class extends the NEM\Models\Transaction class
+ * to provide with an integration of NEM's namespace 
+ * provision transactions
+ * 
+ * @link https://nemproject.github.io/#provisionNamespaceTransaction
+ */
 class NamespaceProvision
     extends Transaction
 {
@@ -103,7 +112,7 @@ class NamespaceProvision
             $uint8_parent);
 
         // specialized data is concatenated to `base transaction data`.
-        return array_merge($baseTx, $output);
+        return ($this->serialized = array_merge($baseTx, $output));
     }
 
     /**

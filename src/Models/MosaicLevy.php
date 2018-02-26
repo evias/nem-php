@@ -19,6 +19,15 @@
  */
 namespace NEM\Models;
 
+/**
+ * This is the MosaicLevy class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's mosaic 
+ * levy objects.
+ * 
+ * @link https://nemproject.github.io/#mosaicLevy
+ */
 class MosaicLevy
     extends Model
 {

@@ -19,6 +19,15 @@
  */
 namespace NEM\Models;
 
+/**
+ * This is the MosaicProperty class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's mosaic 
+ * property objects.
+ * 
+ * @link https://nemproject.github.io/#mosaicProperties
+ */
 class MosaicProperty
     extends Model
 {

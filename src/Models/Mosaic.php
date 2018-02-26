@@ -19,6 +19,15 @@
  */
 namespace NEM\Models;
 
+/**
+ * This is the Mosaic class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's Mosaic 
+ * objects.
+ * 
+ * @link https://nemproject.github.io/#mosaicId
+ */
 class Mosaic
     extends Model
 {

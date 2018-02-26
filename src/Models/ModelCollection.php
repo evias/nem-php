@@ -27,6 +27,13 @@ use NEM\Contracts\Serializable;
 
 use BadMethodCallException;
 
+/**
+ * This is the ModelCollection class
+ *
+ * This class provides an abstraction layer for working
+ * with model collections. This class uses the Illuminate
+ * packages for Collection and Array support.
+ */
 class ModelCollection
     extends Collection
     implements Serializable

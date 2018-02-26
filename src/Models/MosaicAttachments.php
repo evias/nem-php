@@ -21,6 +21,15 @@ namespace NEM\Models;
 
 use NEM\Models\MosaicAttachment;
 
+/**
+ * This is the MosaicAttachments class
+ *
+ * This class extends the NEM\Models\ModelCollection class
+ * to provide with an integration of NEM's Mosaic 
+ * Attachments *lists*.
+ * 
+ * @link https://nemproject.github.io/#mosaic
+ */
 class MosaicAttachments
     extends ModelCollection
 {

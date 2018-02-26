@@ -25,6 +25,15 @@ use NEM\Models\Fee;
 use NEM\Models\Account;
 use NEM\Models\MosaicDefinition as DefinitionModel;
 
+/**
+ * This is the MosaicDefinition class
+ *
+ * This class extends the NEM\Models\Transaction class
+ * to provide with an integration of NEM's mosaic 
+ * definition transactions.
+ * 
+ * @link https://nemproject.github.io/#mosaicDefinitionCreationTransaction
+ */
 class MosaicDefinition
     extends Transaction
 {
@@ -110,7 +119,7 @@ class MosaicDefinition
             $uint8_fee);
 
         // specialized data is concatenated to `base transaction data`.
-        return array_merge($baseTx, $output);
+        return ($this->serialized = array_merge($baseTx, $output));
     }
 
     /**

@@ -60,14 +60,17 @@ class SerializeTransactionMosaicSupplyChangeTest
 
         // test specialized MosaicAttachment::serialize() serialization process
         $serialized = $transaction->serialize();
+        $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [
             2,64,0,0,1,0,0,152,232,17,121,5,32,0,0,0,217,12,8,207,187,249,24,217,48,77,221,69,246,67,37,100,195,144,165,250,207,243,223,23,237,92,9,108,76,207,13,4,240,73,2,0,0,0,0,0,248,31,121,5,27,0,0,0,5,0,0,0,101,118,105,97,115,14,0,0,0,116,101,115,116,45,109,111,115,97,105,99,100,101,102,1,0,0,0,64,66,15,0,0,0,0,0
         ];
         $expectSize = count($expectUInt8);
+        $expectHex  = "0240000001000098e811790520000000d90c08cfbbf918d9304ddd45f6432564c390a5facff3df17ed5c096c4ccf0d04f049020000000000f81f79051b0000000500000065766961730e000000746573742d6d6f736169636465660100000040420f0000000000";
 
         $this->assertNotEmpty($serialized);
+        $this->assertEquals($expectHex, $serialHex);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
         $this->assertEquals($expectSize, count($serialized));
     }

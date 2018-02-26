@@ -22,6 +22,7 @@ use NEM\Tests\TestCase;
 use GuzzleHttp\Exception\ConnectException;
 use Psr\Http\Message\ResponseInterface;
 
+use Mockery;
 use NEM\API;
 use NEM\Errors\NISNotAvailableException;
 
@@ -29,48 +30,38 @@ class GuzzleRequestHandlersRequestsTest
     extends TestCase
 {
     /**
-     * This test will only check if the RequestHandler
-     * instance is correctly handling the GET request
-     * and provides with a ResponseInterface.
+     * Unit Test for *return type of synchronous GET request*.
      *
-     * This test is NOT using promises.
-     *
-     * @return void
+     * @return  void
      */
-    public function testSynchronousGetRequest()
+    public function testGetRequestReturnType_Synchronous()
     {
-        try {
-            $response = $this->client->get("heartbeat", "", [], false);
+        $instance = Mockery::mock("NEM\API");
+        $response = Mockery::mock("Psr\Http\Message\ResponseInterface");
 
-            $this->assertTrue($response instanceof ResponseInterface);
-        }
-        catch (ConnectException $e) {
-            // HOST DOWN, not feature!
-            $this->assertTrue(false !== strpos(strtolower($e->getMessage()), "failed to connect"));
-            //$this->fail("Could not establish connection to remote node 'bigalice2.nem.ninja:7890'.");
-        }
+        $instance->shouldReceive("get")
+                   ->with("heartbeat", "", [], false)
+                   ->andReturn($response);
+
+        $result = $instance->get("heartbeat", "", [], false);
+        $this->assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $result);
     }
 
     /**
-     * This test will only check if the RequestHandler
-     * instance is correctly handling the GET request
-     * and provides with a ResponseInterface.
+     * Unit Test for *return type of asynchronous GET request*.
      *
-     * This test WILL use promises.
-     *
-     * @return void
+     * @return  void
      */
-    public function testAsynchronousGetRequest()
+    public function testGetRequestReturnType_Asynchronous()
     {
-        try {
-            $response = $this->client->get("heartbeat", "", [], true);
+        $instance = Mockery::mock("NEM\API");
+        $response = Mockery::mock("Psr\Http\Message\ResponseInterface");
 
-            $this->assertTrue($response instanceof ResponseInterface);
-        }
-        catch (ConnectException $e) {
-            // HOST DOWN, not feature!
-            $this->assertTrue(false !== strpos(strtolower($e->getMessage()), "failed to connect"));
-            //$this->fail("Could not establish connection to remote node 'bigalice2.nem.ninja:7890'.");
-        }
+        $instance->shouldReceive("get")
+                   ->with("heartbeat", "", [], true) // async
+                   ->andReturn($response);
+
+        $result = $instance->get("heartbeat", "", [], true); // async
+        $this->assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $result);
     }
 }

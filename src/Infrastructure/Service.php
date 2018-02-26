@@ -21,9 +21,20 @@ namespace NEM\Infrastructure;
 use Illuminate\Support\Str;
 
 use NEM\API;
+use NEM\Contracts\Service as ServiceContract;
 
+/**
+ * This is the Service class
+ *
+ * This class provides with an abstraction layer for
+ * NEM Infrastructure services implementing API endpoints
+ * of the NEM network nodes.
+ * 
+ * The \NEM\API class is used internally to provide with
+ * connectivity to the NEM network and its nodes.
+ */
 class Service
-    implements ServiceInterface
+    implements ServiceContract
 {
     /**
      * The NEM API wrapper instance.
@@ -44,9 +55,9 @@ class Service
      *
      * @return void
      */
-    public function __construct(API $api) 
+    public function __construct(API $api = null) 
     {
-        $this->api = $api;
+        $this->api = $api ?: new API([]);
     }
 
     /**

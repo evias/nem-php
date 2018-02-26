@@ -19,6 +19,15 @@
  */
 namespace NEM\Models;
 
+/**
+ * This is the MultisigModification class
+ *
+ * This class extends the NEM\Models\Model class
+ * to provide with an integration of NEM's multisig 
+ * modification objects.
+ * 
+ * @link https://nemproject.github.io/#multisigAggregateModificationTransaction
+ */
 class MultisigModification
     extends Model
 {

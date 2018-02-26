@@ -22,6 +22,14 @@ namespace NEM\Models\Mutators;
 use Illuminate\Support\Str;
 use BadMethodCallException;
 
+/**
+ * This is the ModelMutator class
+ *
+ * This class provides with an abstraction to create
+ * Models. 
+ * 
+ * @see \NEM\Models\Model
+ */
 class ModelMutator
 {
     /**

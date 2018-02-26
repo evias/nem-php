@@ -20,6 +20,15 @@ namespace NEM\Errors;
 
 use RuntimeException;
 
+/**
+ * This is the NISInvalidPublicKeyContent Exception
+ *
+ * This exception is thrown when a invalid data is 
+ * passed as the public key content in the KeyPair
+ * class.
+ * 
+ * @see \NEM\Core\KeyPair
+ */
 class NISInvalidPublicKeyContent
     extends RuntimeException
 {

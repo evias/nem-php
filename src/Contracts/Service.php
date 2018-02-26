@@ -16,9 +16,17 @@
  * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Infrastructure;
+namespace NEM\Contracts;
 
-interface ServiceInterface
+/**
+ * This is the Service interface
+ *
+ * This defines basic rules for NEM Infrastructure
+ * services implementation.
+ * 
+ * @see \NEM\Infrastructure\Service 
+ */
+interface Service
 {
     /**
      * Setter for the `endpoint` property.

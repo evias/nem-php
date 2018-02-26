@@ -24,6 +24,15 @@ use NEM\Models\TransactionType;
 use NEM\Models\Account;
 use NEM\Models\Fee;
 
+/**
+ * This is the ImportanceTransfer class
+ *
+ * This class extends the NEM\Models\Transaction class
+ * to provide with an integration of NEM's importance 
+ * transfer transactions.
+ * 
+ * @link https://nemproject.github.io/#importanceTransferTransaction
+ */
 class ImportanceTransfer
     extends Transaction
 {
@@ -72,7 +81,7 @@ class ImportanceTransfer
             $uint8_acct);
 
         // specialized data is concatenated to `base transaction data`.
-        return array_merge($baseTx, $output);
+        return ($this->serialized = array_merge($baseTx, $output));
     }
 
     /**

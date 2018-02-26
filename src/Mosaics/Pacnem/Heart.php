@@ -25,6 +25,22 @@ use NEM\Models\MosaicProperty;
 use NEM\Models\MosaicLevy;
 use NEM\Models\Mosaic;
 
+/**
+ * This is the Pacnem\Heart class
+ *
+ * This class defines the parameters of mosaic
+ * definition of the asset `pacnem:heart` on the
+ * NEM Testnet Network.
+ * 
+ * The `pacnem:heart` asset is integrated as a 
+ * Credit Token in the PacNEM game. This token must
+ * be paid for.
+ * 
+ * The entry price for PacNEM is 10 XEM for 18 Hearts.
+ * Each `pacnem:heart` gives a player 3 in-games lives.
+ * 
+ * @link https://www.pacnem.com
+ */
 class Heart
     extends MosaicDefinition
 {

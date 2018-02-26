@@ -20,6 +20,14 @@ namespace NEM\Errors;
 
 use RuntimeException;
 
+/**
+ * This is the HasherInvalidContent Exception
+ *
+ * This exception is thrown when invalid data is passed
+ * to the KeccakHasher class.
+ * 
+ * @see \NEM\Core\KeccakHasher
+ */
 class HasherInvalidContent
     extends RuntimeException
 {
