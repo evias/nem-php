@@ -142,6 +142,16 @@ class Transaction
     ];
 
     /**
+     * This contains the serialized copy of a transaction.
+     * 
+     * This array will be filled the first time you call the
+     * serialize() method.
+     * 
+     * @var array
+     */
+    protected $serialized = null;
+
+    /**
      * Class method to create a Transaction object out of
      * a DTO data set.
      * 
@@ -363,7 +373,7 @@ class Transaction
             $uint8_deadline);
 
         // done with `base transaction data` serialization.
-        return $output;
+        return ($this->serialized = $output);
     }
 
     /**

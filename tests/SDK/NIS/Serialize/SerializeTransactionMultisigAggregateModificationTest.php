@@ -78,7 +78,22 @@ class SerializeTransactionMultisigAggregateModificationTest
 
         // test second value
         $relativeChange_2 = -2;
-        $transaction->setAttribute("minCosignatories", ["relativeChange" => $relativeChange_2]);
+
+        $transaction = new MultisigAggregateModification([
+            "timeStamp" => (new TimeWindow(["timeStamp" => 91843540]))->toDTO(),
+            "deadline"  => (new TimeWindow(["timeStamp" => 91847140]))->toDTO(),
+            "version"   => -1744830462,
+            "fee"       => Fee::MULTISIG_AGGREGATE_MODIFICATION,
+            "minCosignatories" => ["relativeChange" => $relativeChange_2],
+            "modifications" => (new MultisigModifications([
+                new MultisigModification([
+                    "modificationType" => MultisigModification::TYPE_REMOVE,
+                    "cosignatoryAccount" => "72117b4254b9e49cdfbaa6b7c1825f002cdd55c838ca78485291dca9834ec176"
+                ])
+            ]))->toDTO(),
+            "signer"    => "480e54c38fedd0f2bf2d53132b819c35ba4270a9144af55a73f325686aa93c96",
+        ]);
+
         $serialized = $transaction->serialize();
         $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 

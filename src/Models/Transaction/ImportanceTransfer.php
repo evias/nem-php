@@ -81,7 +81,7 @@ class ImportanceTransfer
             $uint8_acct);
 
         // specialized data is concatenated to `base transaction data`.
-        return array_merge($baseTx, $output);
+        return ($this->serialized = array_merge($baseTx, $output));
     }
 
     /**

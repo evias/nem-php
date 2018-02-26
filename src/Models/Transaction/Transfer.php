@@ -89,7 +89,7 @@ class Transfer
     public function serialize($parameters = null)
     {
         $baseTx  = parent::serialize($parameters);
-        $nisData = $this->extend();
+        $nisData = $this->toDTO("transaction");
 
         // shortcuts
         $serializer = $this->getSerializer();
@@ -108,16 +108,12 @@ class Transfer
             $uint8_len  = $serializer->serializeInt(8 + strlen(hex2bin($messagePayload)));
             $uint8_type = $serializer->serializeInt($messageType);
             $uint8_hex  = $serializer->serializeString(hex2bin($messagePayload));
-    
+
             $uint8_msg = array_merge($uint8_len, $uint8_type, $uint8_hex);
         }
-        // WARN: It is optional to include the message payload for *NIS* so it 
-        //       is in NIS' best interest to leave it out completely as it will
-        //       obviously require 4bits less than storing 0.
-        //
-        // else { // empty message is 0 on-chain
-        //     $uint8_msg = $serializer->serializeInt(0);
-        // }
+        else { // empty message is 0 on-chain
+             $uint8_msg = $serializer->serializeInt(0);
+        }
 
         // concatenate the UInt8 representation
         $output = array_merge(
@@ -126,6 +122,6 @@ class Transfer
             $uint8_msg);
 
         // specialized data is concatenated to `base transaction data`.
-        return array_merge($baseTx, $output);
+        return ($this->serialized = array_merge($baseTx, $output));
     }
 }

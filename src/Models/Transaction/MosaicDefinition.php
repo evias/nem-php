@@ -119,7 +119,7 @@ class MosaicDefinition
             $uint8_fee);
 
         // specialized data is concatenated to `base transaction data`.
-        return array_merge($baseTx, $output);
+        return ($this->serialized = array_merge($baseTx, $output));
     }
 
     /**

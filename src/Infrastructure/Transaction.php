@@ -77,12 +77,20 @@ class Transaction
      * 
      * @param   \NEM\Models\Transaction     $transaction
      * @param   null|\NEM\Core\KeyPair      $kp
-     * @param   array                       $serialized     The serialized UInt8 byte array
      * @return  null|\NEM\Core\Buffer
      */
-    public function signTransaction(TxModel $transaction, KeyPair $kp = null, array $serialized = [])
+    public function signTransaction(TxModel $transaction, KeyPair $kp = null)
     {
-        return null !== $kp ? $kp->sign($serialized) : null;
+        // always set optional `signer` in case we provide a KeyPair
+        if (null !== $kp) {
+            $transaction->setAttribute("signer", $kp->getPublicKey("hex"));
+        }
+
+        // now we can serialize and sign
+        $serialized = $transaction->serialize();
+        $serialHex = Buffer::fromUInt8($serialized)->getHex();
+        $serialBin = hex2bin($serialHex);
+        return null !== $kp ? $kp->sign($serialBin) : null;
     }
 
     /**
@@ -103,9 +111,9 @@ class Transaction
      */
     public function announce(TxModel $transaction, KeyPair $kp = null)
     {
-        // set optional `signer` in case we provide a KeyPair
+        // always set optional `signer` in case we provide a KeyPair
         if (null !== $kp) {
-            $transaction->setAttribute("signer", $kp->publicKey);
+            $transaction->setAttribute("signer", $kp->getPublicKey("hex"));
         }
 
         // now we can serialize and sign

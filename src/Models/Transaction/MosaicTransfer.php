@@ -71,7 +71,7 @@ class MosaicTransfer
 
         // serialize specialized fields
         $uint8_mosaics = $this->mosaics()->serialize();
-        return array_merge($baseTx, $uint8_mosaics);
+        return ($this->serialized = array_merge($baseTx, $uint8_mosaics));
     }
 
     /**

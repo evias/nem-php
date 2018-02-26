@@ -82,7 +82,7 @@ class Multisig
         $output = array_merge($uint8_len, $uint8_tx);
 
         // specialized data is concatenated to `base transaction data`.
-        return array_merge($baseTx, $output);
+        return ($this->serialized = array_merge($baseTx, $output));
     }
 
     /**
