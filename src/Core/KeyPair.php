@@ -173,7 +173,7 @@ class KeyPair
      */
     public function getAddress($networkId = 104, $prettyFormat = false)
     {
-        $address = \NEM\Models\Address::fromPublicKey($this->getPublicKey());
+        $address = \NEM\Models\Address::fromPublicKey($this->getPublicKey(), $networkId);
         if ($prettyFormat) {
             return $address->toPretty();
         }
