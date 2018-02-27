@@ -40,8 +40,14 @@ class Account
     protected $baseUrl = "/account";
 
     /**
-     * Generate a new Account KeyPair.
+     * Let NIS generate an account KeyPair.
+     * 
+     * WARNING: This method can only be used on a locally running
+     *          NIS. It is preferred to use the \NEM\Core\KeyPair
+     *          class to create accounts on your machine rather than
+     *          let NIS create an account for you.
      *
+     * @internal This method only works with a locally running NIS.
      * @return  object      Object with keys `address`, `publicKey` and `privateKey`.
      */
     public function generateAccount()
@@ -97,7 +103,7 @@ class Account
      * @param   string  $address    Base32 representation of the account address (T-, N-, M- prefixed addresses).
      * @return  object              Instance with keys from [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair) objects.
      */
-    public function getOriginalAccountDataFromDelegatedAccountAddress($address)
+    public function getFromDelegatedAddress($address)
     {
         $apiUrl = $this->getPath('get/forwarded', ["address" => $address]);
         $response = $this->api->getJSON($apiUrl);
@@ -113,7 +119,7 @@ class Account
      * @param   string  $publicKey  Hexadecimal representation of the Public Key
      * @return  object              Instance with keys from [AccountMetaDataPair](https://bob.nem.ninja/docs/#accountMetaDataPair) objects.
      */
-    public function getOriginalAccountDataFromDelegatedAccountPublicKey($publicKey) 
+    public function getFromDelegatedPublicKey($publicKey) 
     {
         $apiUrl = $this->getPath('get/forwarded/from-public-key', ["publicKey" => $publicKey]);
         $response = $this->api->getJSON($apiUrl);
@@ -254,7 +260,7 @@ class Account
      * @param   string  %hash       The 256 bit sha3 hash of the block up to which harvested blocks are returned.
      * @return  object              Instance with keys from [HarvestInfo](https://bob.nem.ninja/docs/#harvestInfo) objects.
      */
-    public function getHarvestInfo($address, $hash) 
+    public function getHarvestInfo($address, $hash = null) 
     {
         $params = ["address" => $address];
 
@@ -374,7 +380,7 @@ class Account
      *                                          than 1000 data points results in an error.
      * @return  array                           Array of object with keys from [Mosaic](https://bob.nem.ninja/docs/#mosaics) objects.
      */
-    public function getHistoricalAccountData($address, $startHeight, $endHeight, $increment)
+    public function getHistoricalAccountData($address, $startHeight = null, $endHeight = null, $increment = null)
     {
         $params = ["address" => $address];
 

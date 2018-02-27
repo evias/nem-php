@@ -1,9 +1,12 @@
-# evias/nem-php
+<p align="center"><img src="https://nem.io/wp-content/themes/nem/img/logo-nem.svg" width="400"></p>
 
-[![Build Status](https://api.travis-ci.org/evias/nem-php.svg?branch=master)](https://travis-ci.com/evias/nem-php)
-[![Latest Stable Version](https://poser.pugx.org/evias/nem-php/version)](https://packagist.org/packages/evias/nem-php)
-[![Latest Unstable Version](https://poser.pugx.org/evias/nem-php/v/unstable)](//packagist.org/packages/evias/nem-php)
-[![License](https://poser.pugx.org/evias/nem-php/license)](https://packagist.org/packages/evias/nem-php)
+<p align="center">
+<a href="https://travis-ci.org/evias/nem-php"><img src="https://travis-ci.org/evias/nem-php.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/evias/nem-php"><img src="https://poser.pugx.org/evias/nem-php/d/total.svg" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/evias/nem-php"><img src="https://poser.pugx.org/evias/nem-php/v/stable.svg" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/evias/nem-php"><img src="https://poser.pugx.org/evias/nem-php/v/unstable" alt="Latest Unstable Version"></a>
+<a href="https://packagist.org/packages/evias/nem-php"><img src="https://poser.pugx.org/evias/nem-php/license.svg" alt="License"></a>
+</p>
 
 This package aims to provide with an easy-to-use PHP Laravel Namespace helping developers to communicate with the NEM blockchain through its NIS API.
 
