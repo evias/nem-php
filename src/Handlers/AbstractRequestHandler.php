@@ -58,16 +58,30 @@ abstract class AbstractRequestHandler
 
     /**
      * This method triggers a GET request to the given
+     * Base URL at the URI `/endpoint` using the GuzzleHttp
+     * client.
+     *
+     * @see  \NEM\Contracts\RequestHandler
+     * @param  string $uri
+     * @param  string $bodyJSON
+     * @param  array  $options
+     * @param  boolean  $usePromises
+     * @return [type]          [description]
+     */
+    abstract public function status(array $options = [], $usePromises = false);
+
+    /**
+     * This method triggers a GET request to the given
      * URI using the GuzzleHttp client.
      *
      * @see  \NEM\Contracts\RequestHandler
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options
-     * @param  boolean  $synchronous
+     * @param  boolean  $usePromises
      * @return [type]          [description]
      */
-    abstract public function get($uri, $bodyJSON, array $options = [], $synchronous = false);
+    abstract public function get($uri, $bodyJSON, array $options = [], $usePromises = false);
 
     /**
      * This method triggers a POST request to the given
@@ -77,8 +91,8 @@ abstract class AbstractRequestHandler
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options
-     * @param  boolean  $synchronous
+     * @param  boolean  $usePromises
      * @return [type]          [description]
      */
-    abstract public function post($uri, $bodyJSON, array $options = [], $synchronous = false);
+    abstract public function post($uri, $bodyJSON, array $options = [], $usePromises = false);
 }
