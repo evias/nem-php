@@ -106,6 +106,54 @@ class GuzzleRequestHandler
 
     /**
      * This method triggers a GET request to the given
+     * Base URL with the URI `/heartbeat` using the GuzzleHttp
+     * client.
+     *
+     * Default behaviour disables Promises Features.
+     *
+     * Promises Features
+     * - success callback can be configured with $options["onSuccess"],
+     *   a ResponseInterface object will be passed to this callable when
+     *   the Request Completes.
+     * - error callback can be configured with $options["onError"],
+     *   a RequestException object will be passed to this callable when
+     *   the Request encounters an error
+     *
+     * @see  \NEM\Contracts\RequestHandler
+     * @param  string $bodyJSON
+     * @param  array  $options      can contain "headers" array, "onSuccess" callable,
+     *                              "onError" callable and any other GuzzleHTTP request
+     *                              options.
+     * @param  boolean  $usePromises
+     * @return [type]
+     */
+    public function status(array $options = [], $usePromises = false)
+    {
+        $headers = [];
+        if (!empty($options["headers"]))
+            $headers = $options["headers"];
+
+        // get generic headers
+        $headers = $this->normalizeHeaders($headers);
+
+        // prepare guzzle request options
+        $options = array_merge($options, [
+            "body"    => "",
+            "headers" => $headers,
+        ]);
+
+        $client  = new Client(["base_uri" => $this->getBaseUrl()]);
+        $request = new Request("GET", "heartbeat", $options);
+        if (! $usePromises)
+            // return the response object when the request is completed.
+            // this behaviour handles the request synchronously.
+            return $client->send($request);
+
+        return $this->promiseResponse($client, $request, $options);
+    }
+
+    /**
+     * This method triggers a GET request to the given
      * URI using the GuzzleHttp client.
      *
      * Default behaviour disables Promises Features.

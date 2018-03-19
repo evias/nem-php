@@ -105,4 +105,29 @@ class Network
 
         throw new NISInvalidNetworkId("Network Id '" . $networkId . "' is invalid.");
     }
+
+    /**
+     * Helper to load a network field from a given `networkId`.
+     * 
+     * @param   integer     $networkId
+     * @param   string      $field          Defaults to "name".
+     * @return  null|string|integer
+     */
+    static public function getFromId($networkId, $field = "name")
+    {
+        foreach (self::$networkInfos as $name => $spec) {
+            if ($spec["id"] !== (int) $networkId) continue;
+
+            if ($field === "name")
+               return $name;
+            elseif (in_array($field, array_keys($spec)))
+                return $spec[$field];
+            else
+                // Field not recognized
+                return null;
+        }
+
+        // Network ID not recognized
+        return null;
+    }
 }

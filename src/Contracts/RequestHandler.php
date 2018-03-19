@@ -34,16 +34,30 @@ interface RequestHandler
     extends Connector
 {
     /**
+     * This method triggers a GET request to the given
+     * Base URL at the URI `/endpoint` using the GuzzleHttp
+     * client.
+     *
+     * @see  \NEM\Contracts\RequestHandler
+     * @param  string $uri
+     * @param  string $bodyJSON
+     * @param  array  $options
+     * @param  boolean  $usePromises
+     * @return [type]          [description]
+     */
+    public function status(array $options = [], $usePromises = false);
+
+    /**
      * This method should implement features for sending
      * GET requests with the implemented library.
      *
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options
-     * @param  boolean  $synchronous
+     * @param  boolean  $usePromises
      * @return [type]          [description]
      */
-    public function get($uri, $bodyJSON, array $options = [], $synchronous = false);
+    public function get($uri, $bodyJSON, array $options = [], $usePromises = false);
 
     /**
      * This method should implement features for sending
@@ -52,8 +66,8 @@ interface RequestHandler
      * @param  string $uri
      * @param  string $bodyJSON
      * @param  array  $options
-     * @param  boolean  $synchronous
+     * @param  boolean  $usePromises
      * @return [type]          [description]
      */
-    public function post($uri, $bodyJSON, array $options = [], $synchronous = false);
+    public function post($uri, $bodyJSON, array $options = [], $usePromises = false);
 }
