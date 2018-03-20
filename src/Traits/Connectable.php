@@ -296,4 +296,41 @@ trait Connectable
     {
         return $this->getScheme() . $this->getBasicAuth() . $this->getHost() . ":" . $this->getPort() . $this->getEndpoint();
     }
+
+    /**
+     * Setter for the `base_url` property. This will create
+     * a new Connectable object and return it.
+     */
+    public function setBaseUrl($baseUrl)
+    {
+        return $this->fillFromBaseUrl($baseUrl);
+    }
+
+    /**
+     * Helper class method to create a Connectabl object from
+     * a fully qualified base url.
+     * 
+     * @param   string  $baseUrl
+     * @return  \NEM\Traits\Connectable
+     */
+    public function fillFromBaseUrl($baseUrl)
+    {
+        $reg = "/^(https?):\/\/((www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6})(:([0-9]+))?/";
+        $matches = [];
+
+        $scheme = "http";
+        $host   = "hugealice.nem.ninja";
+        $port   = 7890;
+        if ((bool) preg_match_all($reg, $baseUrl, $matches)) {
+            $scheme = $matches[1][0];
+            $host   = $matches[2][0];
+            $port   = $matches[5][0];
+        }
+
+        $this->setUseSsl($scheme === "https");
+        $this->setProtocol($scheme);
+        $this->setHost($host);
+        $this->setPort((int) $port);
+        return $this;
+    }
 }

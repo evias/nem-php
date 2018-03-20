@@ -134,4 +134,23 @@ class RequestHandlersConfigurationTest
         $this->assertEquals("nemdev", $connectable->getPassword());
         $this->assertEquals("https://nem:nemdev@127.0.0.1:7890/", $connectable->getBaseUrl());
     }
+
+    /**
+     * This test checks whether the API class correctly
+     * handles the fully qualified base url argument type
+     * for the request handler.
+     *
+     * @return void
+     */
+    public function testRequestHandlerFromBaseUrl()
+    {
+        $url = "http://hugealice.nem.ninja:7890";
+        $client = new API(["base_url" => $url]);
+        $connectable = $client->getRequestHandler();
+
+        $this->assertEquals("http", $connectable->getProtocol());
+        $this->assertEquals("hugealice.nem.ninja", $connectable->getHost());
+        $this->assertEquals(7890, $connectable->getPort());
+        $this->assertEquals("http://hugealice.nem.ninja:7890", $connectable->getBaseUrl());
+    }
 }
