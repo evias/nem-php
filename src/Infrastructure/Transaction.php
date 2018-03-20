@@ -139,10 +139,10 @@ class Transaction
 
         $endpoint = $this->getAnnouncePath($transaction, $kp);
         $apiUrl   = $this->getPath($endpoint, []);
-        $response = $this->api->post($apiUrl, $broadcast);
+        $response = $this->api->postJSON($apiUrl, $broadcast);
 
         //XXX include Error checks
-        $object = json_decode($response);
+        $object = json_decode($response, true);
         return $this->createBaseModel($object); //XXX brr => error/content validation first
     }
 
