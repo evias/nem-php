@@ -21,6 +21,7 @@ namespace NEM\Core;
 use NEM\Core\KeyPair;
 use NEM\Core\Buffer;
 use NEM\Core\KeccakHasher;
+use NEM\Core\EncryptedPayload;
 use \ParagonIE_Sodium_Compat;
 use \ParagonIE_Sodium_Core_Ed25519 as Ed25519;
 use \ParagonIE_Sodium_Core_X25519 as Ed25519ref10;
@@ -99,7 +100,7 @@ class Encryption
      * @throws  InvalidArgumentException    On negative *$keyLength* argument.
      * @throws  InvalidArgumentException    On invalid derivation iterations *$count* or invalid *$keyLength* arguments.
      */
-    public static function derive($algorithm, $password, $salt, $count = 6000, $keyLength = 64) // 6000=NanoWallet, 64=512bits
+    public static function passwordBasedKeyDerivation($algorithm, $password, $salt, $count = 6000, $keyLength = 64) // 6000=NanoWallet, 64=512bits
     {
         // shortcuts + use Buffer always
         $password = self::prepareInputBuffer($password);
@@ -285,10 +286,7 @@ class Encryption
         // shortcuts
         $secretKey = $keyPair->getSecretKey()->getBinary();
         $publicKey = $keyPair->getPublicKey()->getBinary();
-
-        // use Buffer always
-        $data = self::prepareInputBuffer($data);
-        $message   = $data->getBinary();
+        $message = $data->getBinary();
 
         // step 1: crypto_hash_sha512(az, sk, 32);
         $privHash = self::hash($algorithm, $keyPair->getSecretKey()->getBinary(), true);
@@ -347,5 +345,56 @@ class Encryption
         // create 64-bytes size-secured Buffer.
         $bufSignature = new Buffer($sig, 64);
         return $bufSignature;
+    }
+
+    /**
+     * This method lets you encrypt `data` with a given `keyPair`'s private key
+     * and make it readable with the `recipient` public key.
+     * 
+     * This encryption function uses asymmetrical cryptography (Public Key Cryptography).
+     * 
+     * @param   \NEM\Core\KeyPair           $sender         The KeyPair used for encryption.
+     * @param   \NEM\Core\KeyPair           $recipient   000589600   The recipient of the message.
+     * @param   string|\NEM\Core\Buffer     $data           The data that you want to sign.
+     * @param   string                      $algorithm      The hash algorithm used for signature creation.
+     * @return  \NEM\Core\EncryptedPayload
+     */
+    public static function encrypt(KeyPair $sender, KeyPair $recipient, $data, $encoding = "hex")
+    {
+        // shortcuts + use Buffer always
+        $data = self::prepareInputBuffer($data);
+        $secretKey = $sender->getSecretKey()->getBinary();
+        $publicKey = $recipient->getPublicKey()->getBinary();
+        $encryptIv = random_bytes(16);
+        $encryptSalt = random_bytes(32);
+        $encodedR = KeyGenerator::derive($encryptSalt, $secretKey, $publicKey);
+        $base64Iv  = base64_encode($iv);
+
+        // encrypt `data` and return a base64 representation
+        $cipher = \openssl_encrypt(serialize($data), 'AES-256-CBC', $publicKey, 0, $encryptIv);  
+        $payload = new EncryptedPayload($cipher, $encryptIv, $publicKey);
+        return $payload;
+    }
+
+    /**
+     * This method lets you decrypt the `data` EncryptedPayload instance into a plain
+     * text unencrypted value.
+     * 
+     * This decryption function uses asymmetrical cryptography (Public Key Cryptography)
+     * 
+     * @param   \NEM\Core\EncryptedPayload  $data
+     * @return  string
+     */
+    public static function decrypt(EncryptedPayload $data)
+    {
+        $asArray = $data->toArray();
+        $cipherText = $asArray["ciphertext"];
+        $publicKey  = $asArray["key"];
+        $encryptIv  = $asArray["iv"];
+
+        // decrypt the ciphertext
+        $plain = \openssl_decrypt($cipherText, "AES-256-CBC", $publicKey, 0, $encryptIv);
+        $buffer = new Buffer($plain);
+        return $buffer->getBinary();
     }
 }

@@ -24,6 +24,8 @@ use NEM\Core\Buffer;
 use NEM\Core\Encoder;
 use NEM\Core\Encryption;
 use \ParagonIE_Sodium_Core_Ed25519;
+use \ParagonIE_Sodium_Compat;
+use \ParagonIE_Sodium_Core_Util;
 
 /**
  * This is the KeyGenerator class
@@ -37,6 +39,22 @@ use \ParagonIE_Sodium_Core_Ed25519;
  */
 class KeyGenerator
 {
+    /**
+     * Combine two keys into a keypair for use in library methods that expect
+     * a keypair. This doesn't necessarily have to be the same person's keys.
+     *
+     * @param   \NEM\Core\Buffer  $secretKey Secret key
+     * @param   \NEM\Core\Buffer  $publicKey Public key
+     * @return  \NEM\Core\Buffer
+     * @throws SodiumException
+     * @throws TypeError
+     */
+    public function combineKeys(Buffer $secretKey, Buffer $publicKey)
+    {
+        $keypair = ParagonIE_Sodium_Compat::crypto_box_keypair_from_secretkey_and_publickey($secretKey, $publicKey);
+        return new Buffer($keypair, 64);
+    }
+
     /**
      * Derive the public key from the KeyPair's secret.
      *
@@ -64,5 +82,50 @@ class KeyGenerator
 
         assert(SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES === $publicBuf->getSize());
         return $publicBuf;
+    }
+
+    /**
+     * Asymmetrical cryptography key derivation function. This method will produce a 
+     * shared secret for encryption using Public Key Cryptography.
+     * 
+     * The `secretKey` parameter is used as the Sender key and the `publicKey` parameter
+     * is used as the Recipient of the encrypted message. The `salt` parameter is required
+     * because salts should always be random and we need to integrate it to the shared
+     * secret to allow decryption.
+     * 
+     * @param   \NEM\Core\Buffer    $salt
+     * @param   \NEM\Core\Buffer    $secretKey
+     * @param   \NEM\Core\Buffer    $publicKey
+     * @return  \NEM\Core\Buffer
+     */
+    public function deriveKey(Buffer $salt, Buffer $secretKey, Buffer $publicKey)
+    {
+        $saltBinary = $salt->getBinary();
+        $unsafeSecret = $secretKey->getBinary() . $publicKey->getBinary();
+        $keccakSecret = ParagonIE_Sodium_Core_Util::substr(
+            Encryption::hash("keccak-512", $secretKey->getBinary(), true),
+            0, 32
+        );
+
+        // generate safe secret
+        $reducedSecret = substr($keccakSecret, 0, 32);
+        $safeSecret = Buffer::clampBits($reducedSecret, 32);
+        $safeSecret = ParagonIE_Sodium_Compat::crypto_scalarmult_base($safeSecret);
+        $sharedSecret = ParagonIE_Sodium_Compat::crypto_scalarmult($safeSecret, $publicKey->getBinary());
+
+        // salting the secret
+        $saltBuf = new Buffer($saltBinary);
+        $sharedBuf = new Buffer($sharedSecret, 64);
+
+        // salt the byte-level representation
+        $saltUA   = $saltBuf->toUInt8();
+        $sharedUA = $sharedBuf->toUInt8();
+        for ($i = 0, $len = strlen($saltBinary); $i < $len; $i++) {
+            $sharedUA[$i] ^= $saltUA[$i];
+        }
+
+        $sharedSecret = Buffer::fromUInt8($sharedUA);
+        $hashedSecret = Encryption::hash("keccak-256", $sharedSecret);
+        return $hashedSecret;
     }
 }

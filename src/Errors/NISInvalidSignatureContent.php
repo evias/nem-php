@@ -26,7 +26,7 @@ use RuntimeException;
  * This exception is thrown when an invalid content
  * is detected on passed data for a signature
  * 
- * @see \NEM\Core\KeyPair
+ * @see \NEM\Core\Signature
  */
 class NISInvalidSignatureContent
     extends RuntimeException
