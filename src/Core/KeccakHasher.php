@@ -72,6 +72,15 @@ class KeccakHasher
     static public function hash($algorithm, $data, $raw_output = false)
     {
         $hashBits = self::getHashBitLength($algorithm);
+
+        if (function_exists("sha3")) {
+            return sha3($data, (int) $hashBits, (bool) $raw_output);
+        }
+        elseif (function_exists("keccak_hash")) {
+            $raw = keccak_hash($data, (int) $hashBits);
+            return $raw_output ? $raw : new Buffer($raw, $hashBits/8);
+        }
+
         return Keccak::hash($data, (int) $hashBits, (bool) $raw_output);
     }
 
@@ -98,8 +107,10 @@ class KeccakHasher
         elseif (strpos(strtolower($algorithm), "keccak-") !== false) {
             $bits = (int) substr($algorithm, -3); // keccak-256, keccak-512, etc.
 
-            if (! in_array($bits, [256, 228, 384, 512]))
+            if (! in_array($bits, [256, 228, 384, 512])) {
+                // use keccak-512 if unsupported bitlength
                 $bits = 512;
+            }
 
             return $bits;
         }

@@ -28,6 +28,43 @@ use NEM\Core\EncryptedPayload;
 class EncryptionPubKeyTest
     extends TestCase
 {
+    /**
+     * Unit test for *Crypto Shared Key Hash Shared Secret generation*.
+     * 
+     * @return void
+     */
+    public function testCryptoSharedKeyHash()
+    {
+        // prepare
+        $salt = Buffer::fromHex("9d21c9343c8b20afc7fe4735c3a15d178816896a169b64bcda926e46b19dc2fd");
+        $sender = KeyPair::create("e77c84331edbfa3d209c4e68809c98a634ad6e8891e4174455c33be9dd25fce5");
+        $recipient = KeyPair::create("a55041066883e108d3c06a644a0b541656b9b6cc530b558ae618bda89b3edefa");
+
+        // act
+        $generator = new KeyGenerator;
+        $sharedSecret = $generator->getSharedSecret($salt, $sender->getSecretKey(), $recipient->getPublicKey());
+
+        // expected values/assert
+        $expectedUInt8 = [
+            29, 130, 111,  29,
+            18, 241,  75, 223,
+            52, 246,  69,  67,
+           129,  22, 213, 251,
+            52,  31, 251, 129,
+            95, 255,   5,  17,
+           180,  36, 112, 160,
+           236, 108,  92, 251
+        ];
+
+        $this->assertEquals(json_encode($expectedUInt8), json_encode($sharedSecret->toUInt8()));
+        $this->assertEquals(count($expectedUInt8), $sharedSecret->getSize());
+    }
+
+    /**
+     * Unit test for `Crypto Shared key Hash Key Derivation Function`.
+     * 
+     * @return void
+     */
     public function testKeyDerivation()
     {
         // prepare

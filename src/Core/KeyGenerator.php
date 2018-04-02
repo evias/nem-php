@@ -100,7 +100,32 @@ class KeyGenerator
      */
     public function deriveKey(Buffer $salt, Buffer $secretKey, Buffer $publicKey)
     {
-        $saltBinary = $salt->getBinary();
+        // produce ed25519 shared secret
+        $sharedSecret = $this->getSharedSecret($salt, $secretKey, $publicKey);
+
+        // salt the byte-level representation   
+        $saltUA   = $salt->toUInt8();
+        $sharedUA = $sharedSecret->toUInt8();
+        for ($i = 0, $len = count($saltUA); $i < $len; $i++) {
+            $sharedUA[$i] ^= $saltUA[$i];
+        }
+
+        $sharedSecret = Buffer::fromUInt8($sharedUA)->slice(0, 32);
+        $hashedSecret = Encryption::hash("keccak-256", $sharedSecret);
+        return $hashedSecret;
+    }
+
+    /**
+     * Get the asymmetrical cryptography *Shared Secret* between `secretKey` sender
+     * secret key (reversed private key) and `publicKey` recipient public key.
+     * 
+     * @param   \NEM\Core\Buffer    $salt
+     * @param   \NEM\Core\Buffer    $secretKey
+     * @param   \NEM\Core\Buffer    $publicKey
+     * @return  \NEM\Core\Buffer
+     */
+    public function getSharedSecret(Buffer $salt, Buffer $secretKey, Buffer $publicKey)
+    {
         $unsafeSecret = $secretKey->getBinary() . $publicKey->getBinary();
         $keccakSecret = ParagonIE_Sodium_Core_Util::substr(
             Encryption::hash("keccak-512", $secretKey->getBinary(), true),
@@ -108,24 +133,9 @@ class KeyGenerator
         );
 
         // generate safe secret
-        $reducedSecret = substr($keccakSecret, 0, 32);
-        $safeSecret = Buffer::clampBits($reducedSecret, 32);
-        $safeSecret = ParagonIE_Sodium_Compat::crypto_scalarmult_base($safeSecret);
+        $safeSecret = Buffer::clampBits($keccakSecret, 32);
         $sharedSecret = ParagonIE_Sodium_Compat::crypto_scalarmult($safeSecret, $publicKey->getBinary());
-
-        // salting the secret
-        $saltBuf = new Buffer($saltBinary);
-        $sharedBuf = new Buffer($sharedSecret, 64);
-
-        // salt the byte-level representation
-        $saltUA   = $saltBuf->toUInt8();
-        $sharedUA = $sharedBuf->toUInt8();
-        for ($i = 0, $len = strlen($saltBinary); $i < $len; $i++) {
-            $sharedUA[$i] ^= $saltUA[$i];
-        }
-
-        $sharedSecret = Buffer::fromUInt8($sharedUA);
-        $hashedSecret = Encryption::hash("keccak-256", $sharedSecret);
-        return $hashedSecret;
+        $sharedBuf = new Buffer($sharedSecret, 32);
+        return $sharedBuf;
     }
 }
