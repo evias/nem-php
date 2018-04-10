@@ -74,13 +74,16 @@ class KeccakHasher
         $hashBits = self::getHashBitLength($algorithm);
 
         if (function_exists("sha3")) {
+            // use extension https://github.com/strawbrary/php-sha3
             return sha3($data, (int) $hashBits, (bool) $raw_output);
         }
         elseif (function_exists("keccak_hash")) {
+            // use extension archwisp/php-keccak-hash
             $raw = keccak_hash($data, (int) $hashBits);
             return $raw_output ? $raw : new Buffer($raw, $hashBits/8);
         }
 
+        // use dependency kornrunner/keccak
         return Keccak::hash($data, (int) $hashBits, (bool) $raw_output);
     }
 
