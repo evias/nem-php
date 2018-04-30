@@ -67,17 +67,17 @@ class DTOTimeWindowTest
     {
         return [
             [
-                ($t = new DateTime("2018-01-01 01:01:01")),
+                ($t = new DateTime("2018-01-01 01:01:01", new DateTimeZone("UTC"))),
                 87180876, // NIS
                 1514768461 // UTC
             ],
             [
-                ($t1 = new DateTime("2018-01-01 00:01:01")),
+                ($t1 = new DateTime("2018-01-01 00:01:01", new DateTimeZone("UTC"))),
                 87180876 - 3600, 
                 $t1->getTimestamp()
             ],
             [
-                ($t2 = new DateTime("2018-01-02 03:33:33")),
+                ($t2 = new DateTime("2018-01-02 03:33:33", new DateTimeZone("UTC"))),
                 87180876 + 95552, 
                 $t2->getTimestamp()
             ],

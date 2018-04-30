@@ -100,12 +100,12 @@ class Address
             // network name provided, read version byte from SDK
             $networkId = Network::$networkInfos[strtolower($networkId)]["id"];
         }
+        elseif (is_numeric($networkId) && !in_array($networkId, [104, -104, 96])) {
+            throw new NISInvalidNetworkId("Invalid netword ID '" . $networkId . "'");
+        }
         // network name / version byte is important for address creation
         elseif (is_string($networkId)) {
             throw new NISInvalidNetworkName("Invalid network name '" . $networkId . "'");
-        }
-        elseif (is_integer($networkId) && !in_array($networkId, [104, -104, 96])) {
-            throw new NISInvalidNetworkId("Invalid netword ID '" . $networkId . "'");
         }
 
         // step 1: keccak-256 hash of the public key

@@ -226,7 +226,7 @@ class Fee
                         ?: Registry::getDefinition($mosaicFQN);
 
             if ($definition === false) {
-                throw new RuntimeException("Missing MosaicDefinition for Mosaic: `" . $fqn . "`.");
+                throw new RuntimeException("Missing MosaicDefinition for Mosaic: `" . $mosaicFQN . "`.");
             }
 
             // read properties for calculations

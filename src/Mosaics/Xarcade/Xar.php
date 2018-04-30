@@ -17,7 +17,7 @@
  * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Mosaics\Dim;
+namespace NEM\Mosaics\Xarcade;
 
 use NEM\Models\MosaicDefinition;
 use NEM\Models\MosaicProperties;
@@ -26,31 +26,31 @@ use NEM\Models\MosaicLevy;
 use NEM\Models\Mosaic;
 
 /**
- * This is the Dim\Eur class
+ * This is the Xarcade\Xar class
  *
  * This class defines the parameters of mosaic
- * definition of the asset `dim:eur` on the
+ * definition of the asset `xarcade:xar` on the
  * NEM Mainnet Network.
  * 
- * @link https://dimcoin.io
+ * @link https://xarcade.io
  */
-class Eur
+class Xar
     extends MosaicDefinition
 {
     /**
-     * The `dim:eur` Total Coins Supply
+     * The `xarcade:xar` Total Coins Supply
      * 
      * @var integer
      */
     const TOTAL_SUPPLY = 1000000000;
 
     /**
-     * The `dim:eur` mosaics creator public key
+     * The `xarcade:xar` mosaics creator public key
      * in hexadecimal format.
      * 
      * @var string
      */
-    public $creator = "a1df5306355766bd2f9a64efdc089eb294be265987b3359093ae474c051d7d5a";
+    public $creator = "517e547c96c94e2e2181fab857cdbfb7b0e2113f0a46650283d1a59741aef393";
 
     /**
      * Overload of the getTotalSupply() method for fast
@@ -101,7 +101,7 @@ class Eur
     public function properties(array $properties = null)
     {
         $data = [
-            new MosaicProperty(["name" => "divisibility", "value" => 2]),
+            new MosaicProperty(["name" => "divisibility", "value" => 4]),
             new MosaicProperty(["name" => "initialSupply", "value" => 1000000000]),
             new MosaicProperty(["name" => "supplyMutable", "value" => true]),
             new MosaicProperty(["name" => "transferable", "value" => true]),

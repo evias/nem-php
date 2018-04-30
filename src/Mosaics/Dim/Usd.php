@@ -26,26 +26,26 @@ use NEM\Models\MosaicLevy;
 use NEM\Models\Mosaic;
 
 /**
- * This is the Dim\Eur class
+ * This is the Dim\Usd class
  *
  * This class defines the parameters of mosaic
- * definition of the asset `dim:eur` on the
+ * definition of the asset `dim:usd` on the
  * NEM Mainnet Network.
  * 
  * @link https://dimcoin.io
  */
-class Eur
+class Usd
     extends MosaicDefinition
 {
     /**
-     * The `dim:eur` Total Coins Supply
+     * The `dim:usd` Total Coins Supply
      * 
      * @var integer
      */
     const TOTAL_SUPPLY = 1000000000;
 
     /**
-     * The `dim:eur` mosaics creator public key
+     * The `dim:usd` mosaics creator public key
      * in hexadecimal format.
      * 
      * @var string
