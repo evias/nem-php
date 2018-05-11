@@ -79,7 +79,7 @@ under `vendor/bin/phpunit`.
 Alernatively, you can create a symbolic link to this executable file in the `nem-php` clone root folder.
 
 ```bash
-ln -s vendor/bin/phpunit .
+ln -s vendor/bin/phpunit 
 ```
 
 Now you can simply run `phpunit` in the terminal and it will launch the Rocket.. meh, the Unit Tests Suite.

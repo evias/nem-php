@@ -17,6 +17,7 @@ This project follows [Semantic Versioning](CONTRIBUTING.md).
 - implement Fee Structure into SDK (minimum, messages, mosaics and transaction fees)
 - implement NIS Serializer features
 - implement Keccak-512 Hasher features
+- fix timewindow object creations, adapt for UTC core changes
 
 - implement AES encryption for NEM blockchain encrypted messages
 - implement laravel abstraction (Facades and Events)
