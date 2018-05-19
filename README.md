@@ -288,6 +288,8 @@ If you are using Laravel or Lumen, you will need to register the Service Provide
     var_dump($keypair->sign("nem-php by eVias!")->getHex());
     // this will show you the following hexadecimal signature:
     // 177908f0cb5e56a0da11bfc3b38f6d749c4c870c9b356313db6460925e4584a9304e6aa1a5ba50ec2f773bbdfbfc03285a35d986d056df27b7d05a74f6c9b501
+
+    // you can now use this signature and verify it using the Public Key
 ```
 
 ## Troubleshoot / Issues Resolution
