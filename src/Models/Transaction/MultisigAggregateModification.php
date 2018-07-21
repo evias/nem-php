@@ -65,6 +65,23 @@ class MultisigAggregateModification
     /**
      * Overload of the \NEM\Core\Model::serialize() method to provide
      * with a specialization for *MultisigAggregateModification* serialization.
+     * 
+     * 
+     * This will sort multisig modifications contained in the transaction. 
+     * When the transaction is serialized, the multisig modifications
+     * are sorted by type and lexicographically by address.
+     * Following is the resulting sort order for the below defined
+     * transaction:
+     * 
+     * A = bc5761bb3a903d136910fca661c6b1af4d819df4c270f5241143408384322c58
+     * B = 7cbc80a218acba575305e7ff951a336ec66bd122519b12dc26eace26a1354962
+     * C = d4301b99c4a79ef071f9a161d65cd95cba0ca3003cb0138d8b62ff770487a8c4
+     *
+     * A = bc57.. = TD5MITTMM2XDQVJSHEKSPJTCGLFAYFGYDFHPGBEC
+     * B = 7cbc.. = TBYCP5ZYZ4BLCD2TOHXXM6I6ZFK2JQF57SE5QVTK
+     * C = d430.. = TBJ3RBTPA5LSPBPINJY622WTENAF7KGZI53D6DGO
+     *
+     * Resulting Order: C, B, A
      *
      * @see \NEM\Contracts\Serializable
      * @param   null|string $parameters    This parameter can be used to pass a Network ID in case
@@ -97,12 +114,13 @@ class MultisigAggregateModification
             $type1 = $mod1->modificationType;
             $type2 = $mod2->modificationType;
 
-            $lexic1 = Address::fromPublicKey($mod1->cosignatoryAccount->publicKey, $network)->address;
-            $lexic2 = Address::fromPublicKey($mod2->cosignatoryAccount->publicKey, $network)->address;
+            $pub1 = $mod1->cosignatoryAccount->publicKey;
+            $pub2 = $mod2->cosignatoryAccount->publicKey;
+            $lexic1 = Address::fromPublicKey($pub1, $network)->address;
+            $lexic2 = Address::fromPublicKey($pub2, $network)->address;
 
-            return $type1 - $type2
-                || ($lexic1 < $lexic2 ? -1 : $lexic1 > $lexic2 ? 1 : 0);
-        })->values();
+            return $type1 - $type2 || !strcmp($lexic1, $lexic2);
+        })->reverse()->values();
 
         // serialize specialized fields
         $uint8_size = $serializer->serializeInt(count($nisData["modifications"]));

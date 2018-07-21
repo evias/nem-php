@@ -120,6 +120,22 @@ class SerializeTransactionMultisigAggregateModificationTest
     {
         $relativeChange_1 = 3;
 
+        // This will test sorting modifications under the hood. 
+        // When the transaction is serialized, the multisig modifications
+        // are sorted by type and lexicographically by address.
+        // Following is the resulting sort order for the below defined
+        // transaction:
+
+        // A = bc5761bb3a903d136910fca661c6b1af4d819df4c270f5241143408384322c58
+        // B = 7cbc80a218acba575305e7ff951a336ec66bd122519b12dc26eace26a1354962
+        // C = d4301b99c4a79ef071f9a161d65cd95cba0ca3003cb0138d8b62ff770487a8c4
+
+        // A = bc57.. = TD5MITTMM2XDQVJSHEKSPJTCGLFAYFGYDFHPGBEC
+        // B = 7cbc.. = TBYCP5ZYZ4BLCD2TOHXXM6I6ZFK2JQF57SE5QVTK
+        // C = d430.. = TBJ3RBTPA5LSPBPINJY622WTENAF7KGZI53D6DGO
+
+        // Resulting Order: C, B, A
+
         $transaction = new MultisigAggregateModification([
             "timeStamp" => (new TimeWindow(["timeStamp" => 91843540]))->toDTO(),
             "deadline"  => (new TimeWindow(["timeStamp" => 91847140]))->toDTO(),
@@ -144,15 +160,15 @@ class SerializeTransactionMultisigAggregateModificationTest
         ]);
 
         // test specialized MultisigAggregateModification::serialize() serialization process
-        $serialized = $transaction->serialize(104);
+        $serialized = $transaction->serialize(-104);
         $serialHex  = Buffer::fromUInt8($serialized)->getHex();
 
         // expected results
         $expectUInt8 = [
-            1,16,0,0,2,0,0,152,212,107,121,5,32,0,0,0,72,14,84,195,143,237,208,242,191,45,83,19,43,129,156,53,186,66,112,169,20,74,245,90,115,243,37,104,106,169,60,150,32,161,7,0,0,0,0,0,228,121,121,5,3,0,0,0,40,0,0,0,1,0,0,0,32,0,0,0,124,188,128,162,24,172,186,87,83,5,231,255,149,26,51,110,198,107,209,34,81,155,18,220,38,234,206,38,161,53,73,98,40,0,0,0,1,0,0,0,32,0,0,0,212,48,27,153,196,167,158,240,113,249,161,97,214,92,217,92,186,12,163,0,60,176,19,141,139,98,255,119,4,135,168,196,40,0,0,0,1,0,0,0,32,0,0,0,188,87,97,187,58,144,61,19,105,16,252,166,97,198,177,175,77,129,157,244,194,112,245,36,17,67,64,131,132,50,44,88,4,0,0,0,3,0,0,0
+            1,16,0,0,2,0,0,152,212,107,121,5,32,0,0,0,72,14,84,195,143,237,208,242,191,45,83,19,43,129,156,53,186,66,112,169,20,74,245,90,115,243,37,104,106,169,60,150,32,161,7,0,0,0,0,0,228,121,121,5,3,0,0,0,40,0,0,0,1,0,0,0,32,0,0,0,212,48,27,153,196,167,158,240,113,249,161,97,214,92,217,92,186,12,163,0,60,176,19,141,139,98,255,119,4,135,168,196,40,0,0,0,1,0,0,0,32,0,0,0,124,188,128,162,24,172,186,87,83,5,231,255,149,26,51,110,198,107,209,34,81,155,18,220,38,234,206,38,161,53,73,98,40,0,0,0,1,0,0,0,32,0,0,0,188,87,97,187,58,144,61,19,105,16,252,166,97,198,177,175,77,129,157,244,194,112,245,36,17,67,64,131,132,50,44,88,4,0,0,0,3,0,0,0
         ];
         $expectSize = count($expectUInt8);
-        $expectHex  = "0110000002000098d46b790520000000480e54c38fedd0f2bf2d53132b819c35ba4270a9144af55a73f325686aa93c9620a1070000000000e4797905030000002800000001000000200000007cbc80a218acba575305e7ff951a336ec66bd122519b12dc26eace26a1354962280000000100000020000000d4301b99c4a79ef071f9a161d65cd95cba0ca3003cb0138d8b62ff770487a8c4280000000100000020000000bc5761bb3a903d136910fca661c6b1af4d819df4c270f5241143408384322c580400000003000000";
+        $expectHex  = "0110000002000098d46b790520000000480e54c38fedd0f2bf2d53132b819c35ba4270a9144af55a73f325686aa93c9620a1070000000000e479790503000000280000000100000020000000d4301b99c4a79ef071f9a161d65cd95cba0ca3003cb0138d8b62ff770487a8c42800000001000000200000007cbc80a218acba575305e7ff951a336ec66bd122519b12dc26eace26a1354962280000000100000020000000bc5761bb3a903d136910fca661c6b1af4d819df4c270f5241143408384322c580400000003000000";
 
         $this->assertNotEmpty($serialized);
         $this->assertEquals(json_encode($expectUInt8), json_encode($serialized));
