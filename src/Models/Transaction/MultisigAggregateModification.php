@@ -22,6 +22,7 @@ namespace NEM\Models\Transaction;
 use NEM\Models\Transaction;
 use NEM\Models\TransactionType;
 use NEM\Models\Fee;
+use NEM\Models\Address;
 use NEM\Models\Model;
 use NEM\Core\Buffer;
 use NEM\Models\MultisigModifications;
@@ -66,13 +67,21 @@ class MultisigAggregateModification
      * with a specialization for *MultisigAggregateModification* serialization.
      *
      * @see \NEM\Contracts\Serializable
-     * @param   null|string $parameters    non-null will return only the named sub-dtos.
+     * @param   null|string $parameters    This parameter can be used to pass a Network ID in case
+     *                                     you wish to use the right network addresses to sort 
+     *                                     your modifications. Sadly modifications are ordered by
+     *                                     address, not by public key. But usually, when you compare
+     *                                     multiple addresses (pub keys), only the first few characters
+     *                                     are actually needed for sorting. This is why using the default
+     *                                     testnet network is OK too (only the checksum changes due to 
+     *                                     network prefix change).
      * @return  array   Returns a byte-array with values in UInt8 representation.
      */
     public function serialize($parameters = null)
     {
         $baseTx  = parent::serialize($parameters);
         $nisData = $this->toDTO("transaction");
+        $network = $parameters ?: -104; // default testnet
 
         // shortcuts
         $serializer = $this->getSerializer();
@@ -82,10 +91,26 @@ class MultisigAggregateModification
             return new MultisigModification($modification);
         });
 
+        // sort modifications by type and lexicographically
+        $sorted = $mapped->sort(function($mod1, $mod2) use ($network)
+        {
+            $type1 = $mod1->modificationType;
+            $type2 = $mod2->modificationType;
+
+            $lexic1 = Address::fromPublicKey($mod1->cosignatoryAccount->publicKey, $network)->address;
+            $lexic2 = Address::fromPublicKey($mod2->cosignatoryAccount->publicKey, $network)->address;
+
+            return $type1 - $type2
+                || ($lexic1 < $lexic2 ? -1 : $lexic1 > $lexic2 ? 1 : 0);
+        })->values();
+
         // serialize specialized fields
         $uint8_size = $serializer->serializeInt(count($nisData["modifications"]));
         $uint8_mods = [];
-        foreach ($mapped->all() as $modification) {
+        for ($i = 0, $len = $sorted->count(); $i < $len; $i++) {
+            $modification = $sorted->get($i);
+
+            // use MultisigModification::serialize() specialization
             $uint8_mod  = $modification->serialize($parameters);
             $uint8_mods = array_merge($uint8_mods, $uint8_mod);
         }
