@@ -108,29 +108,40 @@ class MultisigAggregateModification
             return new MultisigModification($modification);
         });
 
-        // sort modifications by type and lexicographically
-        $sorted = $mapped->sort(function($mod1, $mod2) use ($network)
-        {
-            $type1 = $mod1->modificationType;
-            $type2 = $mod2->modificationType;
+        // modifications must be grouped by type to be sorted
+        // first by type, then lexicographically by address
+        $modificationsByType = [];
+        foreach ($mapped as $modification) {
 
-            $pub1 = $mod1->cosignatoryAccount->publicKey;
-            $pub2 = $mod2->cosignatoryAccount->publicKey;
-            $lexic1 = Address::fromPublicKey($pub1, $network)->address;
-            $lexic2 = Address::fromPublicKey($pub2, $network)->address;
+            // shortcuts
+            $pubKey = $modification->cosignatoryAccount->publicKey;
+            $type = $modification->modificationType;
+            $address = Address::fromPublicKey($pubKey, -104)->address;
 
-            return $type1 - $type2 || !strcmp($lexic1, $lexic2);
-        })->reverse()->values();
+            if (! isset($modificationsByType[$type])) {
+                $modificationsByType[$type] = [];
+            }
+
+            // group by type
+            $modificationsByType[$type][$address] = $modification;
+        }
+
+        // sort by type, then sort by address
+        ksort($modificationsByType);
+        foreach ($modificationsByType as $modType => &$modsByAddresses) {
+            ksort($modsByAddresses);
+        }
 
         // serialize specialized fields
         $uint8_size = $serializer->serializeInt(count($nisData["modifications"]));
         $uint8_mods = [];
-        for ($i = 0, $len = $sorted->count(); $i < $len; $i++) {
-            $modification = $sorted->get($i);
+        foreach ($modificationsByType as $modType => $modifications) {
+            foreach ($modifications as $address => $modification) {
 
-            // use MultisigModification::serialize() specialization
-            $uint8_mod  = $modification->serialize($parameters);
-            $uint8_mods = array_merge($uint8_mods, $uint8_mod);
+                // use MultisigModification::serialize() specialization
+                $uint8_mod  = $modification->serialize($parameters);
+                $uint8_mods = array_merge($uint8_mods, $uint8_mod);
+            }
         }
 
         // serialize relativeChange only for transaction.version > v2
