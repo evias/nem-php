@@ -74,7 +74,7 @@ class Transaction
      * 
      * @var array
      */
-    static protected $typesClassMap = [
+    static public $typesClassMap = [
         TransactionType::TRANSFER              => "\\NEM\\Models\\Transaction\\Transfer",
         TransactionType::IMPORTANCE_TRANSFER   => "\\NEM\\Models\\Transaction\\ImportanceTransfer",
         TransactionType::MULTISIG_MODIFICATION => "\\NEM\\Models\\Transaction\\MultisigAggregateModification",
