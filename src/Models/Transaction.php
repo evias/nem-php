@@ -179,6 +179,13 @@ class Transaction
 
         // mutate transaction (morph specialized class)
         $classTx = self::$typesClassMap[$type];
+
+        if ($type === TransactionType::TRANSFER
+            && in_array($data["version"], [self::VERSION_2, self::VERSION_2_TEST, self::VERSION_2_MIJIN])) {
+
+            $classTx = "\\NEM\\Models\\Transaction\\MosaicTransfer";
+        }
+
         return new $classTx($data);
     }
 
