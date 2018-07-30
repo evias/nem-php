@@ -149,6 +149,7 @@ class Multisig
      */
     public function setOtherTrans(Transaction $otherTrans)
     {
+        $this->setAttribute("otherTrans", $otherTrans->toDTO("transaction"));
         return $this->otherTrans($otherTrans->toDTO("transaction"));
     }
 
