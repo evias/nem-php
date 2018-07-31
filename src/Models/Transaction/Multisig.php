@@ -100,11 +100,33 @@ class Multisig
      */
     public function extend() 
     {
+        // The Multisig Wrapper transaction should have VERSION_1
+        $version = $this->getAttribute("version");
+        $oneByOld = [
+            Transaction::VERSION_2       => Transaction::VERSION_1,
+            Transaction::VERSION_2_TEST  => Transaction::VERSION_1_TEST,
+            Transaction::VERSION_2_MIJIN => Transaction::VERSION_1_MIJIN,
+        ];
+
+        // Multisig always use *VERSION 1 TRANSACTIONS* (for the wrapper).
+        // this small block will make sure to stay on the correct
+        // network in case a version was set before.
+
+        if (in_array($version, array_keys($oneByOld))) {
+            // switch to v1
+            $version = $oneByOld[$version];
+        }
+        elseif (!$version || !in_array($version, array_values($oneByOld))) {
+            // invalid version provided, set default
+            $version = Transaction::VERSION_1_TEST;
+        }
+
         return [
             "otherTrans" => $this->otherTrans()->toDTO("transaction"),
             "signatures" => $this->signatures()->toDTO(),
             // transaction type specialization
             "type" => TransactionType::MULTISIG,
+            "version" => $version,
         ];
     }
 
