@@ -47,7 +47,7 @@ class DTOTransactionMosaicTransferTest
 
         // expected *default* values
         $expectType    = TransactionType::TRANSFER;
-        $expectVersion = Transaction::VERSION_2; // MOSAIC TRANSFER
+        $expectVersion = Transaction::VERSION_2_TEST; // MOSAIC TRANSFER
 
         // base transaction details test
         $this->assertEquals($expectType, $content["type"]);

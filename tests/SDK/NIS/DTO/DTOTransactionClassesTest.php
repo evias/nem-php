@@ -191,7 +191,7 @@ class DTOTransactionClassesTest
         if ($signature !== null)
             $txData["signature"] = $signature;
 
-        $transaction = new Transfer($txData);
+        $transaction = Transaction::create($txData);
         $transactionNIS = $transaction->toDTO();
 
         $meta = $transactionNIS["meta"];
@@ -214,16 +214,17 @@ class DTOTransactionClassesTest
      */
     public function dtoContentVectorsProvider()
     {
+        //XXX change Transaction test to allow non-amount+recipient transactions
         return [
             [
                 // act
                 null, 10.0, "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
-                "4100", null,
+                "257", null,
                 new Message(["plain" => "https://github.com/evias/nem-php"]), 
                 null, null,
                 // expect
                 10000000, "TDWZ55R5VIHSH5WWK6CEGAIP7D35XVFZ3RU2S5UQ",
-                TransactionType::MULTISIG, Transaction::VERSION_1,
+                TransactionType::TRANSFER, Transaction::VERSION_1,
                 bin2hex("https://github.com/evias/nem-php")
             ],
             [

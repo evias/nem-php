@@ -292,7 +292,7 @@ class Transaction
                                                        : self::VERSION_2;
 
         // validate version field, should always reflect valid NIS tx version
-        $version = $this->getAttribute("version");
+        $version = isset($entity["version"]) ? $entity["version"] : $this->getAttribute("version");
         $versions = [
             self::VERSION_1,        self::VERSION_2,
             self::VERSION_1_TEST,   self::VERSION_2_TEST,
@@ -303,7 +303,7 @@ class Transaction
         }
 
         // validate transaction type, should always be a valid type
-        $type = $this->getAttribute("type") ?: (isset($entity["type"]) ? $entity["type"] : null);
+        $type = isset($entity["type"]) ? $entity["type"] : $this->getAttribute("type");
         $validTypes = array_keys(self::$typesClassMap);
         if (! $type || ! in_array($type, $validTypes)) {
             $type = TransactionType::TRANSFER;
