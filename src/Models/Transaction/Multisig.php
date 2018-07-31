@@ -161,24 +161,20 @@ class Multisig
      */
     public function otherTrans(array $transaction = null)
     {
-        if (! isset($this->otherTransInstance)) {
-            // morph Transaction extension - will read the type of transaction
-            // and instantiate the correct class extending Transaction.
-            $morphed = Transaction::create($transaction ?: $this->getAttribute("otherTrans"));
+        // morph Transaction extension - will read the type of transaction
+        // and instantiate the correct class extending Transaction.
+        $morphed = Transaction::create($transaction ?: $this->getAttribute("otherTrans"));
 
-            if ($morphed->type === TransactionType::MULTISIG) {
-                // cannot nest multisig in another multisig.
-                throw new InvalidArgumentException("It is forbidden to nest a Multisig transaction in another Multisig transaction.");
-            }
-            elseif ($morphed->type === TransactionType::MULTISIG_SIGNATURE) {
-                // cannot nest multisig in another multisig.
-                throw new InvalidArgumentException("It is forbidden to nest a Signature transaction in the inner transaction of a Multisig transaction.");
-            }
-
-            $this->otherTransInstance = $morphed;
+        if ($morphed->type === TransactionType::MULTISIG) {
+            // cannot nest multisig in another multisig.
+            throw new InvalidArgumentException("It is forbidden to nest a Multisig transaction in another Multisig transaction.");
+        }
+        elseif ($morphed->type === TransactionType::MULTISIG_SIGNATURE) {
+            // cannot nest multisig in another multisig.
+            throw new InvalidArgumentException("It is forbidden to nest a Signature transaction in the inner transaction of a Multisig transaction.");
         }
 
-        return $this->otherTransInstance;
+        return $morphed;
     }
 
     /**
