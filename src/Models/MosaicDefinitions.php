@@ -132,7 +132,7 @@ class MosaicDefinitions
                     return $mosDefinition;
                 }
 
-                $lastId = $currentDef->meta->id;
+                $lastId = $currentDef->meta["id"];
             }
 
             $cntFound = $fetchDefs->count();

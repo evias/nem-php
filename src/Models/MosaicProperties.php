@@ -158,7 +158,12 @@ class MosaicProperties
         // sort properties lexicographically (see toDTO() overload)
         $sorted = $this->sortBy("name");
         $index = $propertiesNames[$name];
-        $value = $sorted->get($index)->value;
-        return $value;
+        $prop  = $sorted->get($index);
+
+        if ($prop instanceof MosaicProperty) {
+            return $prop->value;
+        }
+
+        return $prop["value"];
     }
 }
