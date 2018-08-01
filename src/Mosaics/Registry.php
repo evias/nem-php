@@ -51,7 +51,7 @@ final class Registry
      * @return  \NEM\Models\MosaicDefinition
      * @throws  \InvalidArgumentException       On invalid `mosaic` parameter.
      */
-    static public function getDefinition($mosaic, $network = 0x68)
+    static public function getDefinition($mosaic)
     {
         // read the mosaic's fully qualified name
         if ($mosaic instanceof Mosaic) {
@@ -76,9 +76,7 @@ final class Registry
         // no pre-configured mosaic definition class found, use NIS
         // Web service to read mosaic definition.
 
-        //XXX
         return false;
-        //throw new RuntimeException("Unsupported mosaic registry feature.");
     }
 
     /**

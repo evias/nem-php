@@ -64,7 +64,7 @@ class Network
      *
      * @param   string|\NEM\Models\Address  $address
      * @return  \NEM\Models\Model
-     * @throws  \NEM\Errors\NISInvalidAddressFormat     On invalid address format or unrecognized address first character.
+     * @throws  \InvalidArgumentException     On invalid address format or unrecognized address first character.
      */
     static public function fromAddress($address)
     {
@@ -76,17 +76,17 @@ class Network
             $prefix = substr($address, 0, 1);
         }
         else {
-            throw new NISInvalidAddressFormat("Could not identify address format: " . var_export($address, true));
+            throw new \InvalidArgumentException("Could not identify address format: " . var_export($address, true));
         }
 
         foreach (self::$networkInfos as $name => $spec) {
             $netChar = $spec['char'];
 
             if ($prefix == $netChar)
-                return $this->createBaseModel($spec);
+                return $spec["id"];
         }
 
-        throw new NISInvalidAddressFormat("Could not identify network from provided address: " . var_export($address, true));
+        throw new \InvalidArgumentException("Could not identify network from provided address: " . var_export($address, true));
     }
 
     /**

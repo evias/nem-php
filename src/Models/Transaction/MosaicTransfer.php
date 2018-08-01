@@ -28,6 +28,7 @@ use NEM\Models\MosaicDefinition;
 use NEM\Models\MosaicDefinitions;
 use NEM\Models\Fee;
 use NEM\Models\Transaction;
+use NEM\Infrastructure\Network;
 
 /**
  * This is the MosaicTransfer class
@@ -122,7 +123,17 @@ class MosaicTransfer
      */
     public function extendFee()
     {
-        $definitions = MosaicDefinitions::create();
+        // identify network
+        $address = $this->recipient()->address();
+
+        $networkId = 104;
+        if (!empty($address->toClean()))
+            $networkId = Network::fromAddress($address);
+
+        // load definitions for attached mosaics.
+        $definitions = MosaicDefinitions::create($this->mosaics, $networkId);
+
+        // calculate fees for mosaics
         $mosaicsFee = Fee::calculateForMosaics(
                                 $definitions,
                                 $this->mosaics(),

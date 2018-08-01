@@ -15,26 +15,45 @@ use NEM\NemSDK;
  *           Parts of this class may be malfunctioning or 
  *           not working all.
  */
-class Mosaic {
+class Mosaic 
+	extends Service
+{
 
-	public $nemSDK;
-	public $endpoint = '/namespace/';
+    /**
+     * The Base URL for this endpoint.
+     *
+     * @var string
+     */
+    protected $baseUrl = "/mosaic";
 
-	public function __construct( NemSDK $nemSDK ) {
-		$this->nemSDK = $nemSDK;
-	}
-
-	/**
-	 * Gets the mosaic definitions for a given namespace. The request supports paging.
-	 *
+    /**
+     * XXX
+     *
 	 * @param namespace
 	 * @param id         - The topmost mosaic definition database id up to which root mosaic definitions are returned.
 	 *                   The parameter is optional. If not supplied the most recent mosaic definitiona are returned.
 	 * @param pageSize   - The number of mosaic definition objects to be returned for each request. The parameter is
 	 *                   optional. The default value is 25, the minimum value is 5 and hte maximum value is 100.
+	 */
+    public function getMosaicDefinitionsPage($namespace, $id = null, $pageSize = null)
+    {
+        $params = ["namespace" => $namespace]
+                + ($id !== null ? ["id" => $id] : [])
+                + ($pageSize !== null ? ["pageSize" => $pageSize] : []);
+
+        $apiUrl = $this->getPath('definition/page', $params);
+        $response = $this->api->getJSON($apiUrl);
+
+        //XXX include Error checks
+        $object = json_decode($response, true);
+        return $this->createMosaicDefinitionCollection($object["data"]);
+    }
+
+	/**
+	 * Gets the mosaic definitions for a given namespace. The request supports paging.
 	 *
 	 * @returns Observable<MosaicDefinition[]>
-	 */
+	 /
 	private function getMosaicDefinitionsPage( $namespace, $id = null, $pageSize = null ) {
 		$query = 'namespace=' . $namespace;
 		if ( $id !== null ) {
@@ -85,5 +104,6 @@ class Mosaic {
 		}
 
 		return false;
-	}
+    }
+    */
 }

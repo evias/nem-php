@@ -22,6 +22,8 @@ namespace NEM\Models;
 use \NEM\Models\Mosaic;
 use \NEM\Models\MosaicDefinition;
 use \NEM\Mosaics\Registry;
+use \NEM\Infrastructure\Mosaic as MosaicService;
+use \NEM\Infrastructure\ConnectionPool;
 
 /**
  * This is the MosaicDefinitions class
@@ -35,6 +37,8 @@ use \NEM\Mosaics\Registry;
 class MosaicDefinitions
     extends ModelCollection
 {
+    static public $definitions = null;
+
     /**
      * Class method to create a MosaicDefinitions *array*.
      * 
@@ -43,17 +47,98 @@ class MosaicDefinitions
      * 
      * @return \NEM\Models\MosaicDefinitions
      */
-    static public function create()
+    static public function create(MosaicAttachments $mosaics = null, $networkId = 104)
     {
-        //XXX add multi parameters to pass already 
-        //    fetched mosaic definitions
+        if (! self::$definitions) {
+            self::$definitions = new static([
+                Registry::getDefinition("nem:xem")
+            ]);
+        }
 
+        if ($mosaics === null) {
+            return self::$definitions; // only contains nem:xem
+        }
 
-        //XXX check and test whether we want to include *all* preconfigured
-        //    classes or do that on a dynamic level
-        return new static([
-            Registry::getDefinition("nem:xem")
-        ]);
+        $object = new static;
+
+        // for each attached mosaic, we need the mosaic definition
+        foreach ($mosaics as $attachment) {
+
+            $mosaicId = is_array($attachment) ? $attachment["mosaicId"] : $attachment->mosaicId();
+            $mosaic = $object->prepareMosaic($mosaicId);
+            $definition = self::$definitions->getDefinition($mosaic);
+
+            if (false !== $definition) {
+                // definition found for current attached mosaic
+                continue;
+            }
+
+            // try to use Registry
+            $definition = Registry::getDefinition($mosaic);
+            if (false !== $definition) {
+                // mosaic definition *morphed* with Registry.
+                self::$definitions->push($definition);
+                continue;
+            }
+
+            // need network fetch
+
+            // all definitions fetched will be stored in `self::$definitions`
+            $definition = self::fetch($mosaic, $networkId);
+
+            if (false === $definition) {
+                throw new \InvalidArgumentException("Mosaic '" . $mosaic->getFQN() . "' does not exist on network: " . $networkId);
+            }
+        }
+
+        return self::$definitions;
+    }
+
+    /**
+     * 
+     */
+    static public function fetch(Mosaic $mosaic, $networkId = 104) 
+    {
+        if (! self::$definitions) {
+            self::$definitions = new static([
+                Registry::getDefinition("nem:xem")
+            ]);
+        }
+        elseif (false !== ($definition = self::$definitions->getDefinition($mosaic))) {
+            return $definition;
+        }
+
+        // use NEM network to fetch mosaic definition page(s)
+        $pool    = new ConnectionPool($networkId);
+        $service = new MosaicService($pool->getEndpoint());
+        $namespace = $mosaic->getAttribute("namespaceId");
+
+        // start with null
+        $lastId = null;
+        do {
+            // each mosaic definition page may hold up to 50
+            // mosaic definitions. We need to iterate through
+            // *each page* and also *each definition* to find 
+            // the definition for our said `mosaic`.
+
+            $fetchDefs = $service->getMosaicDefinitionsPage($namespace, $lastId, 50);
+            foreach ($fetchDefs as $currentDef) {
+
+                // cache mosaic definitions
+                self::$definitions->push($currentDef);
+
+                if ($currentDef->id()->getFQN() === $mosaic->getFQN()) {
+                    return $currentDef;
+                }
+
+                $lastId = $currentDef->meta->id;
+            }
+
+            $cntFound = $fetchDefs->count();
+        }
+        while ($cntFound > 0);
+
+        return false;
     }
 
     /**
@@ -95,6 +180,10 @@ class MosaicDefinitions
         }
         elseif (is_string($mosaic)) {
             return Mosaic::create($mosaic);
+        }
+        elseif (is_array($mosaic)) {
+            $fqmn = $mosaic["namespaceId"] . ":" . $mosaic["name"];
+            return Mosaic::create($fqmn);
         }
 
         throw new InvalidArgumentException("Unsupported mosaic argument type provided to \\NEM\\Models\\MosaicDefinitions: ", var_export($mosaic));
