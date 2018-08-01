@@ -125,10 +125,11 @@ class MosaicDefinitions
             foreach ($fetchDefs as $currentDef) {
 
                 // cache mosaic definitions
-                self::$definitions->push($currentDef);
+                $mosDefinition = new MosaicDefinition($currentDef->mosaic);
+                self::$definitions->push($mosDefinition);
 
-                if ($currentDef->id()->getFQN() === $mosaic->getFQN()) {
-                    return $currentDef;
+                if ($mosDefinition->id()->getFQN() === $mosaic->getFQN()) {
+                    return $mosDefinition;
                 }
 
                 $lastId = $currentDef->meta->id;
