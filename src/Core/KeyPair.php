@@ -306,6 +306,8 @@ class KeyPair
             // `publicKey` could not be interpreted.
             throw new RuntimeException("Invalid Private key for KeyPair creation. Please use hexadecimal notation (64|66 characters string) or the \\NEM\\Core\\Buffer class.");
         }
+
+	return $publicKey;
     }
 
     /**
