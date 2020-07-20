@@ -602,7 +602,7 @@ class Buffer
         usort($items, function ($a, $b) use ($convertToBuffer) {
             $av = $convertToBuffer($a)->getBinary();
             $bv = $convertToBuffer($b)->getBinary();
-            return $av == $bv ? 0 : $av > $bv ? 1 : -1;
+            return $av == $bv ? 0 : ($av > $bv ? 1 : -1);
         });
 
         return $items;
