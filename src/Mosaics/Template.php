@@ -17,7 +17,7 @@
  * @copyright  (c) 2017-2018, Grégory Saive <greg@evias.be>
  * @link       http://github.com/evias/nem-php
  */
-namespace NEM\Mosaics\Dim;
+namespace NEM\Mosaics;
 
 use NEM\Models\MosaicDefinition;
 use NEM\Models\MosaicProperties;
